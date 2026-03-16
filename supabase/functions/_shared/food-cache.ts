@@ -17,11 +17,12 @@ export async function searchCache(
   const start = Date.now()
 
   // Use the RPC function for trigram similarity search + alias matching
+  // Threshold 0.5 avoids false positives like "cheesecake" → "queso"
   const { data, error } = await supabase
     .rpc("search_foods_cache_with_aliases", {
       search_term: query,
-      similarity_threshold: 0.3,
-      result_limit: 5,
+      similarity_threshold: 0.5,
+      result_limit: 10,
     })
 
   if (error || !data || data.length === 0) {
@@ -29,13 +30,21 @@ export async function searchCache(
     return []
   }
 
-  // Filter: only return results with confidence >= 0.7
-  const confident = data.filter((row: CacheRow) =>
-    row.confidence >= 0.7 && row.similarity_score > 0.3
-  )
+  // Deduplicate by id (UNION in RPC can return same food via name + alias)
+  const seen = new Set<string>()
+  const unique = data.filter((row: CacheRow) => {
+    if (seen.has(row.id)) return false
+    seen.add(row.id)
+    return true
+  })
+
+  // Only return results with decent similarity
+  const confident = unique.filter((row: CacheRow) =>
+    row.similarity_score > 0.5
+  ).slice(0, 5)
 
   if (confident.length === 0) {
-    console.log(`[waterfall] cache MISS for "${query}" — ${data.length} results but none confident enough (${Date.now() - start}ms)`)
+    console.log(`[waterfall] cache MISS for "${query}" — ${unique.length} results but none similar enough (best: ${unique[0]?.similarity_score?.toFixed(2)}) (${Date.now() - start}ms)`)
     return []
   }
 
