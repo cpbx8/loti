@@ -1,29 +1,57 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { useDailyLog } from '@/hooks/useDailyLog'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useDailyLog, getToday } from '@/hooks/useDailyLog'
 import MacroSummary from '@/components/MacroSummary/MacroSummary'
 import FoodLogList from '@/components/FoodLog/FoodLogList'
+import DateNav from '@/components/DateNav'
 
 export default function DashboardScreen() {
   const { t } = useTranslation('dashboard')
   const navigate = useNavigate()
-  const { totals, entries, loading } = useDailyLog()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [date, setDate] = useState(() => searchParams.get('date') ?? getToday())
+  const { totals, entries, loading } = useDailyLog(date)
+
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate)
+    const today = getToday()
+    if (newDate === today) {
+      setSearchParams({})
+    } else {
+      setSearchParams({ date: newDate })
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
       <header className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
-        <button
-          onClick={() => navigate('/favorites')}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-yellow-400"
-          aria-label="Favorites"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigate('/history')}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white"
+            aria-label="History"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => navigate('/favorites')}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-yellow-400"
+            aria-label="Favorites"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </button>
+        </div>
       </header>
+
+      {/* Date navigation */}
+      <DateNav date={date} onChange={handleDateChange} />
 
       {loading ? (
         <div className="flex flex-1 items-center justify-center">

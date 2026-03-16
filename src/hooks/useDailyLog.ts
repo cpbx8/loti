@@ -33,12 +33,43 @@ const EMPTY_TOTALS: DailyTotals = {
   scan_count: 0,
 }
 
-export function useDailyLog() {
+/** Format a Date to YYYY-MM-DD */
+export function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+/** Get today's date string */
+export function getToday(): string {
+  return formatDate(new Date())
+}
+
+/** Shift a date string by N days */
+export function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + days)
+  return formatDate(d)
+}
+
+/** Check if a date string is today */
+export function isToday(dateStr: string): boolean {
+  return dateStr === getToday()
+}
+
+/** Format date for display: "Today", "Yesterday", or "Mon, Mar 14" */
+export function displayDate(dateStr: string): string {
+  const today = getToday()
+  if (dateStr === today) return 'Today'
+  if (dateStr === shiftDate(today, -1)) return 'Yesterday'
+  const d = new Date(dateStr + 'T12:00:00')
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
+export function useDailyLog(date?: string) {
   const [totals, setTotals] = useState<DailyTotals>(EMPTY_TOTALS)
   const [entries, setEntries] = useState<FoodLogEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  const today = new Date().toISOString().slice(0, 10)
+  const targetDate = date ?? getToday()
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -47,7 +78,7 @@ export function useDailyLog() {
     const { data: totalsData } = await supabase
       .from('daily_totals')
       .select('*')
-      .eq('date', today)
+      .eq('date', targetDate)
       .single()
 
     if (totalsData) {
@@ -63,13 +94,13 @@ export function useDailyLog() {
       setTotals(EMPTY_TOTALS)
     }
 
-    // Fetch today's scan log entries
-    const startOfDay = `${today}T00:00:00.000Z`
-    const endOfDay = `${today}T23:59:59.999Z`
+    // Fetch scan log entries for the date
+    const startOfDay = `${targetDate}T00:00:00.000Z`
+    const endOfDay = `${targetDate}T23:59:59.999Z`
 
     const { data: logsData } = await supabase
       .from('scan_logs')
-      .select('id, matched_food_id, calories_kcal, protein_g, carbs_g, fat_g, result_traffic_light, serving_size_g, meal_type, created_at, gpt_raw_response')
+      .select('id, food_name, matched_food_id, calories_kcal, protein_g, carbs_g, fat_g, result_traffic_light, serving_size_g, meal_type, created_at, gpt_raw_response')
       .gte('created_at', startOfDay)
       .lte('created_at', endOfDay)
       .order('created_at', { ascending: false })
@@ -78,7 +109,7 @@ export function useDailyLog() {
       setEntries(
         logsData.map((log) => ({
           id: log.id,
-          food_name: (log.gpt_raw_response as Record<string, unknown>)?.food_name as string | null ?? 'Unknown food',
+          food_name: log.food_name ?? (log.gpt_raw_response as Record<string, unknown>)?.food_name as string | null ?? 'Unknown food',
           calories_kcal: log.calories_kcal,
           protein_g: log.protein_g,
           carbs_g: log.carbs_g,
@@ -94,11 +125,72 @@ export function useDailyLog() {
     }
 
     setLoading(false)
-  }, [today])
+  }, [targetDate])
 
   useEffect(() => {
     refresh()
   }, [refresh])
 
-  return { totals, entries, loading, refresh }
+  return { totals, entries, loading, refresh, date: targetDate }
+}
+
+/** Fetch weekly totals for the history screen */
+export function useWeeklyHistory(endDate?: string) {
+  const [days, setDays] = useState<Array<{ date: string; totals: DailyTotals }>>([])
+  const [loading, setLoading] = useState(true)
+
+  const end = endDate ?? getToday()
+
+  const refresh = useCallback(async () => {
+    setLoading(true)
+
+    const startDate = shiftDate(end, -6)
+
+    const { data } = await supabase
+      .from('daily_totals')
+      .select('*')
+      .gte('date', startDate)
+      .lte('date', end)
+      .order('date', { ascending: true })
+
+    // Build 7-day array, filling in zeros for missing days
+    const result: Array<{ date: string; totals: DailyTotals }> = []
+    for (let i = 0; i < 7; i++) {
+      const d = shiftDate(startDate, i)
+      const found = data?.find(row => row.date === d)
+      result.push({
+        date: d,
+        totals: found ? {
+          total_calories: found.total_calories ?? 0,
+          total_protein_g: found.total_protein_g ?? 0,
+          total_carbs_g: found.total_carbs_g ?? 0,
+          total_fat_g: found.total_fat_g ?? 0,
+          total_fiber_g: found.total_fiber_g ?? 0,
+          scan_count: found.scan_count ?? 0,
+        } : EMPTY_TOTALS,
+      })
+    }
+
+    setDays(result)
+    setLoading(false)
+  }, [end])
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  // Compute weekly averages
+  const daysWithData = days.filter(d => d.totals.scan_count > 0)
+  const count = daysWithData.length || 1
+  const avgCalories = Math.round(daysWithData.reduce((s, d) => s + d.totals.total_calories, 0) / count)
+  const avgProtein = Math.round(daysWithData.reduce((s, d) => s + d.totals.total_protein_g, 0) / count * 10) / 10
+  const avgCarbs = Math.round(daysWithData.reduce((s, d) => s + d.totals.total_carbs_g, 0) / count * 10) / 10
+  const avgFat = Math.round(daysWithData.reduce((s, d) => s + d.totals.total_fat_g, 0) / count * 10) / 10
+  const daysLogged = daysWithData.length
+
+  return {
+    days, loading, refresh,
+    averages: { avgCalories, avgProtein, avgCarbs, avgFat },
+    daysLogged,
+  }
 }

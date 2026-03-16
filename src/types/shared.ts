@@ -63,3 +63,34 @@ export interface ErrorResponse {
   error: string
   message: string
 }
+
+// ─── Waterfall Search Types ──────────────────────────────────
+
+export type FoodSource = 'cache' | 'fatsecret' | 'openfoodfacts' | 'gpt4o' | 'user' | 'seed'
+
+export interface FoodSearchResult {
+  id?: string
+  name_es: string
+  name_en?: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  fiber_g?: number
+  serving_size: number
+  serving_unit: string
+  serving_description?: string
+  source: FoodSource
+  source_id?: string
+  confidence: number
+  barcode?: string
+  image_url?: string
+}
+
+export interface SearchResponse {
+  results: FoodSearchResult[]
+  source: string
+  cached: boolean
+  latency_ms: number
+  error?: string
+}

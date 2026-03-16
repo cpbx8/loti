@@ -5,6 +5,7 @@ import SearchScreen from '@/screens/SearchScreen'
 import BarcodeScreen from '@/screens/BarcodeScreen'
 import TextInputScreen from '@/screens/TextInputScreen'
 import FavoritesScreen from '@/screens/FavoritesScreen'
+import HistoryScreen from '@/screens/HistoryScreen'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/barcode" element={<BarcodeScreen />} />
         <Route path="/text" element={<TextInputScreen />} />
         <Route path="/favorites" element={<FavoritesScreen />} />
+        <Route path="/history" element={<HistoryScreen />} />
       </Routes>
     </BrowserRouter>
   )
