@@ -1,0 +1,18 @@
+{
+  "appName": "Loti",
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "retry": "Try Again",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "disclaimer": "For informational purposes only. Consult your healthcare provider.",
+  "disclaimerEstimated": "GI value is AI-estimated. Consult your healthcare provider.",
+  "errors": {
+    "offline": "You're offline. Check your connection and try again.",
+    "timeout": "Request timed out. Try again.",
+    "rateLimited": "Too many scans. Please wait a bit and try again.",
+    "unauthorized": "Please sign in to continue.",
+    "unknown": "Something went wrong. Please try again."
+  }
+}

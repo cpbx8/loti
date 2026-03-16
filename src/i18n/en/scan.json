@@ -1,0 +1,32 @@
+{
+  "title": "Scan Food",
+  "capture": "Take Photo",
+  "retake": "Retake",
+  "confirm": "Use This Photo",
+  "back": "Back",
+  "scanning": "Analyzing your food...",
+  "logThis": "Log This",
+  "scanAnother": "Scan Another",
+  "noFoodDetected": "No food detected. Try a clearer photo.",
+  "trafficLight": {
+    "green": "Low Impact",
+    "yellow": "Medium Impact",
+    "red": "High Impact"
+  },
+  "confidence": {
+    "high": "Published GI",
+    "medium": "Estimated GI",
+    "low": "AI Estimated"
+  },
+  "mealType": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snack": "Snack"
+  },
+  "serving": "{{grams}}g serving",
+  "calories": "Calories",
+  "protein": "Protein",
+  "carbs": "Carbs",
+  "fat": "Fat"
+}

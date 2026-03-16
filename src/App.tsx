@@ -1,0 +1,22 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import DashboardScreen from '@/screens/DashboardScreen'
+import ScanScreen from '@/screens/ScanScreen'
+import SearchScreen from '@/screens/SearchScreen'
+import BarcodeScreen from '@/screens/BarcodeScreen'
+import TextInputScreen from '@/screens/TextInputScreen'
+import FavoritesScreen from '@/screens/FavoritesScreen'
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<DashboardScreen />} />
+        <Route path="/scan" element={<ScanScreen />} />
+        <Route path="/search" element={<SearchScreen />} />
+        <Route path="/barcode" element={<BarcodeScreen />} />
+        <Route path="/text" element={<TextInputScreen />} />
+        <Route path="/favorites" element={<FavoritesScreen />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}

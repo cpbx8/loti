@@ -1,0 +1,12 @@
+{
+  "title": "Hoy",
+  "calories": "Calorías",
+  "protein": "Proteína",
+  "carbs": "Carbohidratos",
+  "fat": "Grasa",
+  "fiber": "Fibra",
+  "eaten": "consumidas",
+  "remaining": "restantes",
+  "noMeals": "No hay comidas registradas hoy",
+  "scanFirst": "Escanea tu primera comida para comenzar"
+}

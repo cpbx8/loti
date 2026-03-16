@@ -1,0 +1,32 @@
+{
+  "title": "Escanear Comida",
+  "capture": "Tomar Foto",
+  "retake": "Repetir",
+  "confirm": "Usar Esta Foto",
+  "back": "Atrás",
+  "scanning": "Analizando tu comida...",
+  "logThis": "Registrar",
+  "scanAnother": "Escanear Otra",
+  "noFoodDetected": "No se detectó comida. Intenta con una foto más clara.",
+  "trafficLight": {
+    "green": "Impacto Bajo",
+    "yellow": "Impacto Medio",
+    "red": "Impacto Alto"
+  },
+  "confidence": {
+    "high": "IG Publicado",
+    "medium": "IG Estimado",
+    "low": "Estimado por IA"
+  },
+  "mealType": {
+    "breakfast": "Desayuno",
+    "lunch": "Comida",
+    "dinner": "Cena",
+    "snack": "Snack"
+  },
+  "serving": "{{grams}}g porción",
+  "calories": "Calorías",
+  "protein": "Proteína",
+  "carbs": "Carbohidratos",
+  "fat": "Grasa"
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Today",
+  "calories": "Calories",
+  "protein": "Protein",
+  "carbs": "Carbs",
+  "fat": "Fat",
+  "fiber": "Fiber",
+  "eaten": "eaten",
+  "remaining": "remaining",
+  "noMeals": "No meals logged yet today",
+  "scanFirst": "Scan your first meal to get started"
+}

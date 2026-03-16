@@ -1,0 +1,18 @@
+{
+  "appName": "Loti",
+  "loading": "Cargando...",
+  "error": "Algo salió mal",
+  "retry": "Reintentar",
+  "cancel": "Cancelar",
+  "confirm": "Confirmar",
+  "save": "Guardar",
+  "disclaimer": "Solo con fines informativos. Consulta a tu profesional de salud.",
+  "disclaimerEstimated": "El valor de IG es estimado por IA. Consulta a tu profesional de salud.",
+  "errors": {
+    "offline": "Sin conexión. Revisa tu conexión e intenta de nuevo.",
+    "timeout": "Tiempo de espera agotado. Intenta de nuevo.",
+    "rateLimited": "Demasiados escaneos. Espera un momento e intenta de nuevo.",
+    "unauthorized": "Inicia sesión para continuar.",
+    "unknown": "Algo salió mal. Intenta de nuevo."
+  }
+}
