@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSearch } from '@/hooks/useSearch'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useDailyLog } from '@/hooks/useDailyLog'
 import type { FoodSearchResult, ScanResult } from '@/types/shared'
 
 const SOURCE_META: Record<string, { icon: string; label: string; color: string }> = {
@@ -17,7 +18,24 @@ export default function SearchScreen() {
   const navigate = useNavigate()
   const search = useSearch()
   const { add: addFav, remove: removeFav, isFavorite, favorites } = useFavorites()
+  const { addEntry } = useDailyLog()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
+
+  const handleLog = (r: FoodSearchResult) => {
+    addEntry({
+      food_name: r.name_en || r.name_es,
+      calories_kcal: r.calories,
+      protein_g: r.protein_g,
+      carbs_g: r.carbs_g,
+      fat_g: r.fat_g,
+      fiber_g: r.fiber_g ?? null,
+      serving_size_g: r.serving_size,
+      input_method: 'manual_search',
+    })
+    search.clear()
+    setSelected(null)
+    navigate('/')
+  }
 
   const toggleFav = (result: FoodSearchResult) => {
     const scanResult = toScanResult(result)
@@ -40,7 +58,7 @@ export default function SearchScreen() {
         isFav={isFavorite(selected.name_es)}
         onToggleFav={() => toggleFav(selected)}
         onBack={() => setSelected(null)}
-        onLog={() => { search.clear(); setSelected(null); navigate('/') }}
+        onLog={() => handleLog(selected)}
       />
     )
   }

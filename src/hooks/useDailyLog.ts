@@ -1,5 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useState, useCallback } from 'react'
 import type { TrafficLight } from '@/types/shared'
 
 export interface DailyTotals {
@@ -64,120 +63,110 @@ export function displayDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
-export function useDailyLog(date?: string) {
-  const [totals, setTotals] = useState<DailyTotals>(EMPTY_TOTALS)
-  const [entries, setEntries] = useState<FoodLogEntry[]>([])
-  const [loading, setLoading] = useState(true)
+// ─── Local Storage Food Log ─────────────────────────────────
+// Stores food log entries in localStorage until auth is added.
+// Will migrate to Supabase scan_logs table when auth is implemented.
 
-  const targetDate = date ?? getToday()
+const LOG_STORAGE_KEY = 'loti_food_log'
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
-
-    // Fetch daily totals
-    const { data: totalsData } = await supabase
-      .from('daily_totals')
-      .select('*')
-      .eq('date', targetDate)
-      .single()
-
-    if (totalsData) {
-      setTotals({
-        total_calories: totalsData.total_calories ?? 0,
-        total_protein_g: totalsData.total_protein_g ?? 0,
-        total_carbs_g: totalsData.total_carbs_g ?? 0,
-        total_fat_g: totalsData.total_fat_g ?? 0,
-        total_fiber_g: totalsData.total_fiber_g ?? 0,
-        scan_count: totalsData.scan_count ?? 0,
-      })
-    } else {
-      setTotals(EMPTY_TOTALS)
-    }
-
-    // Fetch scan log entries for the date
-    const startOfDay = `${targetDate}T00:00:00.000Z`
-    const endOfDay = `${targetDate}T23:59:59.999Z`
-
-    const { data: logsData } = await supabase
-      .from('scan_logs')
-      .select('id, food_name, matched_food_id, calories_kcal, protein_g, carbs_g, fat_g, result_traffic_light, serving_size_g, meal_type, created_at, gpt_raw_response')
-      .gte('created_at', startOfDay)
-      .lte('created_at', endOfDay)
-      .order('created_at', { ascending: false })
-
-    if (logsData) {
-      setEntries(
-        logsData.map((log) => ({
-          id: log.id,
-          food_name: log.food_name ?? (log.gpt_raw_response as Record<string, unknown>)?.food_name as string | null ?? 'Unknown food',
-          calories_kcal: log.calories_kcal,
-          protein_g: log.protein_g,
-          carbs_g: log.carbs_g,
-          fat_g: log.fat_g,
-          result_traffic_light: log.result_traffic_light as TrafficLight | null,
-          serving_size_g: log.serving_size_g,
-          meal_type: log.meal_type,
-          created_at: log.created_at,
-        })),
-      )
-    } else {
-      setEntries([])
-    }
-
-    setLoading(false)
-  }, [targetDate])
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  return { totals, entries, loading, refresh, date: targetDate }
+export interface NewLogEntry {
+  food_name: string
+  calories_kcal: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  fiber_g: number | null
+  serving_size_g: number
+  input_method: string
 }
 
-/** Fetch weekly totals for the history screen */
-export function useWeeklyHistory(endDate?: string) {
-  const [days, setDays] = useState<Array<{ date: string; totals: DailyTotals }>>([])
-  const [loading, setLoading] = useState(true)
+function loadAllEntries(): FoodLogEntry[] {
+  try {
+    const raw = localStorage.getItem(LOG_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
 
-  const end = endDate ?? getToday()
+function saveAllEntries(entries: FoodLogEntry[]) {
+  localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(entries))
+}
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
+function getEntriesForDate(allEntries: FoodLogEntry[], dateStr: string): FoodLogEntry[] {
+  return allEntries.filter(e => e.created_at.startsWith(dateStr))
+}
 
-    const startDate = shiftDate(end, -6)
+function computeTotals(entries: FoodLogEntry[]): DailyTotals {
+  return {
+    total_calories: entries.reduce((s, e) => s + (e.calories_kcal ?? 0), 0),
+    total_protein_g: entries.reduce((s, e) => s + (e.protein_g ?? 0), 0),
+    total_carbs_g: entries.reduce((s, e) => s + (e.carbs_g ?? 0), 0),
+    total_fat_g: entries.reduce((s, e) => s + (e.fat_g ?? 0), 0),
+    total_fiber_g: entries.reduce((s, e) => s + ((e as FoodLogEntry & { fiber_g?: number }).fiber_g ?? 0), 0),
+    scan_count: entries.length,
+  }
+}
 
-    const { data } = await supabase
-      .from('daily_totals')
-      .select('*')
-      .gte('date', startDate)
-      .lte('date', end)
-      .order('date', { ascending: true })
+export function useDailyLog(date?: string) {
+  const targetDate = date ?? getToday()
+  const [allEntries, setAllEntries] = useState<FoodLogEntry[]>(() => loadAllEntries())
 
-    // Build 7-day array, filling in zeros for missing days
-    const result: Array<{ date: string; totals: DailyTotals }> = []
-    for (let i = 0; i < 7; i++) {
-      const d = shiftDate(startDate, i)
-      const found = data?.find(row => row.date === d)
-      result.push({
-        date: d,
-        totals: found ? {
-          total_calories: found.total_calories ?? 0,
-          total_protein_g: found.total_protein_g ?? 0,
-          total_carbs_g: found.total_carbs_g ?? 0,
-          total_fat_g: found.total_fat_g ?? 0,
-          total_fiber_g: found.total_fiber_g ?? 0,
-          scan_count: found.scan_count ?? 0,
-        } : EMPTY_TOTALS,
-      })
+  const dayEntries = getEntriesForDate(allEntries, targetDate)
+  const totals = computeTotals(dayEntries)
+
+  const addEntry = useCallback((entry: NewLogEntry) => {
+    const newEntry: FoodLogEntry = {
+      id: crypto.randomUUID(),
+      food_name: entry.food_name,
+      calories_kcal: entry.calories_kcal,
+      protein_g: entry.protein_g,
+      carbs_g: entry.carbs_g,
+      fat_g: entry.fat_g,
+      result_traffic_light: null,
+      serving_size_g: entry.serving_size_g,
+      meal_type: null,
+      created_at: new Date().toISOString(),
     }
+    const updated = [newEntry, ...allEntries]
+    setAllEntries(updated)
+    saveAllEntries(updated)
+  }, [allEntries])
 
-    setDays(result)
-    setLoading(false)
-  }, [end])
+  const removeEntry = useCallback((id: string) => {
+    const updated = allEntries.filter(e => e.id !== id)
+    setAllEntries(updated)
+    saveAllEntries(updated)
+  }, [allEntries])
 
-  useEffect(() => {
-    refresh()
-  }, [refresh])
+  const refresh = useCallback(() => {
+    setAllEntries(loadAllEntries())
+  }, [])
+
+  return {
+    totals,
+    entries: dayEntries,
+    loading: false,
+    refresh,
+    addEntry,
+    removeEntry,
+    date: targetDate,
+  }
+}
+
+/** Fetch weekly totals for the history screen (localStorage-backed) */
+export function useWeeklyHistory(endDate?: string) {
+  const end = endDate ?? getToday()
+  const startDate = shiftDate(end, -6)
+  const allEntries = loadAllEntries()
+
+  // Build 7-day array
+  const days: Array<{ date: string; totals: DailyTotals }> = []
+  for (let i = 0; i < 7; i++) {
+    const d = shiftDate(startDate, i)
+    const dayEntries = getEntriesForDate(allEntries, d)
+    days.push({ date: d, totals: computeTotals(dayEntries) })
+  }
 
   // Compute weekly averages
   const daysWithData = days.filter(d => d.totals.scan_count > 0)
@@ -189,7 +178,7 @@ export function useWeeklyHistory(endDate?: string) {
   const daysLogged = daysWithData.length
 
   return {
-    days, loading, refresh,
+    days, loading: false,
     averages: { avgCalories, avgProtein, avgCarbs, avgFat },
     daysLogged,
   }

@@ -1,129 +1,188 @@
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useCamera } from '@/hooks/useCamera'
-import { useScan } from '@/hooks/useScan'
+import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
+import { useDailyLog } from '@/hooks/useDailyLog'
+import { FoodResultCard, FoodResultList, SearchMeta } from '@/components/FoodResultCard'
+import type { FoodSearchResult } from '@/types/shared'
+import { useState } from 'react'
 
 export default function ScanScreen() {
-  const { t } = useTranslation('scan')
   const navigate = useNavigate()
   const camera = useCamera()
-  const scan = useScan()
+  const search = useWaterfallSearch()
+  const { addEntry } = useDailyLog()
+  const [selected, setSelected] = useState<FoodSearchResult | null>(null)
 
   const handleConfirm = async () => {
     if (!camera.base64) return
-    await scan.scan(camera.base64)
+    setSelected(null)
+    await search.searchPhoto(camera.base64)
   }
 
-  const handleLogAndReturn = () => {
+  const handleLog = () => {
+    const item = selected ?? search.topResult
+    if (!item) return
+    addEntry({
+      food_name: item.name_en || item.name_es,
+      calories_kcal: item.calories,
+      protein_g: item.protein_g,
+      carbs_g: item.carbs_g,
+      fat_g: item.fat_g,
+      fiber_g: item.fiber_g ?? null,
+      serving_size_g: item.serving_size,
+      input_method: 'photo_scan',
+    })
     camera.reset()
-    scan.reset()
+    search.reset()
+    setSelected(null)
+    navigate('/')
+  }
+
+  const handleLogAll = () => {
+    for (const item of search.results) {
+      addEntry({
+        food_name: item.name_en || item.name_es,
+        calories_kcal: item.calories,
+        protein_g: item.protein_g,
+        carbs_g: item.carbs_g,
+        fat_g: item.fat_g,
+        fiber_g: item.fiber_g ?? null,
+        serving_size_g: item.serving_size,
+        input_method: 'photo_scan',
+      })
+    }
+    camera.reset()
+    search.reset()
     navigate('/')
   }
 
   const handleScanAnother = () => {
     camera.reset()
-    scan.reset()
+    search.reset()
+    setSelected(null)
   }
 
-  // State: scan complete — show result
-  if (scan.state === 'done' && scan.result) {
-    const r = scan.result
+  // ─── Result view ──────────────────────────────────────────
+  if (search.state === 'done' && search.results.length > 0) {
+    const display = selected ?? search.topResult!
+    const multiple = search.results.length > 1
+
     return (
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center border-b border-gray-200 px-4 py-3">
-          <h1 className="text-lg font-bold text-gray-900">{r.food_name}</h1>
+      <div className="flex flex-1 flex-col bg-gray-950">
+        <header className="flex items-center border-b border-gray-800 px-4 py-3">
+          <button onClick={handleScanAnother} className="text-sm text-gray-400 hover:text-white">
+            ← Back
+          </button>
+          <h1 className="ml-3 text-lg font-bold text-white">
+            {multiple ? `${search.results.length} Items Found` : (display.name_en || display.name_es)}
+          </h1>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-          {/* Traffic light */}
-          <div className={`rounded-xl p-4 ${
-            r.traffic_light === 'green' ? 'bg-gl-green/10' :
-            r.traffic_light === 'yellow' ? 'bg-gl-yellow/10' :
-            'bg-gl-red/10'
-          }`}>
-            <p className={`text-lg font-bold ${
-              r.traffic_light === 'green' ? 'text-gl-green' :
-              r.traffic_light === 'yellow' ? 'text-gl-yellow' :
-              'text-gl-red'
-            }`}>
-              {t(`trafficLight.${r.traffic_light}`)}
-            </p>
-            {r.glycemic_index != null && (
-              <p className="mt-1 text-sm text-gray-500">
-                GI: {r.glycemic_index} · GL: {r.glycemic_load ?? '—'}
-              </p>
-            )}
-          </div>
-
-          {/* Macros */}
-          <div className="grid grid-cols-2 gap-3">
-            <MacroCard label={t('calories')} value={r.calories_kcal} unit="kcal" />
-            <MacroCard label={t('protein')} value={r.protein_g} unit="g" />
-            <MacroCard label={t('carbs')} value={r.carbs_g} unit="g" />
-            <MacroCard label={t('fat')} value={r.fat_g} unit="g" />
-          </div>
-
-          <p className="text-sm text-gray-400">
-            {t('serving', { grams: r.serving_size_g })} · {t(`confidence.${r.confidence}`)}
-          </p>
-
-          {/* Swap suggestion */}
-          {r.swap_suggestion && (
-            <div className="rounded-lg bg-blue-50 px-3 py-2">
-              <p className="text-sm text-blue-800">{r.swap_suggestion}</p>
+          {/* Show captured photo thumbnail */}
+          {camera.previewUrl && (
+            <div className="w-24 h-24 overflow-hidden rounded-lg self-center">
+              <img src={camera.previewUrl} alt="Scanned food" className="h-full w-full object-cover" />
             </div>
           )}
 
-          {/* Disclaimer */}
-          <p className="text-xs text-gray-300">{r.disclaimer}</p>
+          {multiple ? (
+            <>
+              <FoodResultList
+                results={search.results}
+                onSelect={setSelected}
+                selectedIndex={selected ? search.results.indexOf(selected) : 0}
+              />
+              {selected && (
+                <div className="mt-2 rounded-xl bg-gray-900/50 p-4">
+                  <FoodResultCard result={selected} />
+                </div>
+              )}
+            </>
+          ) : (
+            <FoodResultCard result={display} />
+          )}
+
+          <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
-        <div className="flex gap-3 border-t border-gray-200 p-4">
+        <div className="flex gap-3 border-t border-gray-800 p-4">
           <button
             onClick={handleScanAnother}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-base font-medium text-gray-700 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
           >
-            {t('scanAnother')}
+            Scan Another
           </button>
+          {multiple ? (
+            <button
+              onClick={selected ? handleLog : handleLogAll}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            >
+              {selected ? 'Log Selected' : 'Log All'}
+            </button>
+          ) : (
+            <button
+              onClick={handleLog}
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            >
+              Log This
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ─── Scanning in progress ─────────────────────────────────
+  if (search.state === 'loading') {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-950 p-6">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-700 border-t-primary" />
+        <p className="text-lg text-gray-400">Analyzing your food...</p>
+      </div>
+    )
+  }
+
+  // ─── Error ────────────────────────────────────────────────
+  if (search.state === 'error') {
+    return (
+      <div className="flex flex-1 flex-col bg-gray-950">
+        <header className="flex items-center border-b border-gray-800 px-4 py-3">
+          <button onClick={handleScanAnother} className="text-sm text-gray-400 hover:text-white">
+            ← Back
+          </button>
+          <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
+        </header>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
+          <div className="rounded-xl bg-red-900/20 px-4 py-3">
+            <p className="text-sm text-red-300">{search.error}</p>
+          </div>
           <button
-            onClick={handleLogAndReturn}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            onClick={handleScanAnother}
+            className="rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
           >
-            {t('logThis')}
+            Try Again
           </button>
         </div>
       </div>
     )
   }
 
-  // State: scanning in progress
-  if (scan.state === 'scanning') {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
-        <p className="text-lg text-gray-500">{t('scanning')}</p>
-      </div>
-    )
-  }
-
-  // State: no photo yet — show capture prompt
+  // ─── No photo yet — capture prompt ────────────────────────
   if (!camera.previewUrl) {
     return (
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center border-b border-gray-200 px-4 py-3">
-          <button
-            onClick={() => navigate('/')}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            {t('back')}
+      <div className="flex flex-1 flex-col bg-gray-950">
+        <header className="flex items-center border-b border-gray-800 px-4 py-3">
+          <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-white">
+            ← Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-gray-900">{t('title')}</h1>
+          <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
         </header>
 
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          {(camera.error || scan.error) && (
-            <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-              {camera.error || scan.error}
+          {camera.error && (
+            <p className="rounded-md bg-red-900/20 px-3 py-2 text-sm text-red-300">
+              {camera.error}
             </p>
           )}
 
@@ -131,7 +190,7 @@ export default function ScanScreen() {
             onClick={camera.capture}
             disabled={camera.loading}
             className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
-            aria-label={t('capture')}
+            aria-label="Take photo"
           >
             {camera.loading ? (
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
@@ -143,60 +202,42 @@ export default function ScanScreen() {
             )}
           </button>
 
-          <p className="text-gray-500">{t('capture')}</p>
+          <p className="text-gray-500">Take a photo of your food</p>
         </div>
       </div>
     )
   }
 
-  // State: photo captured — show review
+  // ─── Photo captured — review ──────────────────────────────
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center border-b border-gray-200 px-4 py-3">
-        <button
-          onClick={() => { camera.reset(); navigate('/') }}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          {t('back')}
+    <div className="flex flex-1 flex-col bg-gray-950">
+      <header className="flex items-center border-b border-gray-800 px-4 py-3">
+        <button onClick={() => { camera.reset(); navigate('/') }} className="text-sm text-gray-400 hover:text-white">
+          ← Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-gray-900">{t('title')}</h1>
+        <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
       </header>
 
       <div className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="w-full max-w-sm overflow-hidden rounded-xl">
-          <img
-            src={camera.previewUrl}
-            alt="Captured food"
-            className="h-auto w-full object-cover"
-          />
+          <img src={camera.previewUrl} alt="Captured food" className="h-auto w-full object-cover" />
         </div>
 
         <div className="mt-6 flex w-full max-w-sm gap-3">
           <button
             onClick={camera.reset}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-base font-medium text-gray-700 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
           >
-            {t('retake')}
+            Retake
           </button>
           <button
             onClick={handleConfirm}
             className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
           >
-            {t('confirm')}
+            Analyze
           </button>
         </div>
       </div>
-    </div>
-  )
-}
-
-function MacroCard({ label, value, unit }: { label: string; value: number | null; unit: string }) {
-  return (
-    <div className="rounded-lg bg-gray-800 p-3">
-      <p className="text-sm text-gray-400">{label}</p>
-      <p className="text-xl font-bold text-white">
-        {value != null ? value : '—'}<span className="text-sm font-normal text-gray-400"> {unit}</span>
-      </p>
     </div>
   )
 }
