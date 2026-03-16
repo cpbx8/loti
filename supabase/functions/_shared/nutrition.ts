@@ -1,4 +1,4 @@
-/** Shared nutrition resolution: FatSecret → USDA → GPT estimation */
+/** Shared nutrition resolution: FatSecret API only */
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!
 const FATSECRET_CLIENT_ID = Deno.env.get("FATSECRET_CLIENT_ID") ?? ""
@@ -15,42 +15,23 @@ export interface NutritionData {
   carbs_g: number
   fat_g: number
   fiber_g: number
-  source: "fatsecret" | "usda" | "ai_estimated"
+  source: "fatsecret"
 }
 
 /**
- * Resolve nutrition data for a food name at a given serving size.
- * Pipeline: FatSecret → USDA → GPT estimation
+ * Resolve nutrition data via FatSecret API only.
+ * Returns null if food not found.
  */
 export async function resolveNutrition(
   foodName: string,
-  category: string,
+  _category: string,
   servingG: number,
-): Promise<NutritionData> {
-  // 1. Try FatSecret
+): Promise<NutritionData | null> {
   if (FATSECRET_CLIENT_ID) {
     const fs = await searchFatSecret(foodName, servingG)
     if (fs) return { ...fs, source: "fatsecret" }
   }
-
-  // 2. Try USDA
-  if (USDA_API_KEY) {
-    const usda = await searchUSDA(foodName, servingG)
-    if (usda) return { ...usda, serving_label: null, source: "usda" }
-  }
-
-  // 3. GPT estimation
-  const est = await estimateNutrition(foodName, category, servingG)
-  return {
-    food_name: foodName,
-    serving_label: null,
-    calories_kcal: est.calories_kcal,
-    protein_g: est.protein_g,
-    carbs_g: est.carbs_g,
-    fat_g: est.fat_g,
-    fiber_g: est.fiber_g,
-    source: "ai_estimated",
-  }
+  return null
 }
 
 export interface NutritionEstimate {

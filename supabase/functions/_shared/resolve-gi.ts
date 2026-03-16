@@ -58,74 +58,67 @@ export async function resolveGI(
     return buildBarcodeResult(input)
   }
 
-  // Step 3: Try external nutrition APIs (FatSecret → USDA)
+  // Step 3: FatSecret API lookup
   const nutrition = await resolveNutrition(
     input.food_name,
     input.category ?? "other",
     input.serving_size_g,
   )
 
-  if (nutrition.source !== "ai_estimated") {
-    const giEstimate = await estimateGI(input.food_name, input.category ?? "other")
-    const perUnitGL = computeGL(giEstimate, nutrition.carbs_g, input.serving_size_g, input.serving_size_g)
-    const totalGL = perUnitGL != null ? Math.round(perUnitGL * input.quantity) : null
-
+  if (!nutrition) {
+    // FatSecret didn't find the food — return a not-found result
     return {
-      food_name: nutrition.food_name,
+      food_name: input.food_name,
       category: input.category ?? "other",
-      calories_kcal: Math.round(nutrition.calories_kcal * input.quantity),
-      protein_g: Math.round(nutrition.protein_g * input.quantity * 10) / 10,
-      carbs_g: Math.round(nutrition.carbs_g * input.quantity * 10) / 10,
-      fat_g: Math.round(nutrition.fat_g * input.quantity * 10) / 10,
-      fiber_g: Math.round(nutrition.fiber_g * input.quantity * 10) / 10,
+      calories_kcal: null,
+      protein_g: null,
+      carbs_g: null,
+      fat_g: null,
+      fiber_g: null,
       serving_size_g: input.total_g,
-      serving_label: nutrition.serving_label,
-      glycemic_index: giEstimate,
-      glycemic_load: totalGL,
-      traffic_light: classifyGL(totalGL),
-      confidence: "medium",
-      gi_source: "estimated",
+      serving_label: null,
+      glycemic_index: null,
+      glycemic_load: null,
+      traffic_light: "green",
+      confidence: "low",
+      gi_source: "unknown",
       swap_suggestion: null,
-      disclaimer: `Nutrition from ${nutrition.source === "fatsecret" ? "FatSecret" : "USDA FoodData Central"}. GI is AI-estimated. Consult a healthcare professional.`,
+      disclaimer: "Food not found in FatSecret database.",
       input_method: input.input_method,
       quantity: input.quantity,
-      per_unit_gl: perUnitGL,
+      per_unit_gl: null,
       matched_food_id: null,
-      match_method: nutrition.source,
+      match_method: "not_found",
     }
   }
 
-  // Step 4: Full GPT estimation
-  const estimation = await estimateNutrition(
-    input.food_name,
-    input.category ?? "other",
-    input.serving_size_g,
-  )
-  const perUnitGL = computeGL(estimation.glycemic_index, estimation.carbs_g, input.serving_size_g, input.serving_size_g)
+  // Step 4: Estimate GI via GPT-mini (FatSecret doesn't provide GI)
+  const giEstimate = await estimateGI(input.food_name, input.category ?? "other")
+  const perUnitGL = computeGL(giEstimate, nutrition.carbs_g, input.serving_size_g, input.serving_size_g)
   const totalGL = perUnitGL != null ? Math.round(perUnitGL * input.quantity) : null
 
   return {
-    food_name: input.food_name,
+    food_name: nutrition.food_name,
     category: input.category ?? "other",
-    calories_kcal: Math.round(estimation.calories_kcal * input.quantity),
-    protein_g: Math.round(estimation.protein_g * input.quantity * 10) / 10,
-    carbs_g: Math.round(estimation.carbs_g * input.quantity * 10) / 10,
-    fat_g: Math.round(estimation.fat_g * input.quantity * 10) / 10,
-    fiber_g: Math.round(estimation.fiber_g * input.quantity * 10) / 10,
+    calories_kcal: Math.round(nutrition.calories_kcal * input.quantity),
+    protein_g: Math.round(nutrition.protein_g * input.quantity * 10) / 10,
+    carbs_g: Math.round(nutrition.carbs_g * input.quantity * 10) / 10,
+    fat_g: Math.round(nutrition.fat_g * input.quantity * 10) / 10,
+    fiber_g: Math.round(nutrition.fiber_g * input.quantity * 10) / 10,
     serving_size_g: input.total_g,
-    serving_label: null,
-    glycemic_index: estimation.glycemic_index,
+    serving_label: nutrition.serving_label,
+    glycemic_index: giEstimate,
     glycemic_load: totalGL,
     traffic_light: classifyGL(totalGL),
-    confidence: "low",
+    confidence: "medium",
     gi_source: "estimated",
-    swap_suggestion: estimation.swap_suggestion,
-    disclaimer: "AI-estimated values. Consult a healthcare professional for medical advice.",
+    swap_suggestion: null,
+    disclaimer: "Nutrition from FatSecret. GI is AI-estimated. Consult a healthcare professional.",
     input_method: input.input_method,
     quantity: input.quantity,
     per_unit_gl: perUnitGL,
     matched_food_id: null,
-    match_method: "ai_estimated",
+    match_method: "fatsecret",
   }
 }
 

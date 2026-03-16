@@ -92,7 +92,7 @@ export default function SearchScreen() {
             <div className="flex flex-col items-center gap-3 pt-8 text-center">
               <div className="text-4xl">🔍</div>
               <p className="text-sm text-gray-400">Type any food to get nutrition info</p>
-              <p className="text-xs text-gray-600">Powered by AI · FatSecret · USDA</p>
+              <p className="text-xs text-gray-600">Powered by FatSecret</p>
 
               {/* Quick examples */}
               <div className="mt-2 flex flex-wrap justify-center gap-2">
@@ -203,16 +203,32 @@ function ResultView({ result: r, isFav, onToggleFav, onBack, onLog }: {
         </div>
 
         <p className="text-sm text-gray-500">
-          {r.serving_size_g}g per serving · Source: {r.match_method}
+          {r.serving_size_g}g per serving
         </p>
+
+        {/* Source badge */}
+        <div className="flex items-center gap-2 rounded-lg bg-gray-900 px-3 py-2">
+          <span className="text-base">{r.match_method === 'fatsecret' ? '📊' : '🤖'}</span>
+          <div>
+            <p className="text-xs font-medium text-gray-300">
+              {r.match_method === 'fatsecret' ? 'FatSecret Database' :
+               r.match_method === 'not_found' ? 'Not Found' : 'AI-Estimated'}
+            </p>
+            <p className="text-xs text-gray-500">
+              {r.match_method === 'fatsecret'
+                ? 'Nutrition from FatSecret. GI estimated by AI.'
+                : r.match_method === 'not_found'
+                ? 'This food was not found in FatSecret.'
+                : 'Values estimated by AI. May vary from actual values.'}
+            </p>
+          </div>
+        </div>
 
         {r.swap_suggestion && (
           <div className="rounded-lg bg-blue-900/20 px-3 py-2">
-            <p className="text-sm text-blue-300">{r.swap_suggestion}</p>
+            <p className="text-sm text-blue-300">💡 {r.swap_suggestion}</p>
           </div>
         )}
-
-        <p className="text-xs text-gray-600">{r.disclaimer}</p>
       </div>
 
       <div className="flex gap-3 border-t border-gray-800 p-4">

@@ -48,15 +48,6 @@ export default function DashboardScreen() {
       {/* Action FABs */}
       <div className="fixed bottom-6 left-1/2 flex -translate-x-1/2 items-end gap-3">
         <button
-          onClick={() => navigate('/search')}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-800 text-gray-300 shadow-lg transition-transform hover:scale-105 active:scale-95"
-          aria-label="Search food"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
-        <button
           onClick={() => navigate('/text')}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-800 text-gray-300 shadow-lg transition-transform hover:scale-105 active:scale-95"
           aria-label="Text input"
