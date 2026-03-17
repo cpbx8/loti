@@ -11,20 +11,13 @@ interface Props {
 
 export default function OnboardingLayout({ children, hideProgress, hideBack }: Props) {
   const { back, stepNumber, totalSteps } = useOnboarding()
-  const progress = (stepNumber / totalSteps) * 100
 
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-[100svh]">
-      {/* Progress bar */}
+      {/* Progress dots + back button */}
       {!hideProgress && (
         <div className="relative">
-          <div className="h-[3px] w-full bg-border">
-            <div
-              className="h-full bg-primary transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between px-5 pt-3">
+          <div className="flex items-center justify-between px-5 pt-4 pb-1">
             {!hideBack ? (
               <button
                 onClick={back}
@@ -39,9 +32,20 @@ export default function OnboardingLayout({ children, hideProgress, hideBack }: P
             ) : (
               <div />
             )}
-            <span className="text-sm text-text-tertiary">
-              Step {stepNumber} of {totalSteps}
-            </span>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-full transition-all duration-300 ${
+                    i + 1 === stepNumber
+                      ? 'h-2 w-2 bg-primary'
+                      : i + 1 < stepNumber
+                        ? 'h-1.5 w-1.5 bg-primary/40'
+                        : 'h-1.5 w-1.5 bg-border'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

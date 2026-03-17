@@ -4,6 +4,7 @@ import { useSearch } from '@/hooks/useSearch'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useDailyLog } from '@/hooks/useDailyLog'
 import type { FoodSearchResult, ScanResult } from '@/types/shared'
+import FatSecretAttribution from '@/components/FatSecretAttribution'
 
 const SOURCE_META: Record<string, { label: string; color: string }> = {
   cache:         { label: 'Cached',          color: 'text-info' },
@@ -29,6 +30,7 @@ export default function SearchScreen() {
       carbs_g: r.carbs_g,
       fat_g: r.fat_g,
       fiber_g: r.fiber_g ?? null,
+      glycemic_load: r.glycemic_load ?? null,
       serving_size_g: r.serving_size,
       input_method: 'manual_search',
     })
@@ -284,35 +286,38 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
           {r.serving_description && ` (${r.serving_description})`}
         </p>
 
-        {/* Source badge */}
-        <div className="flex items-center gap-2 rounded-xl bg-card px-4 py-3 shadow-sm">
-          <span className={`inline-block h-3 w-3 rounded-full ${
-            SOURCE_META[r.source]?.color === 'text-info' ? 'bg-info' :
-            SOURCE_META[r.source]?.color === 'text-tl-green-fill' ? 'bg-tl-green-fill' :
-            SOURCE_META[r.source]?.color === 'text-tl-green-accent' ? 'bg-tl-green-accent' :
-            SOURCE_META[r.source]?.color === 'text-tl-yellow-fill' ? 'bg-tl-yellow-fill' :
-            'bg-text-tertiary'
-          }`} />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-text-primary">
-              {SOURCE_META[r.source]?.label ?? r.source}
-            </p>
-            <p className="text-xs text-text-tertiary">
-              {r.source === 'cache' && 'Previously looked up -- instant result'}
-              {r.source === 'fatsecret' && 'Verified nutrition database'}
-              {r.source === 'openfoodfacts' && 'Open-source food database'}
-              {r.source === 'gpt4o' && 'AI-estimated values -- may vary from actual'}
-              {r.source === 'seed' && 'Pre-loaded Mexican food data'}
-              {r.source === 'user' && 'Community-contributed data'}
-            </p>
+        {/* Source attribution */}
+        {r.source === 'fatsecret' ? (
+          <FatSecretAttribution />
+        ) : (
+          <div className="flex items-center gap-2 rounded-xl bg-card px-4 py-3 shadow-sm">
+            <span className={`inline-block h-3 w-3 rounded-full ${
+              SOURCE_META[r.source]?.color === 'text-info' ? 'bg-info' :
+              SOURCE_META[r.source]?.color === 'text-tl-green-fill' ? 'bg-tl-green-fill' :
+              SOURCE_META[r.source]?.color === 'text-tl-green-accent' ? 'bg-tl-green-accent' :
+              SOURCE_META[r.source]?.color === 'text-tl-yellow-fill' ? 'bg-tl-yellow-fill' :
+              'bg-text-tertiary'
+            }`} />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-text-primary">
+                {SOURCE_META[r.source]?.label ?? r.source}
+              </p>
+              <p className="text-xs text-text-tertiary">
+                {r.source === 'cache' && 'Previously looked up -- instant result'}
+                {r.source === 'openfoodfacts' && 'Open-source food database'}
+                {r.source === 'gpt4o' && 'AI-estimated values -- may vary from actual'}
+                {r.source === 'seed' && 'Pre-loaded Mexican food data'}
+                {r.source === 'user' && 'Community-contributed data'}
+              </p>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-text-tertiary">
+                {Math.round(r.confidence * 100)}% conf
+              </span>
+              {cached && <span className="text-xs text-info">cached</span>}
+            </div>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-text-tertiary">
-              {Math.round(r.confidence * 100)}% conf
-            </span>
-            {cached && <span className="text-xs text-info">cached</span>}
-          </div>
-        </div>
+        )}
 
         {/* Latency */}
         <p className="text-xs text-text-tertiary text-center">

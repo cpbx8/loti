@@ -1,4 +1,5 @@
 import { useOnboarding } from '@/contexts/OnboardingContext'
+import FatSecretAttribution from '@/components/FatSecretAttribution'
 
 export default function WelcomeScreen() {
   const { next } = useOnboarding()
@@ -30,6 +31,10 @@ export default function WelcomeScreen() {
       <button className="mt-4 text-sm text-text-tertiary hover:text-text-secondary min-h-[44px]">
         Already have an account? Sign in
       </button>
+
+      <div className="mt-8">
+        <FatSecretAttribution />
+      </div>
     </div>
   )
 }

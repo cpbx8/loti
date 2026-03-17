@@ -170,26 +170,32 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     return fromIndex
   }
 
-  const next = useCallback(() => {
+  // Sync to localStorage inside updaters so state survives auth-triggered re-mounts
+  const persistAndSet = useCallback((updater: (prev: OnboardingState) => OnboardingState) => {
     setState(prev => {
-      const nextIdx = findNextVisible(prev.currentScreen)
-      return {
-        ...prev,
-        currentScreen: nextIdx,
-        screensCompleted: Math.max(prev.screensCompleted, prev.currentScreen + 1),
-      }
+      const next = updater(prev)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      return next
     })
+  }, [])
+
+  const next = useCallback(() => {
+    persistAndSet(prev => ({
+      ...prev,
+      currentScreen: findNextVisible(prev.currentScreen),
+      screensCompleted: Math.max(prev.screensCompleted, prev.currentScreen + 1),
+    }))
   }, [state.healthState])
 
   const back = useCallback(() => {
-    setState(prev => ({
+    persistAndSet(prev => ({
       ...prev,
       currentScreen: findPrevVisible(prev.currentScreen),
     }))
   }, [state.healthState])
 
   const skip = useCallback(() => {
-    setState(prev => ({
+    persistAndSet(prev => ({
       ...prev,
       currentScreen: findNextVisible(prev.currentScreen),
       screensCompleted: Math.max(prev.screensCompleted, prev.currentScreen + 1),

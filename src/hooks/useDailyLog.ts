@@ -17,6 +17,7 @@ export interface FoodLogEntry {
   protein_g: number | null
   carbs_g: number | null
   fat_g: number | null
+  glycemic_load: number | null
   result_traffic_light: TrafficLight | null
   serving_size_g: number | null
   meal_type: string | null
@@ -76,6 +77,7 @@ export interface NewLogEntry {
   carbs_g: number
   fat_g: number
   fiber_g: number | null
+  glycemic_load?: number | null
   serving_size_g: number
   input_method: string
 }
@@ -123,6 +125,7 @@ export function useDailyLog(date?: string) {
       protein_g: entry.protein_g,
       carbs_g: entry.carbs_g,
       fat_g: entry.fat_g,
+      glycemic_load: entry.glycemic_load ?? null,
       result_traffic_light: null,
       serving_size_g: entry.serving_size_g,
       meal_type: null,

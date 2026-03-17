@@ -29,6 +29,7 @@ export default function TextInputScreen() {
       carbs_g: item.carbs_g,
       fat_g: item.fat_g,
       fiber_g: item.fiber_g ?? null,
+      glycemic_load: item.glycemic_load ?? null,
       serving_size_g: item.serving_size,
       input_method: 'text_input',
     })

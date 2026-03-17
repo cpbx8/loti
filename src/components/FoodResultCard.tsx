@@ -5,6 +5,8 @@
  */
 import type { FoodSearchResult } from '@/types/shared'
 import TrafficLightBadge from './TrafficLightBadge'
+import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
+import FatSecretAttribution from './FatSecretAttribution'
 
 // ─── Source Badge ─────────────────────────────────────────────
 
@@ -54,7 +56,12 @@ interface FoodResultCardProps {
 export function FoodResultCard({ result: r, showSource = true }: FoodResultCardProps) {
   const displayName = r.name_en || r.name_es
   const subtitle = r.name_en && r.name_es !== r.name_en ? r.name_es : undefined
-  const hasTL = r.traffic_light != null
+  const thresholds = useThresholds()
+  // Recompute traffic light from GL using personalized thresholds
+  const tl = r.glycemic_load != null
+    ? getPersonalizedTrafficLight(r.glycemic_load, thresholds)
+    : r.traffic_light
+  const hasTL = tl != null
 
   return (
     <div className="flex flex-col gap-4">
@@ -65,26 +72,26 @@ export function FoodResultCard({ result: r, showSource = true }: FoodResultCardP
           {subtitle && <p className="text-sm text-text-secondary">{subtitle}</p>}
         </div>
         {hasTL && (
-          <TrafficLightBadge rating={r.traffic_light!} size="md" animated />
+          <TrafficLightBadge rating={tl!} size="md" animated />
         )}
       </div>
 
       {/* GI / GL hero section */}
       {hasTL && r.glycemic_index != null && (
         <div className={`rounded-xl p-4 ${
-          r.traffic_light === 'green' ? 'bg-tl-green-bg' :
-          r.traffic_light === 'yellow' ? 'bg-tl-yellow-bg' :
+          tl === 'green' ? 'bg-tl-green-bg' :
+          tl === 'yellow' ? 'bg-tl-yellow-bg' :
           'bg-tl-red-bg'
         }`}>
           <div className="flex items-center justify-around">
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: r.traffic_light === 'green' ? '#2E7D32' : r.traffic_light === 'yellow' ? '#E65100' : '#C62828' }}>
+              <p className="text-2xl font-bold" style={{ color: tl === 'green' ? '#2E7D32' : tl === 'yellow' ? '#E65100' : '#C62828' }}>
                 {Math.round(r.glycemic_index)}
               </p>
               <p className="text-xs text-text-secondary">GI</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold" style={{ color: r.traffic_light === 'green' ? '#2E7D32' : r.traffic_light === 'yellow' ? '#E65100' : '#C62828' }}>
+              <p className="text-2xl font-bold" style={{ color: tl === 'green' ? '#2E7D32' : tl === 'yellow' ? '#E65100' : '#C62828' }}>
                 {r.glycemic_load != null ? Math.round(r.glycemic_load) : '--'}
               </p>
               <p className="text-xs text-text-secondary">GL</p>
@@ -119,9 +126,11 @@ export function FoodResultCard({ result: r, showSource = true }: FoodResultCardP
         {r.fiber_g != null && ` · ${r.fiber_g}g fiber`}
       </p>
 
-      {/* Source badge */}
+      {/* Source attribution */}
       {showSource && (
-        <SourceBadge source={r.source} confidence={r.confidence} />
+        r.source === 'fatsecret'
+          ? <FatSecretAttribution />
+          : <SourceBadge source={r.source} confidence={r.confidence} />
       )}
 
       {/* Disclaimer */}
@@ -141,11 +150,15 @@ interface FoodResultListProps {
 }
 
 export function FoodResultList({ results, onSelect, selectedIndex }: FoodResultListProps) {
+  const thresholds = useThresholds()
   return (
     <div className="flex flex-col gap-2">
       {results.map((r, i) => {
         const displayName = r.name_en || r.name_es
         const isSelected = selectedIndex === i
+        const itemTL = r.glycemic_load != null
+          ? getPersonalizedTrafficLight(r.glycemic_load, thresholds)
+          : r.traffic_light
         return (
           <button
             key={r.id ?? `${r.name_es}-${i}`}
@@ -154,8 +167,8 @@ export function FoodResultList({ results, onSelect, selectedIndex }: FoodResultL
               isSelected ? 'bg-primary-light border border-primary/30' : 'bg-card shadow-sm hover:bg-surface'
             }`}
           >
-            {r.traffic_light && (
-              <TrafficLightBadge rating={r.traffic_light} size="sm" />
+            {itemTL && (
+              <TrafficLightBadge rating={itemTL} size="sm" />
             )}
             <div className="flex-1 min-w-0">
               <p className="font-medium text-text-primary truncate">{displayName}</p>
@@ -181,6 +194,7 @@ interface CompositeResultCardProps {
 }
 
 export function CompositeResultCard({ total, components }: CompositeResultCardProps) {
+  const thresholds = useThresholds()
   return (
     <div className="flex flex-col gap-4">
       {/* Total */}
@@ -190,10 +204,14 @@ export function CompositeResultCard({ total, components }: CompositeResultCardPr
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-text-tertiary mb-2">Breakdown</p>
         <div className="space-y-1.5">
-          {components.map((c, i) => (
+          {components.map((c, i) => {
+            const compTL = c.glycemic_load != null
+              ? getPersonalizedTrafficLight(c.glycemic_load, thresholds)
+              : c.traffic_light
+            return (
             <div key={i} className="flex items-center gap-3 rounded-xl bg-surface px-3 py-2">
-              {c.traffic_light && (
-                <TrafficLightBadge rating={c.traffic_light} size="sm" />
+              {compTL && (
+                <TrafficLightBadge rating={compTL} size="sm" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-text-primary truncate">{c.name_en || c.name_es}</p>
@@ -206,7 +224,8 @@ export function CompositeResultCard({ total, components }: CompositeResultCardPr
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

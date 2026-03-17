@@ -3,6 +3,7 @@
  * Shows total macros + per-component breakdown.
  */
 import type { FoodSearchResult } from '@/types/shared'
+import FatSecretAttribution from './FatSecretAttribution'
 
 const SOURCE_INFO: Record<string, { label: string; color: string }> = {
   cache:         { label: 'Cached',          color: 'text-info' },
@@ -75,13 +76,17 @@ export default function CompositeResultCard({ total, components, onLog, onScanAn
           </div>
         </div>
 
-        {/* Source badge */}
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 text-sm ${info.color}`}>
-            <span className="inline-block h-2 w-2 rounded-full bg-current" />
-            {info.label}
-          </span>
-        </div>
+        {/* Source attribution */}
+        {total.source === 'fatsecret' ? (
+          <FatSecretAttribution />
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 text-sm ${info.color}`}>
+              <span className="inline-block h-2 w-2 rounded-full bg-current" />
+              {info.label}
+            </span>
+          </div>
+        )}
 
         {/* Action row */}
         <div className="flex gap-3">

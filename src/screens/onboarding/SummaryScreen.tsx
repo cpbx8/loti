@@ -4,7 +4,7 @@ import { useOnboarding, computeThresholds, getTrafficLightFromGL, ONBOARDING_SCR
 import TrafficLightBadge from '@/components/TrafficLightBadge'
 
 const HEALTH_LABELS: Record<string, string> = {
-  healthy: 'Healthy / Curious',
+  healthy: 'Healthy',
   prediabetic: 'Prediabetic',
   type2: 'Type 2 Diabetes',
   gestational: 'Gestational Diabetes',

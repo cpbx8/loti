@@ -31,6 +31,12 @@ export default function A1CScreen() {
       <OnboardingHeadline>Do you know your most recent A1C?</OnboardingHeadline>
       <OnboardingSubtext>Don't worry if you don't — we can work without it</OnboardingSubtext>
 
+      <div className="mx-auto mt-4 rounded-xl bg-card border border-border px-4 py-3 max-w-sm">
+        <p className="text-xs text-text-tertiary leading-relaxed">
+          <span className="font-medium text-text-secondary">What is A1C?</span> It's a blood test that measures your average blood sugar over the past 2-3 months. Your doctor may also call it HbA1c or glycated hemoglobin.
+        </p>
+      </div>
+
       <div className="mt-8 flex flex-col items-center">
         <div className="relative w-full max-w-[200px]">
           <input

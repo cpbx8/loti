@@ -4,6 +4,7 @@
  * Thin 2px colored top border in brand.primary.
  */
 import type { FoodSearchResult } from '@/types/shared'
+import FatSecretAttribution from './FatSecretAttribution'
 
 const SOURCE_INFO: Record<string, { label: string; color: string }> = {
   cache:         { label: 'Cached',          color: 'text-info' },
@@ -57,18 +58,22 @@ export default function ResultCard({ result: r, onScanAnother, onLog }: ResultCa
           <MacroCard label="Fat" value={r.fat_g} unit="g" />
         </div>
 
-        {/* Source badge + confidence */}
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 text-sm ${info.color}`}>
-            <span className="inline-block h-2 w-2 rounded-full bg-current" />
-            {info.label}
-          </span>
-          {r.confidence < 1 && (
-            <span className="text-xs text-text-tertiary">
-              ({Math.round(r.confidence * 100)}% confidence)
+        {/* Source attribution */}
+        {r.source === 'fatsecret' ? (
+          <FatSecretAttribution />
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 text-sm ${info.color}`}>
+              <span className="inline-block h-2 w-2 rounded-full bg-current" />
+              {info.label}
             </span>
-          )}
-        </div>
+            {r.confidence < 1 && (
+              <span className="text-xs text-text-tertiary">
+                ({Math.round(r.confidence * 100)}% confidence)
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Disclaimer */}
         <p className="text-xs text-text-tertiary leading-relaxed">

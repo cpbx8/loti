@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Favorite } from '@/hooks/useFavorites'
 import type { ScanResult } from '@/types/shared'
+import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 
 export default function FavoritesScreen() {
   const navigate = useNavigate()
@@ -85,7 +86,10 @@ function FavoriteRow({ favorite: fav, onSelect, onRemove }: {
   onRemove: () => void
 }) {
   const r = fav.cached_result
-  const tlColor = r.traffic_light
+  const thresholds = useThresholds()
+  const tlColor = r.glycemic_load != null
+    ? getPersonalizedTrafficLight(r.glycemic_load, thresholds)
+    : r.traffic_light
 
   return (
     <div className="flex items-center gap-3 px-5 py-3 bg-card">
@@ -118,7 +122,10 @@ function FavoriteRow({ favorite: fav, onSelect, onRemove }: {
 // ─── Result View (reused pattern) ────────────────────────────
 
 function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: () => void; onLog: () => void }) {
-  const tlColor = r.traffic_light
+  const thresholds = useThresholds()
+  const tlColor = r.glycemic_load != null
+    ? getPersonalizedTrafficLight(r.glycemic_load, thresholds)
+    : r.traffic_light
 
   return (
     <div className="flex flex-1 flex-col bg-surface">

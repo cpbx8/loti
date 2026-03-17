@@ -1,4 +1,5 @@
 import type { FoodLogEntry } from '@/hooks/useDailyLog'
+import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 
 interface Props {
   entry: FoodLogEntry
@@ -11,17 +12,23 @@ const trafficDot: Record<string, string> = {
 }
 
 export default function FoodLogItem({ entry }: Props) {
+  const thresholds = useThresholds()
   const time = new Date(entry.created_at).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   })
+
+  // Recompute traffic light from stored GL using personalized thresholds
+  const tl = entry.glycemic_load != null
+    ? getPersonalizedTrafficLight(entry.glycemic_load, thresholds)
+    : entry.result_traffic_light
 
   return (
     <div className="flex items-center gap-3 px-5 py-3 bg-card">
       {/* Traffic light dot */}
       <div
         className={`h-3 w-3 flex-shrink-0 rounded-full ${
-          entry.result_traffic_light ? trafficDot[entry.result_traffic_light] : 'bg-disabled'
+          tl ? trafficDot[tl] : 'bg-disabled'
         }`}
       />
 
