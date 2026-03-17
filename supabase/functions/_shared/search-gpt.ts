@@ -25,7 +25,10 @@ Given a food description or photo, return ONLY valid JSON (no markdown, no backt
       "fat_g": 15,
       "fiber_g": 3,
       "serving_description": "3 tacos with corn tortilla, pineapple, onion, cilantro",
-      "confidence": 0.8
+      "confidence": 0.8,
+      "glycemic_index": 52,
+      "gi_source": "estimated",
+      "swap_suggestion": null
     }
   ]
 }
@@ -35,7 +38,9 @@ Rules:
 - For photos with multiple items, return each as a separate item
 - Be specific to Mexican cuisine — a "taco" means a small corn tortilla street taco, not a Taco Bell shell
 - confidence should be 0.6-0.9 for common foods, 0.3-0.5 for unusual or hard-to-identify items
-- If you cannot identify the food at all, return {"items": []} with no hallucinated data`
+- If you cannot identify the food at all, return {"items": []} with no hallucinated data
+- glycemic_index: integer 0-100. Use "published" for gi_source if it's a well-known food with published GI data, "estimated" otherwise
+- swap_suggestion: If the food has high glycemic load, suggest a culturally appropriate lower-GI Mexican alternative in Spanish (1 sentence). null if already low-GI.`
 
 // ─── Text Search (last resort for regional Mexican dishes) ───
 
@@ -173,6 +178,9 @@ interface GPTItem {
   fiber_g?: number
   serving_description?: string
   confidence?: number
+  glycemic_index?: number
+  gi_source?: "published" | "estimated"
+  swap_suggestion?: string | null
 }
 
 function gptItemToResult(item: GPTItem): FoodSearchResult {
@@ -189,5 +197,8 @@ function gptItemToResult(item: GPTItem): FoodSearchResult {
     serving_description: item.serving_description,
     source: "gpt4o",
     confidence: item.confidence ?? 0.7,
+    glycemic_index: item.glycemic_index != null ? Math.max(0, Math.min(100, Math.round(item.glycemic_index))) : undefined,
+    gi_source: item.gi_source === "published" ? "published" : item.gi_source === "estimated" ? "estimated" : undefined,
+    swap_suggestion: item.swap_suggestion ?? undefined,
   }
 }

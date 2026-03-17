@@ -124,13 +124,20 @@ export async function cacheResult(
     }
 
     if (existing) {
-      // Update: increment lookup_count
+      // Update: increment lookup_count + update GI if now available
+      const updateData: Record<string, unknown> = {
+        lookup_count: (existing.lookup_count ?? 0) + 1,
+        updated_at: new Date().toISOString(),
+      }
+      if (result.glycemic_index != null) {
+        updateData.glycemic_index = result.glycemic_index
+        updateData.glycemic_load = result.glycemic_load ?? null
+        updateData.traffic_light = result.traffic_light ?? null
+        updateData.gi_source = result.gi_source ?? "unknown"
+      }
       await supabase
         .from("foods_cache")
-        .update({
-          lookup_count: (existing.lookup_count ?? 0) + 1,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", existing.id)
       console.log(`[waterfall] cache UPDATE for "${result.name_es}" (source: ${result.source})`)
     } else {
@@ -150,6 +157,10 @@ export async function cacheResult(
         barcode: result.barcode ?? null,
         confidence: result.confidence,
         image_url: result.image_url ?? null,
+        glycemic_index: result.glycemic_index ?? null,
+        glycemic_load: result.glycemic_load ?? null,
+        traffic_light: result.traffic_light ?? null,
+        gi_source: result.gi_source ?? "unknown",
         metadata: {},
       })
       console.log(`[waterfall] cache INSERT for "${result.name_es}" (source: ${result.source})`)
@@ -219,6 +230,10 @@ interface CacheRow {
   lookup_count: number
   verified: boolean
   metadata: Record<string, unknown>
+  glycemic_index: number | null
+  glycemic_load: number | null
+  traffic_light: string | null
+  gi_source: string | null
   similarity_score?: number
 }
 
@@ -239,5 +254,9 @@ function rowToResult(row: CacheRow): FoodSearchResult {
     confidence: row.confidence,
     barcode: row.barcode ?? undefined,
     image_url: row.image_url ?? undefined,
+    glycemic_index: row.glycemic_index ?? undefined,
+    glycemic_load: row.glycemic_load ?? undefined,
+    traffic_light: (row.traffic_light as FoodSearchResult["traffic_light"]) ?? undefined,
+    gi_source: (row.gi_source as FoodSearchResult["gi_source"]) ?? undefined,
   }
 }

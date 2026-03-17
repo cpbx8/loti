@@ -24,14 +24,14 @@ export default function DashboardScreen() {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col bg-surface">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+      <header className="flex items-center justify-between border-b border-border bg-card px-5 py-3">
+        <h1 className="text-xl font-bold text-text-primary">{t('title')}</h1>
         <div className="flex items-center gap-1">
           <button
             onClick={() => navigate('/history')}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="flex items-center justify-center rounded-lg p-2 text-text-secondary hover:bg-surface min-h-[44px] min-w-[44px]"
             aria-label="History"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -40,7 +40,7 @@ export default function DashboardScreen() {
           </button>
           <button
             onClick={() => navigate('/favorites')}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-yellow-400"
+            className="flex items-center justify-center rounded-lg p-2 text-text-secondary hover:bg-surface hover:text-primary min-h-[44px] min-w-[44px]"
             aria-label="Favorites"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -55,7 +55,7 @@ export default function DashboardScreen() {
 
       {loading ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
         </div>
       ) : (
         <>
@@ -63,7 +63,7 @@ export default function DashboardScreen() {
           <MacroSummary totals={totals} />
 
           {/* Divider */}
-          <div className="border-t border-gray-800" />
+          <div className="border-t border-border" />
 
           {/* Food log */}
           <FoodLogList entries={entries} />
@@ -77,7 +77,7 @@ export default function DashboardScreen() {
       <div className="fixed bottom-6 left-1/2 flex -translate-x-1/2 items-end gap-3">
         <button
           onClick={() => navigate('/text')}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-800 text-gray-300 shadow-lg transition-transform hover:scale-105 active:scale-95"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-text-secondary shadow-md border border-border transition-transform hover:scale-105 active:scale-95"
           aria-label="Text input"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -95,12 +95,12 @@ export default function DashboardScreen() {
           </svg>
         </button>
         <button
-          onClick={() => navigate('/barcode')}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-800 text-gray-300 shadow-lg transition-transform hover:scale-105 active:scale-95"
-          aria-label="Scan barcode"
+          onClick={() => navigate('/search')}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-text-secondary shadow-md border border-border transition-transform hover:scale-105 active:scale-95"
+          aria-label="Search food"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2v16H3V4zm4 0h1v16H7V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h1v16h-1V4zm3 0h2v16h-2V4z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
       </div>

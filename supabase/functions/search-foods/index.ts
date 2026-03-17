@@ -20,6 +20,8 @@ import { searchCache, searchCacheBarcode, cacheResult } from "../_shared/food-ca
 import { searchFatSecretText, searchFatSecretBarcode } from "../_shared/search-fatsecret.ts"
 import { searchOFFText, searchOFFBarcode } from "../_shared/search-off.ts"
 import { searchGPTText, searchGPTPhoto } from "../_shared/search-gpt.ts"
+import { decomposeFood } from "../_shared/decompose.ts"
+import { estimateGI } from "../_shared/estimate-gi.ts"
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -68,6 +70,49 @@ Deno.serve(async (req) => {
   }
 })
 
+// ─── Single-item Waterfall Lookup ────────────────────────────
+// Looks up ONE food through cache → FatSecret → OFF → GPT
+
+async function lookupSingle(
+  supabase: ReturnType<typeof createClient>,
+  query: string,
+  servingGrams?: number,
+): Promise<{ result: FoodSearchResult | null; source: string; cached: boolean }> {
+  // Tier 0: Cache
+  const cacheResults = await searchCache(supabase, query)
+  if (cacheResults.length > 0) {
+    const r = cacheResults[0]
+    if (servingGrams && r.serving_size !== servingGrams) {
+      return { result: scaleResult(r, servingGrams), source: "cache", cached: true }
+    }
+    return { result: r, source: "cache", cached: true }
+  }
+
+  // Tier 1: FatSecret
+  const fsResults = await searchFatSecretText(query)
+  if (fsResults.length > 0) {
+    const r = fsResults[0]
+    cacheResult(supabase, r).catch(() => {})
+    if (servingGrams && r.serving_size !== servingGrams) {
+      return { result: scaleResult(r, servingGrams), source: "fatsecret", cached: false }
+    }
+    return { result: r, source: "fatsecret", cached: false }
+  }
+
+  // Tier 2: Open Food Facts
+  const offResults = await searchOFFText(query)
+  if (offResults.length > 0) {
+    const r = offResults[0]
+    cacheResult(supabase, r).catch(() => {})
+    if (servingGrams && r.serving_size !== servingGrams) {
+      return { result: scaleResult(r, servingGrams), source: "openfoodfacts", cached: false }
+    }
+    return { result: r, source: "openfoodfacts", cached: false }
+  }
+
+  return { result: null, source: "none", cached: false }
+}
+
 // ─── Text Search Waterfall ───────────────────────────────────
 
 async function waterfallText(
@@ -75,24 +120,88 @@ async function waterfallText(
   query: string,
   startTime: number,
 ): Promise<SearchResponse> {
-  // Tier 0: Cache
+  // Step 0: Try direct lookup first (fast path for single items like "banana")
   const cacheResults = await searchCache(supabase, query)
   if (cacheResults.length > 0) {
+    const withGI = await Promise.all(cacheResults.map(estimateGI))
+    // Write back GI data to cache for results that didn't have it
+    for (const r of withGI) {
+      if (r.id && r.glycemic_index != null) {
+        cacheResult(supabase, r).catch(() => {})
+      }
+    }
     return {
-      results: cacheResults,
+      results: withGI,
       source: "cache",
       cached: true,
       latency_ms: Date.now() - startTime,
     }
   }
 
+  // Step 1: Decompose the food into components using GPT-4o-mini
+  // "bistec taco" → [corn tortilla 30g, bistec 80g, onion/cilantro 15g]
+  // "banana" → [banana 120g] (single, no extra cost)
+  const decomp = await decomposeFood(query)
+
+  // Step 2: If NOT composite, run the normal single-item waterfall
+  if (!decomp.composite) {
+    return waterfallSingleItem(supabase, query, startTime)
+  }
+
+  // Step 3: Composite food — look up each component through the waterfall
+  console.log(`[waterfall] Composite food "${query}" → ${decomp.components.length} components`)
+
+  const componentResults: FoodSearchResult[] = []
+  let primarySource = "cache"
+  let anyCached = false
+
+  for (const comp of decomp.components) {
+    // Try English name first (better for FatSecret), fall back to Spanish
+    let lookup = await lookupSingle(supabase, comp.name, comp.grams)
+    if (!lookup.result) {
+      lookup = await lookupSingle(supabase, comp.name_es, comp.grams)
+    }
+
+    if (lookup.result) {
+      componentResults.push(lookup.result)
+      if (lookup.cached) anyCached = true
+      if (!lookup.cached) primarySource = lookup.source
+    } else {
+      // Last resort: estimate via GPT for this component
+      console.log(`[waterfall] Component "${comp.name}" not found in tiers 0-2, using GPT`)
+    }
+  }
+
+  // Step 4: If we got components, estimate GI for each, then build combined total
+  if (componentResults.length > 0) {
+    const componentsWithGI = await Promise.all(componentResults.map(estimateGI))
+    const total = buildMealTotal(query, componentsWithGI)
+    return {
+      results: [total, ...componentsWithGI],
+      source: primarySource,
+      cached: anyCached,
+      latency_ms: Date.now() - startTime,
+    }
+  }
+
+  // Step 5: Fallback — GPT-4o estimates the whole dish
+  return waterfallSingleItem(supabase, query, startTime)
+}
+
+// ─── Single Item Waterfall (non-composite path) ─────────────
+
+async function waterfallSingleItem(
+  supabase: ReturnType<typeof createClient>,
+  query: string,
+  startTime: number,
+): Promise<SearchResponse> {
   // Tier 1: FatSecret
   const fsResults = await searchFatSecretText(query)
   if (fsResults.length > 0) {
-    // Write back to cache (non-blocking)
-    for (const r of fsResults) cacheResult(supabase, r).catch(() => {})
+    const withGI = await Promise.all(fsResults.map(estimateGI))
+    for (const r of withGI) cacheResult(supabase, r).catch(() => {})
     return {
-      results: fsResults,
+      results: withGI,
       source: "fatsecret",
       cached: false,
       latency_ms: Date.now() - startTime,
@@ -102,33 +211,102 @@ async function waterfallText(
   // Tier 2: Open Food Facts
   const offResults = await searchOFFText(query)
   if (offResults.length > 0) {
-    for (const r of offResults) cacheResult(supabase, r).catch(() => {})
+    const withGI = await Promise.all(offResults.map(estimateGI))
+    for (const r of withGI) cacheResult(supabase, r).catch(() => {})
     return {
-      results: offResults,
+      results: withGI,
       source: "openfoodfacts",
       cached: false,
       latency_ms: Date.now() - startTime,
     }
   }
 
-  // Tier 3: GPT-4o (last resort — likely a regional Mexican dish)
+  // Tier 3: GPT-4o (already includes GI from prompt)
   const gptResults = await searchGPTText(query)
   if (gptResults.length > 0) {
-    for (const r of gptResults) cacheResult(supabase, r).catch(() => {})
+    // GPT results may already have GI from the prompt; estimateGI will just compute GL/traffic light
+    const withGI = await Promise.all(gptResults.map(estimateGI))
+    for (const r of withGI) cacheResult(supabase, r).catch(() => {})
     return {
-      results: gptResults,
+      results: withGI,
       source: "gpt4o",
       cached: false,
       latency_ms: Date.now() - startTime,
     }
   }
 
-  // Nothing found
   return {
     results: [],
     source: "none",
     cached: false,
     latency_ms: Date.now() - startTime,
+  }
+}
+
+// ─── Scale nutrition to a different serving size ─────────────
+
+function scaleResult(r: FoodSearchResult, targetGrams: number): FoodSearchResult {
+  if (r.serving_size <= 0) return r
+  const ratio = targetGrams / r.serving_size
+  return {
+    ...r,
+    calories: Math.round(r.calories * ratio),
+    protein_g: Math.round(r.protein_g * ratio * 10) / 10,
+    carbs_g: Math.round(r.carbs_g * ratio * 10) / 10,
+    fat_g: Math.round(r.fat_g * ratio * 10) / 10,
+    fiber_g: r.fiber_g != null ? Math.round(r.fiber_g * ratio * 10) / 10 : undefined,
+    serving_size: targetGrams,
+    serving_description: `${targetGrams}g (scaled)`,
+  }
+}
+
+// ─── Build a combined meal total from components ─────────────
+
+function buildMealTotal(name: string, components: FoodSearchResult[]): FoodSearchResult {
+  const totalCal = components.reduce((s, c) => s + c.calories, 0)
+  const totalP = components.reduce((s, c) => s + c.protein_g, 0)
+  const totalC = components.reduce((s, c) => s + c.carbs_g, 0)
+  const totalF = components.reduce((s, c) => s + c.fat_g, 0)
+  const totalFiber = components.reduce((s, c) => s + (c.fiber_g ?? 0), 0)
+  const totalGrams = components.reduce((s, c) => s + c.serving_size, 0)
+
+  // Total GL = sum of component GLs
+  const totalGL = Math.round(
+    components.reduce((s, c) => s + (c.glycemic_load ?? 0), 0) * 10,
+  ) / 10
+
+  let traffic_light: "green" | "yellow" | "red"
+  if (totalGL <= 10) {
+    traffic_light = "green"
+  } else if (totalGL <= 19) {
+    traffic_light = "yellow"
+  } else {
+    traffic_light = "red"
+  }
+
+  // Find the worst swap suggestion from components (highest GL component)
+  const worstComponent = components
+    .filter(c => c.swap_suggestion)
+    .sort((a, b) => (b.glycemic_load ?? 0) - (a.glycemic_load ?? 0))[0]
+
+  const componentNames = components.map(c => c.name_en || c.name_es).join(" + ")
+
+  return {
+    name_es: name,
+    name_en: name,
+    calories: Math.round(totalCal),
+    protein_g: Math.round(totalP * 10) / 10,
+    carbs_g: Math.round(totalC * 10) / 10,
+    fat_g: Math.round(totalF * 10) / 10,
+    fiber_g: Math.round(totalFiber * 10) / 10,
+    serving_size: totalGrams,
+    serving_unit: "g",
+    serving_description: `Total (${componentNames})`,
+    source: "cache",
+    confidence: Math.min(...components.map(c => c.confidence)),
+    glycemic_load: totalGL,
+    traffic_light,
+    swap_suggestion: worstComponent?.swap_suggestion,
   }
 }
 
@@ -142,8 +320,12 @@ async function waterfallBarcode(
   // Tier 0: Cache
   const cached = await searchCacheBarcode(supabase, barcode)
   if (cached) {
+    const withGI = await estimateGI(cached)
+    if (withGI.id && withGI.glycemic_index != null) {
+      cacheResult(supabase, withGI).catch(() => {})
+    }
     return {
-      results: [cached],
+      results: [withGI],
       source: "cache",
       cached: true,
       latency_ms: Date.now() - startTime,
@@ -153,9 +335,10 @@ async function waterfallBarcode(
   // Tier 1: FatSecret barcode
   const fsResult = await searchFatSecretBarcode(barcode)
   if (fsResult) {
-    cacheResult(supabase, fsResult).catch(() => {})
+    const withGI = await estimateGI(fsResult)
+    cacheResult(supabase, withGI).catch(() => {})
     return {
-      results: [fsResult],
+      results: [withGI],
       source: "fatsecret",
       cached: false,
       latency_ms: Date.now() - startTime,
@@ -165,9 +348,10 @@ async function waterfallBarcode(
   // Tier 2: Open Food Facts barcode
   const offResult = await searchOFFBarcode(barcode)
   if (offResult) {
-    cacheResult(supabase, offResult).catch(() => {})
+    const withGI = await estimateGI(offResult)
+    cacheResult(supabase, withGI).catch(() => {})
     return {
-      results: [offResult],
+      results: [withGI],
       source: "openfoodfacts",
       cached: false,
       latency_ms: Date.now() - startTime,
@@ -178,9 +362,10 @@ async function waterfallBarcode(
   const gptResults = await searchGPTText(`Product with barcode ${barcode}`)
   if (gptResults.length > 0) {
     gptResults[0].barcode = barcode
-    cacheResult(supabase, gptResults[0]).catch(() => {})
+    const withGI = await estimateGI(gptResults[0])
+    cacheResult(supabase, withGI).catch(() => {})
     return {
-      results: gptResults,
+      results: [withGI, ...gptResults.slice(1)],
       source: "gpt4o",
       cached: false,
       latency_ms: Date.now() - startTime,
@@ -231,8 +416,17 @@ async function waterfallPhoto(
     }
   }
 
+  // Post-process: estimate GI for all results
+  const withGI = await Promise.all(finalResults.map(estimateGI))
+  // Write back GI data to cache
+  for (const r of withGI) {
+    if (r.glycemic_index != null) {
+      cacheResult(supabase, r).catch(() => {})
+    }
+  }
+
   return {
-    results: finalResults,
+    results: withGI,
     source: "gpt4o",
     cached: false,
     latency_ms: Date.now() - startTime,

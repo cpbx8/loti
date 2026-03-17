@@ -19,6 +19,11 @@ export interface FoodSearchResult {
   confidence: number       // 0-1
   barcode?: string
   image_url?: string
+  glycemic_index?: number    // 0-100
+  glycemic_load?: number     // GI * carbs_g / 100
+  traffic_light?: 'green' | 'yellow' | 'red'
+  gi_source?: 'published' | 'estimated' | 'unknown'
+  swap_suggestion?: string
 }
 
 export interface SearchResponse {

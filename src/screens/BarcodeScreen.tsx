@@ -48,22 +48,25 @@ export default function BarcodeScreen() {
     const display = selected ?? search.topResult!
 
     return (
-      <div className="flex flex-1 flex-col bg-gray-950">
-        <header className="flex items-center border-b border-gray-800 px-4 py-3">
-          <button onClick={handleScanAnother} className="text-sm text-gray-400 hover:text-white">
-            ← Back
+      <div className="flex flex-1 flex-col bg-surface">
+        <header className="flex items-center border-b border-border bg-card px-5 py-3">
+          <button onClick={handleScanAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-white">
+          <h1 className="ml-3 text-lg font-bold text-text-primary">
             {display.name_en || display.name_es}
           </h1>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
           <FoodResultCard result={display} />
 
           {search.results.length > 1 && (
             <>
-              <p className="text-xs font-medium text-gray-500 mt-2">Other matches</p>
+              <p className="text-xs font-medium text-text-tertiary mt-2">Other matches</p>
               <FoodResultList
                 results={search.results}
                 onSelect={setSelected}
@@ -75,16 +78,16 @@ export default function BarcodeScreen() {
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
-        <div className="flex gap-3 border-t border-gray-800 p-4">
+        <div className="flex gap-3 border-t border-border bg-card p-4">
           <button
             onClick={handleScanAnother}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+            className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-surface min-h-[44px]"
           >
             Scan Another
           </button>
           <button
             onClick={handleLog}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
           >
             Log This
           </button>
@@ -96,10 +99,10 @@ export default function BarcodeScreen() {
   // ─── Loading ─────────────────────────────────────────────
   if (search.state === 'loading') {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-950 p-6">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-700 border-t-primary" />
-        <p className="text-lg text-gray-400">Looking up barcode...</p>
-        {scannedBarcode && <p className="text-sm text-gray-600">{scannedBarcode}</p>}
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
+        <p className="text-lg text-text-secondary">Looking up barcode...</p>
+        {scannedBarcode && <p className="text-sm text-text-tertiary">{scannedBarcode}</p>}
       </div>
     )
   }
@@ -107,20 +110,20 @@ export default function BarcodeScreen() {
   // ─── Error ───────────────────────────────────────────────
   if (search.state === 'error') {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-950 p-6">
-        <div className="rounded-xl bg-red-900/20 px-4 py-3">
-          <p className="text-sm text-red-300">{search.error}</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
+        <div className="rounded-xl bg-error/10 px-4 py-3">
+          <p className="text-sm text-error">{search.error}</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={handleScanAnother}
-            className="rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+            className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
           >
             Try Again
           </button>
           <button
             onClick={() => navigate('/scan')}
-            className="rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            className="rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
           >
             Photo Scan Instead
           </button>
@@ -131,29 +134,35 @@ export default function BarcodeScreen() {
 
   // ─── Scanner view (default) ──────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
-        <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-white">
-          ← Back
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
+        <button onClick={() => navigate('/')} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white">Scan Barcode</h1>
+        <h1 className="ml-3 text-lg font-bold text-text-primary">Scan Barcode</h1>
       </header>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4">
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 p-5">
         <BarcodeScanner
           onDetected={handleDetected}
           active={search.state === 'idle'}
         />
 
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-text-secondary">
           Point your camera at a barcode, or type it manually
         </p>
 
         <button
           onClick={() => navigate('/scan')}
-          className="text-sm text-gray-400 hover:text-white"
+          className="text-sm text-primary hover:text-primary-dark min-h-[44px] flex items-center"
         >
-          Switch to Photo Scan →
+          Switch to Photo Scan
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>

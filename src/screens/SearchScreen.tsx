@@ -5,13 +5,13 @@ import { useFavorites } from '@/hooks/useFavorites'
 import { useDailyLog } from '@/hooks/useDailyLog'
 import type { FoodSearchResult, ScanResult } from '@/types/shared'
 
-const SOURCE_META: Record<string, { icon: string; label: string; color: string }> = {
-  cache: { icon: '⚡', label: 'Cached', color: 'text-blue-400' },
-  fatsecret: { icon: '📊', label: 'FatSecret', color: 'text-green-400' },
-  openfoodfacts: { icon: '🌍', label: 'Open Food Facts', color: 'text-orange-400' },
-  gpt4o: { icon: '🤖', label: 'AI Estimated', color: 'text-purple-400' },
-  seed: { icon: '🌱', label: 'Verified', color: 'text-emerald-400' },
-  user: { icon: '👤', label: 'Community', color: 'text-cyan-400' },
+const SOURCE_META: Record<string, { label: string; color: string }> = {
+  cache:         { label: 'Cached',          color: 'text-info' },
+  fatsecret:     { label: 'FatSecret',       color: 'text-info' },
+  openfoodfacts: { label: 'Open Food Facts', color: 'text-tl-green-accent' },
+  gpt4o:         { label: 'AI Estimated',    color: 'text-tl-yellow-fill' },
+  seed:          { label: 'Verified',        color: 'text-tl-green-fill' },
+  user:          { label: 'Community',        color: 'text-info' },
 }
 
 export default function SearchScreen() {
@@ -65,15 +65,18 @@ export default function SearchScreen() {
 
   // ─── Search view ─────────────────────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
         <button
           onClick={() => navigate('/')}
-          className="text-sm text-gray-400 hover:text-white"
+          className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center"
         >
-          ← Back
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white">Search Food</h1>
+        <h1 className="ml-3 text-lg font-bold text-text-primary">Search Food</h1>
       </header>
 
       <div className="p-4">
@@ -84,14 +87,16 @@ export default function SearchScreen() {
             onChange={e => search.setQuery(e.target.value)}
             placeholder="Search any food..."
             autoFocus
-            className="w-full rounded-xl border border-gray-700 bg-gray-900 px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:outline-none"
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-text-primary placeholder-text-tertiary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 shadow-sm"
           />
           {search.query && (
             <button
               onClick={search.clear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
-              ✕
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
         </div>
@@ -101,8 +106,8 @@ export default function SearchScreen() {
         {/* Searching */}
         {search.state === 'searching' && (
           <div className="flex flex-col items-center gap-3 py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-3 border-gray-700 border-t-primary" />
-            <p className="text-sm text-gray-400">Searching across databases...</p>
+            <div className="h-8 w-8 animate-spin rounded-full border-3 border-border border-t-primary" />
+            <p className="text-sm text-text-secondary">Searching across databases...</p>
           </div>
         )}
 
@@ -113,9 +118,9 @@ export default function SearchScreen() {
             <div className="mb-3 flex items-center gap-2">
               <SourceBadge source={search.source} />
               {search.cached && (
-                <span className="rounded-full bg-blue-900/30 px-2 py-0.5 text-xs text-blue-400">⚡ Instant</span>
+                <span className="rounded-full bg-info/10 px-2 py-0.5 text-xs text-info">Instant</span>
               )}
-              <span className="ml-auto text-xs text-gray-600">{search.latencyMs}ms</span>
+              <span className="ml-auto text-xs text-text-tertiary">{search.latencyMs}ms</span>
             </div>
 
             <div className="space-y-2">
@@ -123,23 +128,24 @@ export default function SearchScreen() {
                 <button
                   key={result.id ?? `${result.name_es}-${i}`}
                   onClick={() => setSelected(result)}
-                  className="flex w-full items-center gap-3 rounded-lg bg-gray-900 px-4 py-3 text-left hover:bg-gray-800 transition-colors"
+                  className="flex w-full items-center gap-3 rounded-xl bg-card px-4 py-3 text-left shadow-sm hover:shadow-md transition-shadow min-h-[44px]"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">{result.name_es}</p>
+                    <p className="font-medium text-text-primary truncate">{result.name_es}</p>
                     {result.name_en && result.name_en !== result.name_es && (
-                      <p className="text-xs text-gray-500 truncate">{result.name_en}</p>
+                      <p className="text-xs text-text-tertiary truncate">{result.name_en}</p>
                     )}
-                    <p className="mt-0.5 text-sm text-gray-400">
+                    <p className="mt-0.5 text-sm text-text-secondary">
                       {result.calories} kcal · {result.protein_g}g P · {result.carbs_g}g C · {result.fat_g}g F
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-text-tertiary">
                       {result.serving_size}{result.serving_unit}
                     </span>
-                    <span className={`text-xs ${SOURCE_META[result.source]?.color ?? 'text-gray-500'}`}>
-                      {SOURCE_META[result.source]?.icon} {SOURCE_META[result.source]?.label ?? result.source}
+                    <span className={`inline-flex items-center gap-1 text-xs ${SOURCE_META[result.source]?.color ?? 'text-text-tertiary'}`}>
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+                      {SOURCE_META[result.source]?.label ?? result.source}
                     </span>
                   </div>
                 </button>
@@ -151,10 +157,10 @@ export default function SearchScreen() {
         {/* Error */}
         {search.state === 'error' && (
           <div className="flex flex-col items-center gap-3 py-12">
-            <p className="text-sm text-red-400">{search.error ?? 'Search failed'}</p>
+            <p className="text-sm text-error">{search.error ?? 'Search failed'}</p>
             <button
               onClick={search.retry}
-              className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+              className="rounded-xl border border-border px-4 py-2.5 text-sm text-text-secondary hover:bg-card min-h-[44px]"
             >
               Retry
             </button>
@@ -165,10 +171,12 @@ export default function SearchScreen() {
         {search.state === 'idle' && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col items-center gap-3 pt-8 text-center">
-              <div className="text-4xl">🔍</div>
-              <p className="text-sm text-gray-400">Type any food to get nutrition info</p>
-              <p className="text-xs text-gray-600">
-                Searches FatSecret → Open Food Facts → AI
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <p className="text-sm text-text-secondary">Type any food to get nutrition info</p>
+              <p className="text-xs text-text-tertiary">
+                Searches FatSecret, Open Food Facts, and AI
               </p>
 
               {/* Quick examples */}
@@ -177,7 +185,7 @@ export default function SearchScreen() {
                   <button
                     key={example}
                     onClick={() => search.setQuery(example)}
-                    className="rounded-full border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-white"
+                    className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-text-secondary hover:border-primary hover:text-primary min-h-[32px]"
                   >
                     {example}
                   </button>
@@ -189,10 +197,10 @@ export default function SearchScreen() {
             {favorites.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-600">Favorites</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-text-tertiary">Favorites</p>
                   <button
                     onClick={() => navigate('/favorites')}
-                    className="text-xs text-primary hover:text-primary-light"
+                    className="text-xs text-primary hover:text-primary-dark"
                   >
                     See all
                   </button>
@@ -202,10 +210,10 @@ export default function SearchScreen() {
                     <button
                       key={fav.id}
                       onClick={() => search.setQuery(fav.food_name)}
-                      className="flex-shrink-0 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-left hover:bg-gray-800"
+                      className="flex-shrink-0 rounded-xl border border-border bg-card px-3 py-2 text-left hover:shadow-sm min-h-[44px]"
                     >
-                      <p className="text-sm font-medium text-white whitespace-nowrap">{fav.food_name}</p>
-                      <p className="text-xs text-gray-500">{fav.cached_result.calories_kcal} kcal</p>
+                      <p className="text-sm font-medium text-text-primary whitespace-nowrap">{fav.food_name}</p>
+                      <p className="text-xs text-text-tertiary">{fav.cached_result.calories_kcal} kcal</p>
                     </button>
                   ))}
                 </div>
@@ -231,20 +239,23 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
   onLog: () => void
 }) {
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
-        <button onClick={onBack} className="text-sm text-gray-400 hover:text-white">
-          ← Back
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
+        <button onClick={onBack} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white truncate">{r.name_es}</h1>
+        <h1 className="ml-3 text-lg font-bold text-text-primary truncate">{r.name_es}</h1>
         <button
           onClick={onToggleFav}
-          className="ml-auto p-1 flex-shrink-0"
+          className="ml-auto p-2 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isFav ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path
-              className={isFav ? 'text-yellow-400' : 'text-gray-500'}
+              className={isFav ? 'text-primary' : 'text-text-tertiary'}
               strokeLinecap="round" strokeLinejoin="round"
               d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
             />
@@ -252,7 +263,7 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
         </button>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
         {/* Macros grid */}
         <div className="grid grid-cols-2 gap-3">
           <MacroCard label="Calories" value={r.calories} unit="kcal" highlight />
@@ -262,57 +273,63 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
         </div>
 
         {r.fiber_g != null && (
-          <div className="rounded-lg bg-gray-900 px-3 py-2">
-            <p className="text-sm text-gray-400">Fiber: <span className="font-medium text-white">{r.fiber_g}g</span></p>
+          <div className="rounded-xl bg-card px-3 py-2 shadow-sm">
+            <p className="text-sm text-text-secondary">Fiber: <span className="font-medium text-text-primary">{r.fiber_g}g</span></p>
           </div>
         )}
 
         {/* Serving info */}
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-tertiary">
           Per {r.serving_size}{r.serving_unit}
           {r.serving_description && ` (${r.serving_description})`}
         </p>
 
         {/* Source badge */}
-        <div className="flex items-center gap-2 rounded-lg bg-gray-900 px-3 py-2.5">
-          <span className="text-lg">{SOURCE_META[r.source]?.icon ?? '❓'}</span>
+        <div className="flex items-center gap-2 rounded-xl bg-card px-4 py-3 shadow-sm">
+          <span className={`inline-block h-3 w-3 rounded-full ${
+            SOURCE_META[r.source]?.color === 'text-info' ? 'bg-info' :
+            SOURCE_META[r.source]?.color === 'text-tl-green-fill' ? 'bg-tl-green-fill' :
+            SOURCE_META[r.source]?.color === 'text-tl-green-accent' ? 'bg-tl-green-accent' :
+            SOURCE_META[r.source]?.color === 'text-tl-yellow-fill' ? 'bg-tl-yellow-fill' :
+            'bg-text-tertiary'
+          }`} />
           <div className="flex-1">
-            <p className={`text-sm font-medium ${SOURCE_META[r.source]?.color ?? 'text-gray-300'}`}>
+            <p className="text-sm font-medium text-text-primary">
               {SOURCE_META[r.source]?.label ?? r.source}
             </p>
-            <p className="text-xs text-gray-500">
-              {r.source === 'cache' && 'Previously looked up — instant result'}
+            <p className="text-xs text-text-tertiary">
+              {r.source === 'cache' && 'Previously looked up -- instant result'}
               {r.source === 'fatsecret' && 'Verified nutrition database'}
               {r.source === 'openfoodfacts' && 'Open-source food database'}
-              {r.source === 'gpt4o' && 'AI-estimated values — may vary from actual'}
+              {r.source === 'gpt4o' && 'AI-estimated values -- may vary from actual'}
               {r.source === 'seed' && 'Pre-loaded Mexican food data'}
               {r.source === 'user' && 'Community-contributed data'}
             </p>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-xs text-gray-600">
+            <span className="text-xs text-text-tertiary">
               {Math.round(r.confidence * 100)}% conf
             </span>
-            {cached && <span className="text-xs text-blue-400">⚡ cached</span>}
+            {cached && <span className="text-xs text-info">cached</span>}
           </div>
         </div>
 
         {/* Latency */}
-        <p className="text-xs text-gray-600 text-center">
+        <p className="text-xs text-text-tertiary text-center">
           Found via {source} in {latencyMs}ms
         </p>
       </div>
 
-      <div className="flex gap-3 border-t border-gray-800 p-4">
+      <div className="flex gap-3 border-t border-border bg-card p-4">
         <button
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+          className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-surface min-h-[44px]"
         >
           Back to Results
         </button>
         <button
           onClick={onLog}
-          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+          className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
         >
           Log This
         </button>
@@ -327,18 +344,19 @@ function SourceBadge({ source }: { source: string }) {
   const meta = SOURCE_META[source]
   if (!meta) return null
   return (
-    <span className={`rounded-full bg-gray-900 px-2.5 py-0.5 text-xs font-medium ${meta.color}`}>
-      {meta.icon} {meta.label}
+    <span className={`inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-0.5 text-xs font-medium shadow-sm ${meta.color}`}>
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+      {meta.label}
     </span>
   )
 }
 
 function MacroCard({ label, value, unit, highlight }: { label: string; value: number | null; unit: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg p-3 ${highlight ? 'bg-primary/10' : 'bg-gray-900'}`}>
-      <p className="text-sm text-gray-400">{label}</p>
-      <p className={`text-xl font-bold ${highlight ? 'text-primary' : 'text-white'}`}>
-        {value != null ? value : '—'}<span className="text-sm font-normal text-gray-400"> {unit}</span>
+    <div className={`rounded-xl p-3 shadow-sm ${highlight ? 'bg-primary-light' : 'bg-card'}`}>
+      <p className="text-sm text-text-secondary">{label}</p>
+      <p className={`text-xl font-bold ${highlight ? 'text-primary' : 'text-text-primary'}`}>
+        {value != null ? value : '--'}<span className="text-sm font-normal text-text-tertiary"> {unit}</span>
       </p>
     </div>
   )

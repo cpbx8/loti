@@ -22,7 +22,7 @@ export default function MacroSummary({ totals }: Props) {
   const offset = circumference - (calPercent / 100) * circumference
 
   return (
-    <div className="flex items-center gap-4 px-4 py-5">
+    <div className="flex items-center gap-4 px-5 py-5 bg-card">
       {/* Calorie ring */}
       <div className="relative flex-shrink-0">
         <svg width={size} height={size} className="-rotate-90">
@@ -33,7 +33,7 @@ export default function MacroSummary({ totals }: Props) {
             fill="none"
             stroke="currentColor"
             strokeWidth={stroke}
-            className="text-gray-700"
+            className="text-border"
           />
           <circle
             cx={size / 2}
@@ -49,14 +49,14 @@ export default function MacroSummary({ totals }: Props) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-white">{totals.total_calories}</span>
-          <span className="text-xs text-gray-400">{t('eaten')}</span>
+          <span className="text-2xl font-bold text-text-primary">{totals.total_calories}</span>
+          <span className="text-xs text-text-tertiary">{t('eaten')}</span>
         </div>
       </div>
 
       {/* Macro bars */}
       <div className="flex flex-1 flex-col gap-3">
-        <div className="mb-1 text-sm text-gray-400">
+        <div className="mb-1 text-sm text-text-secondary">
           {remaining} kcal {t('remaining')}
         </div>
         <MacroBar

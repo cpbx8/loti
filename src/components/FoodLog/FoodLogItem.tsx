@@ -5,9 +5,9 @@ interface Props {
 }
 
 const trafficDot: Record<string, string> = {
-  green: 'bg-gl-green',
-  yellow: 'bg-gl-yellow',
-  red: 'bg-gl-red',
+  green: 'bg-tl-green-fill',
+  yellow: 'bg-tl-yellow-fill',
+  red: 'bg-tl-red-fill',
 }
 
 export default function FoodLogItem({ entry }: Props) {
@@ -17,25 +17,25 @@ export default function FoodLogItem({ entry }: Props) {
   })
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="flex items-center gap-3 px-5 py-3 bg-card">
       {/* Traffic light dot */}
       <div
         className={`h-3 w-3 flex-shrink-0 rounded-full ${
-          entry.result_traffic_light ? trafficDot[entry.result_traffic_light] : 'bg-gray-500'
+          entry.result_traffic_light ? trafficDot[entry.result_traffic_light] : 'bg-disabled'
         }`}
       />
 
       {/* Food info */}
       <div className="flex-1 min-w-0">
-        <p className="truncate text-sm font-medium text-white">
+        <p className="truncate text-sm font-medium text-text-primary">
           {entry.food_name ?? 'Unknown'}
         </p>
-        <p className="text-xs text-gray-400">{time}</p>
+        <p className="text-xs text-text-tertiary">{time}</p>
       </div>
 
       {/* Calories */}
-      <span className="text-sm font-medium text-gray-300">
-        {entry.calories_kcal ?? '—'} kcal
+      <span className="text-sm font-medium text-text-primary">
+        {entry.calories_kcal ?? '--'} kcal
       </span>
     </div>
   )

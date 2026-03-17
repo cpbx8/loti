@@ -28,35 +28,40 @@ export default function FavoritesScreen() {
 
   // ─── List view ─────────────────────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
         <button
           onClick={() => navigate('/')}
-          className="text-sm text-gray-400 hover:text-white"
+          className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center"
         >
-          ← Back
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white">Favorites</h1>
-        <span className="ml-auto text-sm text-gray-500">{favorites.length}</span>
+        <h1 className="ml-3 text-lg font-bold text-text-primary">Favorites</h1>
+        <span className="ml-auto text-sm text-text-tertiary">{favorites.length}</span>
       </header>
 
       <div className="flex-1 overflow-y-auto">
         {favorites.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center px-6">
-            <div className="text-4xl">⭐</div>
-            <p className="text-sm text-gray-400">No favorites yet</p>
-            <p className="text-xs text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <p className="text-sm text-text-secondary">No favorites yet</p>
+            <p className="text-xs text-text-tertiary">
               Search for a food, then tap the star to save it here for quick access
             </p>
             <button
               onClick={() => navigate('/search')}
-              className="mt-2 rounded-lg bg-primary/20 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/30"
+              className="mt-2 rounded-xl bg-primary-light px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 min-h-[44px]"
             >
               Search Foods
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-gray-800/50">
+          <div className="divide-y divide-border">
             {favorites.map(fav => (
               <FavoriteRow
                 key={fav.id}
@@ -83,23 +88,23 @@ function FavoriteRow({ favorite: fav, onSelect, onRemove }: {
   const tlColor = r.traffic_light
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <button onClick={onSelect} className="flex flex-1 items-center gap-3 text-left min-w-0">
+    <div className="flex items-center gap-3 px-5 py-3 bg-card">
+      <button onClick={onSelect} className="flex flex-1 items-center gap-3 text-left min-w-0 min-h-[44px]">
         <div className={`h-3 w-3 flex-shrink-0 rounded-full ${
-          tlColor === 'green' ? 'bg-gl-green' :
-          tlColor === 'yellow' ? 'bg-gl-yellow' : 'bg-gl-red'
+          tlColor === 'green' ? 'bg-tl-green-fill' :
+          tlColor === 'yellow' ? 'bg-tl-yellow-fill' : 'bg-tl-red-fill'
         }`} />
         <div className="flex-1 min-w-0">
-          <p className="truncate font-medium text-white">{fav.food_name}</p>
-          <p className="text-sm text-gray-500">
-            {r.calories_kcal ?? '—'} kcal
+          <p className="truncate font-medium text-text-primary">{fav.food_name}</p>
+          <p className="text-sm text-text-tertiary">
+            {r.calories_kcal ?? '--'} kcal
             {r.glycemic_index != null && ` · GI ${r.glycemic_index}`}
           </p>
         </div>
       </button>
       <button
         onClick={onRemove}
-        className="flex-shrink-0 p-2 text-gray-500 hover:text-red-400"
+        className="flex-shrink-0 p-2 text-text-tertiary hover:text-error min-h-[44px] min-w-[44px] flex items-center justify-center"
         aria-label="Remove favorite"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -116,30 +121,33 @@ function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: 
   const tlColor = r.traffic_light
 
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
-        <button onClick={onBack} className="text-sm text-gray-400 hover:text-white">
-          ← Back
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
+        <button onClick={onBack} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white">{r.food_name}</h1>
-        <span className="ml-auto rounded bg-yellow-900/30 px-2 py-0.5 text-xs text-yellow-400">★ Fav</span>
+        <h1 className="ml-3 text-lg font-bold text-text-primary">{r.food_name}</h1>
+        <span className="ml-auto rounded-lg bg-primary-light px-2 py-0.5 text-xs text-primary font-medium">Fav</span>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
         <div className={`rounded-xl p-4 ${
-          tlColor === 'green' ? 'bg-green-900/20' :
-          tlColor === 'yellow' ? 'bg-yellow-900/20' : 'bg-red-900/20'
+          tlColor === 'green' ? 'bg-tl-green-bg' :
+          tlColor === 'yellow' ? 'bg-tl-yellow-bg' : 'bg-tl-red-bg'
         }`}>
           <p className={`text-lg font-bold ${
-            tlColor === 'green' ? 'text-green-400' :
-            tlColor === 'yellow' ? 'text-yellow-400' : 'text-red-400'
+            tlColor === 'green' ? 'text-tl-green-fill' :
+            tlColor === 'yellow' ? 'text-tl-yellow-fill' : 'text-tl-red-fill'
           }`}>
             {tlColor === 'green' ? 'Low Impact' :
              tlColor === 'yellow' ? 'Medium Impact' : 'High Impact'}
           </p>
           {r.glycemic_index != null && (
-            <p className="mt-1 text-sm text-gray-400">
-              GI: {r.glycemic_index} · GL: {r.glycemic_load ?? '—'}
+            <p className="mt-1 text-sm text-text-secondary">
+              GI: {r.glycemic_index} · GL: {r.glycemic_load ?? '--'}
             </p>
           )}
         </div>
@@ -151,27 +159,27 @@ function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: 
           <MacroCard label="Fat" value={r.fat_g} unit="g" />
         </div>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-tertiary">
           {r.serving_size_g}g per serving
         </p>
 
         {r.swap_suggestion && (
-          <div className="rounded-lg bg-blue-900/20 px-3 py-2">
-            <p className="text-sm text-blue-300">{r.swap_suggestion}</p>
+          <div className="rounded-xl bg-info/10 px-3 py-2">
+            <p className="text-sm text-info">{r.swap_suggestion}</p>
           </div>
         )}
       </div>
 
-      <div className="flex gap-3 border-t border-gray-800 p-4">
+      <div className="flex gap-3 border-t border-border bg-card p-4">
         <button
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+          className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-surface min-h-[44px]"
         >
           Back
         </button>
         <button
           onClick={onLog}
-          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+          className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
         >
           Log This
         </button>
@@ -182,10 +190,10 @@ function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: 
 
 function MacroCard({ label, value, unit }: { label: string; value: number | null; unit: string }) {
   return (
-    <div className="rounded-lg bg-gray-900 p-3">
-      <p className="text-sm text-gray-400">{label}</p>
-      <p className="text-xl font-bold text-white">
-        {value != null ? value : '—'}<span className="text-sm font-normal text-gray-400"> {unit}</span>
+    <div className="rounded-xl bg-card p-3 shadow-sm">
+      <p className="text-sm text-text-secondary">{label}</p>
+      <p className="text-xl font-bold text-text-primary">
+        {value != null ? value : '--'}<span className="text-sm font-normal text-text-tertiary"> {unit}</span>
       </p>
     </div>
   )

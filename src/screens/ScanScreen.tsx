@@ -68,20 +68,23 @@ export default function ScanScreen() {
     const multiple = search.results.length > 1
 
     return (
-      <div className="flex flex-1 flex-col bg-gray-950">
-        <header className="flex items-center border-b border-gray-800 px-4 py-3">
-          <button onClick={handleScanAnother} className="text-sm text-gray-400 hover:text-white">
-            ← Back
+      <div className="flex flex-1 flex-col bg-surface">
+        <header className="flex items-center border-b border-border bg-card px-5 py-3">
+          <button onClick={handleScanAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-white">
+          <h1 className="ml-3 text-lg font-bold text-text-primary">
             {multiple ? `${search.results.length} Items Found` : (display.name_en || display.name_es)}
           </h1>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
           {/* Show captured photo thumbnail */}
           {camera.previewUrl && (
-            <div className="w-24 h-24 overflow-hidden rounded-lg self-center">
+            <div className="w-24 h-24 overflow-hidden rounded-xl self-center shadow-sm">
               <img src={camera.previewUrl} alt="Scanned food" className="h-full w-full object-cover" />
             </div>
           )}
@@ -94,7 +97,7 @@ export default function ScanScreen() {
                 selectedIndex={selected ? search.results.indexOf(selected) : 0}
               />
               {selected && (
-                <div className="mt-2 rounded-xl bg-gray-900/50 p-4">
+                <div className="mt-2 rounded-xl bg-card p-4 shadow-sm">
                   <FoodResultCard result={selected} />
                 </div>
               )}
@@ -106,24 +109,24 @@ export default function ScanScreen() {
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
-        <div className="flex gap-3 border-t border-gray-800 p-4">
+        <div className="flex gap-3 border-t border-border bg-card p-4">
           <button
             onClick={handleScanAnother}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+            className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-surface min-h-[44px]"
           >
             Scan Another
           </button>
           {multiple ? (
             <button
               onClick={selected ? handleLog : handleLogAll}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               {selected ? 'Log Selected' : 'Log All'}
             </button>
           ) : (
             <button
               onClick={handleLog}
-              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               Log This
             </button>
@@ -136,9 +139,9 @@ export default function ScanScreen() {
   // ─── Scanning in progress ─────────────────────────────────
   if (search.state === 'loading') {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gray-950 p-6">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-700 border-t-primary" />
-        <p className="text-lg text-gray-400">Analyzing your food...</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
+        <p className="text-lg text-text-secondary">Analyzing your food...</p>
       </div>
     )
   }
@@ -146,20 +149,23 @@ export default function ScanScreen() {
   // ─── Error ────────────────────────────────────────────────
   if (search.state === 'error') {
     return (
-      <div className="flex flex-1 flex-col bg-gray-950">
-        <header className="flex items-center border-b border-gray-800 px-4 py-3">
-          <button onClick={handleScanAnother} className="text-sm text-gray-400 hover:text-white">
-            ← Back
+      <div className="flex flex-1 flex-col bg-surface">
+        <header className="flex items-center border-b border-border bg-card px-5 py-3">
+          <button onClick={handleScanAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
+          <h1 className="ml-3 text-lg font-bold text-text-primary">Photo Scan</h1>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <div className="rounded-xl bg-red-900/20 px-4 py-3">
-            <p className="text-sm text-red-300">{search.error}</p>
+          <div className="rounded-xl bg-error/10 px-4 py-3">
+            <p className="text-sm text-error">{search.error}</p>
           </div>
           <button
             onClick={handleScanAnother}
-            className="rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+            className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
           >
             Try Again
           </button>
@@ -171,17 +177,20 @@ export default function ScanScreen() {
   // ─── No photo yet — capture prompt ────────────────────────
   if (!camera.previewUrl) {
     return (
-      <div className="flex flex-1 flex-col bg-gray-950">
-        <header className="flex items-center border-b border-gray-800 px-4 py-3">
-          <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-white">
-            ← Back
+      <div className="flex flex-1 flex-col bg-surface">
+        <header className="flex items-center border-b border-border bg-card px-5 py-3">
+          <button onClick={() => navigate('/')} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
+          <h1 className="ml-3 text-lg font-bold text-text-primary">Photo Scan</h1>
         </header>
 
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           {camera.error && (
-            <p className="rounded-md bg-red-900/20 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl bg-error/10 px-3 py-2 text-sm text-error">
               {camera.error}
             </p>
           )}
@@ -202,7 +211,7 @@ export default function ScanScreen() {
             )}
           </button>
 
-          <p className="text-gray-500">Take a photo of your food</p>
+          <p className="text-text-secondary">Take a photo of your food</p>
         </div>
       </div>
     )
@@ -210,29 +219,32 @@ export default function ScanScreen() {
 
   // ─── Photo captured — review ──────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-gray-950">
-      <header className="flex items-center border-b border-gray-800 px-4 py-3">
-        <button onClick={() => { camera.reset(); navigate('/') }} className="text-sm text-gray-400 hover:text-white">
-          ← Back
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className="flex items-center border-b border-border bg-card px-5 py-3">
+        <button onClick={() => { camera.reset(); navigate('/') }} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-white">Photo Scan</h1>
+        <h1 className="ml-3 text-lg font-bold text-text-primary">Photo Scan</h1>
       </header>
 
-      <div className="flex flex-1 flex-col items-center justify-center p-4">
-        <div className="w-full max-w-sm overflow-hidden rounded-xl">
+      <div className="flex flex-1 flex-col items-center justify-center p-5">
+        <div className="w-full max-w-sm overflow-hidden rounded-xl shadow-md">
           <img src={camera.previewUrl} alt="Captured food" className="h-auto w-full object-cover" />
         </div>
 
         <div className="mt-6 flex w-full max-w-sm gap-3">
           <button
             onClick={camera.reset}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-base font-medium text-gray-300 hover:bg-gray-800"
+            className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
           >
             Retake
           </button>
           <button
             onClick={handleConfirm}
-            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-base font-medium text-white hover:bg-primary-dark"
+            className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
           >
             Analyze
           </button>
