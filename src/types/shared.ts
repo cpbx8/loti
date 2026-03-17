@@ -85,6 +85,12 @@ export interface FoodSearchResult {
   confidence: number
   barcode?: string
   image_url?: string
+  // GI / Traffic Light
+  glycemic_index?: number        // 0-100
+  glycemic_load?: number         // GI × carbs_g / 100
+  traffic_light?: TrafficLight   // green/yellow/red based on GL
+  gi_source?: GiSource           // published or estimated
+  swap_suggestion?: string       // lower-GI alternative
 }
 
 export interface SearchResponse {
