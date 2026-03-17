@@ -8,7 +8,7 @@
 import type { FoodSearchResult } from "./waterfall-types.ts"
 
 const USER_AGENT = "Loti-App/1.0 (contact@loti.app)"
-const TIMEOUT_MS = 3000
+const TIMEOUT_MS = 8000
 
 // ─── Barcode Lookup ──────────────────────────────────────────
 

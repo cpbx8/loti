@@ -10,7 +10,7 @@ import type { FoodSearchResult } from "./waterfall-types.ts"
 
 const FATSECRET_CLIENT_ID = Deno.env.get("FATSECRET_CLIENT_ID") ?? ""
 const FATSECRET_CLIENT_SECRET = Deno.env.get("FATSECRET_CLIENT_SECRET") ?? ""
-const TIMEOUT_MS = 3000
+const TIMEOUT_MS = 5000
 
 let tokenCache: { token: string; expiry: number } | null = null
 

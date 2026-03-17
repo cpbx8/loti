@@ -120,9 +120,14 @@ async function waterfallText(
   query: string,
   startTime: number,
 ): Promise<SearchResponse> {
-  // Step 0: Try direct lookup first (fast path for single items like "banana")
+  // Step 0: Try cache first (fast path)
   const cacheResults = await searchCache(supabase, query)
-  if (cacheResults.length > 0) {
+
+  // Only use cache as fast-path if result is a confident direct match
+  // (avoids "bistec taco" matching "bistec de res" and skipping decomposition)
+  const isDirectMatch = cacheResults.length > 0 && isGoodMatch(query, cacheResults[0])
+
+  if (isDirectMatch) {
     const withGI = await Promise.all(cacheResults.map(estimateGI))
     // Write back GI data to cache for results that didn't have it
     for (const r of withGI) {
@@ -143,8 +148,22 @@ async function waterfallText(
   // "banana" → [banana 120g] (single, no extra cost)
   const decomp = await decomposeFood(query)
 
-  // Step 2: If NOT composite, run the normal single-item waterfall
+  // Step 2: If NOT composite, try cache partial matches first, then waterfall
   if (!decomp.composite) {
+    if (cacheResults.length > 0) {
+      const withGI = await Promise.all(cacheResults.map(estimateGI))
+      for (const r of withGI) {
+        if (r.id && r.glycemic_index != null) {
+          cacheResult(supabase, r).catch(() => {})
+        }
+      }
+      return {
+        results: withGI,
+        source: "cache",
+        cached: true,
+        latency_ms: Date.now() - startTime,
+      }
+    }
     return waterfallSingleItem(supabase, query, startTime)
   }
 
@@ -345,17 +364,57 @@ async function waterfallBarcode(
     }
   }
 
-  // Tier 2: Open Food Facts barcode
-  const offResult = await searchOFFBarcode(barcode)
-  if (offResult) {
-    const withGI = await estimateGI(offResult)
-    cacheResult(supabase, withGI).catch(() => {})
-    return {
-      results: [withGI],
-      source: "openfoodfacts",
-      cached: false,
-      latency_ms: Date.now() - startTime,
+  // Tier 2: Open Food Facts barcode (inline fetch — more reliable than module with timeout)
+  try {
+    const offRes = await fetch(
+      `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`,
+      { headers: { "User-Agent": "Loti-App/1.0 (contact@loti.app)" } },
+    )
+    if (offRes.ok) {
+      const offData = await offRes.json() as Record<string, unknown>
+      const product = offData.product as Record<string, unknown> | undefined
+      if (product && offData.status !== 0) {
+        const nutriments = product.nutriments as Record<string, number> | undefined
+        const name = (product.product_name as string) ?? (product.product_name_en as string) ?? (product.product_name_es as string) ?? null
+        const cal = nutriments?.["energy-kcal_100g"] ?? 0
+        const carbs = nutriments?.["carbohydrates_100g"] ?? 0
+        const protein = nutriments?.["proteins_100g"] ?? 0
+        const fat = nutriments?.["fat_100g"] ?? 0
+
+        if (name && (cal > 0 || carbs > 0 || protein > 0)) {
+          const servingQty = parseFloat(product.serving_quantity as string) || 100
+          const useServing = !!product.serving_quantity
+          const offResult: FoodSearchResult = {
+            name_es: name,
+            name_en: (product.product_name_en as string) ?? undefined,
+            calories: Math.round(useServing ? (nutriments?.["energy-kcal_serving"] ?? cal * servingQty / 100) : cal),
+            protein_g: Math.round((useServing ? (nutriments?.["proteins_serving"] ?? protein * servingQty / 100) : protein) * 10) / 10,
+            carbs_g: Math.round((useServing ? (nutriments?.["carbohydrates_serving"] ?? carbs * servingQty / 100) : carbs) * 10) / 10,
+            fat_g: Math.round((useServing ? (nutriments?.["fat_serving"] ?? fat * servingQty / 100) : fat) * 10) / 10,
+            fiber_g: Math.round((nutriments?.["fiber_100g"] ?? 0) * 10) / 10,
+            serving_size: useServing ? servingQty : 100,
+            serving_unit: "g",
+            serving_description: (product.serving_size as string) ?? undefined,
+            source: "openfoodfacts",
+            source_id: barcode,
+            confidence: 0.85,
+            barcode,
+            image_url: (product.image_url as string) ?? undefined,
+          }
+          console.log(`[waterfall] barcode OFF HIT for "${barcode}" → ${name}`)
+          const withGI = await estimateGI(offResult)
+          cacheResult(supabase, withGI).catch(() => {})
+          return {
+            results: [withGI],
+            source: "openfoodfacts",
+            cached: false,
+            latency_ms: Date.now() - startTime,
+          }
+        }
+      }
     }
+  } catch (e) {
+    console.log(`[waterfall] barcode OFF error: ${e instanceof Error ? e.message : String(e)}`)
   }
 
   // Tier 3: GPT-4o text fallback with barcode
@@ -434,6 +493,28 @@ async function waterfallPhoto(
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
+
+/** Check if a cache result is a good direct match for the query (not a partial/tangential match) */
+function isGoodMatch(query: string, result: FoodSearchResult): boolean {
+  const q = query.toLowerCase()
+  const nameEs = result.name_es.toLowerCase()
+  const nameEn = (result.name_en ?? "").toLowerCase()
+
+  // Exact match
+  if (nameEs === q || nameEn === q) return true
+
+  // Query contains the result name or vice versa
+  if (nameEs.includes(q) || q.includes(nameEs)) return true
+  if (nameEn && (nameEn.includes(q) || q.includes(nameEn))) return true
+
+  // Check if all query words appear in the result name
+  const queryWords = q.split(/\s+/)
+  const nameWords = `${nameEs} ${nameEn}`.split(/\s+/)
+  const allWordsMatch = queryWords.every(w => nameWords.some(n => n.includes(w) || w.includes(n)))
+  if (allWordsMatch) return true
+
+  return false
+}
 
 function normalizeQuery(query: string): string {
   return query
