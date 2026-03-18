@@ -191,7 +191,7 @@ export default function ScanScreen() {
           <h1 className="ml-3 text-lg font-bold text-text-primary">Photo Scan</h1>
         </header>
 
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 overflow-y-auto">
           {camera.error && (
             <p className="rounded-xl bg-error/10 px-3 py-2 text-sm text-error">
               {camera.error}
@@ -215,6 +215,22 @@ export default function ScanScreen() {
           </button>
 
           <p className="text-text-secondary">Take a photo of your food</p>
+
+          <div className="mt-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-text-tertiary">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <button
+            onClick={() => navigate('/barcode')}
+            className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium text-text-primary hover:bg-surface min-h-[44px]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h3v16H3V4zm5 0h1v16H8V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h3v16h-3V4z" />
+            </svg>
+            Scan a barcode instead
+          </button>
         </div>
       </div>
     )
