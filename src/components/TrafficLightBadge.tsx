@@ -4,6 +4,7 @@
  * Colorblind-safe: always includes a shape icon (checkmark/triangle/circle).
  * Traffic light colors are SACRED and used ONLY for GI ratings.
  */
+import type React from 'react'
 
 type Rating = 'green' | 'yellow' | 'red'
 type Size = 'sm' | 'md' | 'lg'
@@ -58,7 +59,7 @@ function CircleIcon({ className }: { className: string }) {
   )
 }
 
-const ICON_MAP: Record<Rating, (props: { className: string }) => JSX.Element> = {
+const ICON_MAP: Record<Rating, (props: { className: string }) => React.ReactNode> = {
   green: CheckIcon,
   yellow: TriangleIcon,
   red: CircleIcon,

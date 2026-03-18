@@ -4,9 +4,11 @@ import FoodLogItem from './FoodLogItem'
 
 interface Props {
   entries: FoodLogEntry[]
+  onRemove?: (id: string) => void
+  onUpdateServing?: (id: string, count: number) => void
 }
 
-export default function FoodLogList({ entries }: Props) {
+export default function FoodLogList({ entries, onRemove, onUpdateServing }: Props) {
   const { t } = useTranslation('dashboard')
 
   if (entries.length === 0) {
@@ -19,12 +21,15 @@ export default function FoodLogList({ entries }: Props) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="divide-y divide-border">
-        {entries.map((entry) => (
-          <FoodLogItem key={entry.id} entry={entry} />
-        ))}
-      </div>
+    <div className="flex flex-col gap-3">
+      {entries.map((entry) => (
+        <FoodLogItem
+          key={entry.id}
+          entry={entry}
+          onRemove={onRemove}
+          onUpdateServing={onUpdateServing}
+        />
+      ))}
     </div>
   )
 }

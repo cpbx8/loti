@@ -6,6 +6,8 @@ import BarcodeScreen from '@/screens/BarcodeScreen'
 import TextInputScreen from '@/screens/TextInputScreen'
 import FavoritesScreen from '@/screens/FavoritesScreen'
 import HistoryScreen from '@/screens/HistoryScreen'
+import StoreGuideScreen from '@/screens/StoreGuideScreen'
+import SettingsScreen from '@/screens/SettingsScreen'
 import OnboardingScreen from '@/screens/OnboardingScreen'
 
 function hasCompletedOnboarding(): boolean {
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="/text" element={<TextInputScreen />} />
         <Route path="/favorites" element={<FavoritesScreen />} />
         <Route path="/history" element={<HistoryScreen />} />
+        <Route path="/store-guide/:chainId" element={<StoreGuideScreen />} />
+        <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
     </BrowserRouter>
   )

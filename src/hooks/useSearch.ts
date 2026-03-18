@@ -12,7 +12,7 @@ export function useSearch() {
   const [cached, setCached] = useState(false)
   const [latencyMs, setLatencyMs] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const requestRef = useRef(0)
 
   const doSearch = useCallback(async (term: string, id: number) => {

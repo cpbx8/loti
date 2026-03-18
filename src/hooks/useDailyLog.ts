@@ -20,11 +20,12 @@ export interface FoodLogEntry {
   glycemic_load: number | null
   result_traffic_light: TrafficLight | null
   serving_size_g: number | null
+  serving_count?: number
   meal_type: string | null
   created_at: string
 }
 
-const EMPTY_TOTALS: DailyTotals = {
+const _EMPTY_TOTALS: DailyTotals = {
   total_calories: 0,
   total_protein_g: 0,
   total_carbs_g: 0,
@@ -32,6 +33,7 @@ const EMPTY_TOTALS: DailyTotals = {
   total_fiber_g: 0,
   scan_count: 0,
 }
+void _EMPTY_TOTALS
 
 /** Format a Date to YYYY-MM-DD */
 export function formatDate(date: Date): string {
@@ -78,6 +80,7 @@ export interface NewLogEntry {
   fat_g: number
   fiber_g: number | null
   glycemic_load?: number | null
+  result_traffic_light?: TrafficLight | null
   serving_size_g: number
   input_method: string
 }
@@ -126,7 +129,7 @@ export function useDailyLog(date?: string) {
       carbs_g: entry.carbs_g,
       fat_g: entry.fat_g,
       glycemic_load: entry.glycemic_load ?? null,
-      result_traffic_light: null,
+      result_traffic_light: entry.result_traffic_light ?? null,
       serving_size_g: entry.serving_size_g,
       meal_type: null,
       created_at: new Date().toISOString(),
@@ -142,6 +145,12 @@ export function useDailyLog(date?: string) {
     saveAllEntries(updated)
   }, [allEntries])
 
+  const updateServingCount = useCallback((id: string, count: number) => {
+    const updated = allEntries.map(e => e.id === id ? { ...e, serving_count: count } : e)
+    setAllEntries(updated)
+    saveAllEntries(updated)
+  }, [allEntries])
+
   const refresh = useCallback(() => {
     setAllEntries(loadAllEntries())
   }, [])
@@ -153,6 +162,7 @@ export function useDailyLog(date?: string) {
     refresh,
     addEntry,
     removeEntry,
+    updateServingCount,
     date: targetDate,
   }
 }

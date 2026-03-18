@@ -123,7 +123,7 @@ export default function SummaryScreen() {
 
           <div className="rounded-xl bg-card p-4 border border-border shadow-sm">
             <div className="flex items-center gap-3">
-              {newTL && <TrafficLightBadge level={newTL} size="md" />}
+              {newTL && <TrafficLightBadge rating={newTL} size="md" />}
               <div>
                 <p className="font-medium text-text-primary">
                   {firstScan.name_en || firstScan.name_es}
