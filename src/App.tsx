@@ -16,7 +16,7 @@ function hasCompletedOnboarding(): boolean {
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+    <BrowserRouter>
       <Routes>
         <Route path="/onboarding" element={<OnboardingScreen />} />
         <Route path="/" element={hasCompletedOnboarding() ? <DashboardScreen /> : <Navigate to="/onboarding" replace />} />
