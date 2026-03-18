@@ -3,6 +3,7 @@
  * Teaches the traffic light concept when no meals are logged.
  */
 import TrafficLightBadge from './TrafficLightBadge'
+import LotiMascot from './LotiMascot'
 
 interface Props {
   onScanTap: () => void
@@ -11,7 +12,10 @@ interface Props {
 export default function TrafficLightExplainer({ onScanTap }: Props) {
   return (
     <div className="mx-5 mt-3 rounded-xl bg-card p-5 shadow-sm">
-      <p className="text-sm font-semibold text-text-primary mb-4">How Loti works</p>
+      <div className="flex items-center gap-3 mb-4">
+        <LotiMascot expression="neutral" size="sm" />
+        <p className="text-sm font-semibold text-text-primary">How Loti works</p>
+      </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">

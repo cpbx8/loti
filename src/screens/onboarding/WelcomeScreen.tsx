@@ -1,17 +1,13 @@
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import FatSecretAttribution from '@/components/FatSecretAttribution'
+import LotiMascot from '@/components/LotiMascot'
 
 export default function WelcomeScreen() {
   const { next } = useOnboarding()
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-primary/10 to-surface min-h-[100svh] px-8">
-      {/* Axolotl illustration placeholder */}
-      <div className="mb-8 flex h-32 w-32 items-center justify-center rounded-full bg-primary-light">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m0 0V5a3 3 0 00-6 0v8" />
-        </svg>
-      </div>
+      <LotiMascot expression="welcome" size="xl" className="mb-8" />
 
       <h1 className="text-center text-2xl font-bold text-text-primary leading-tight">
         See how your food affects your glucose

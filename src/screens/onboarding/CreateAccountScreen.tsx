@@ -10,6 +10,9 @@ export default function CreateAccountScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSignIn, setShowSignIn] = useState(false)
+  const [signInEmail, setSignInEmail] = useState('')
+  const [signInPassword, setSignInPassword] = useState('')
 
   const canSubmit = email.includes('@') && password.length >= 8
 
@@ -48,6 +51,26 @@ export default function CreateAccountScreen() {
         options: { redirectTo: `${window.location.origin}/onboarding` },
       })
       if (authError) setError(authError.message)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignIn = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: signInEmail,
+        password: signInPassword,
+      })
+      if (authError) {
+        setError(authError.message)
+        return
+      }
+      next()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
     } finally {
@@ -173,6 +196,57 @@ export default function CreateAccountScreen() {
           <span className="underline">Terms of Service</span> and{' '}
           <span className="underline">Privacy Policy</span>
         </p>
+
+        {/* Already have an account — sign in */}
+        {!showSignIn ? (
+          <button
+            onClick={() => setShowSignIn(true)}
+            className="mt-2 w-full text-center text-sm font-medium text-primary min-h-[44px]"
+          >
+            Already have an account? Sign in
+          </button>
+        ) : (
+          <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
+            <p className="text-sm font-semibold text-text-primary">Sign in to existing account</p>
+            <div>
+              <label htmlFor="signin-email" className="block text-sm font-medium text-text-secondary mb-1">Email</label>
+              <input
+                id="signin-email"
+                type="email"
+                autoComplete="email"
+                value={signInEmail}
+                onChange={e => setSignInEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base text-text-primary focus:border-primary focus:outline-none min-h-[48px]"
+              />
+            </div>
+            <div>
+              <label htmlFor="signin-password" className="block text-sm font-medium text-text-secondary mb-1">Password</label>
+              <input
+                id="signin-password"
+                type="password"
+                autoComplete="current-password"
+                value={signInPassword}
+                onChange={e => setSignInPassword(e.target.value)}
+                placeholder="Your password"
+                className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base text-text-primary focus:border-primary focus:outline-none min-h-[48px]"
+              />
+            </div>
+            <button
+              onClick={handleSignIn}
+              disabled={!signInEmail.includes('@') || signInPassword.length < 8 || loading}
+              className="w-full rounded-xl bg-primary px-4 py-3.5 text-base font-semibold text-white hover:bg-primary-dark disabled:opacity-40 min-h-[48px] transition-colors"
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+            <button
+              onClick={() => setShowSignIn(false)}
+              className="text-sm text-text-tertiary min-h-[44px]"
+            >
+              Back to create account
+            </button>
+          </div>
+        )}
       </div>
     </OnboardingLayout>
   )

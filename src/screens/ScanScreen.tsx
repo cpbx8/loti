@@ -5,6 +5,7 @@ import { useDailyLog } from '@/hooks/useDailyLog'
 import { FoodResultCard, FoodResultList, SearchMeta } from '@/components/FoodResultCard'
 import type { FoodSearchResult } from '@/types/shared'
 import { useState } from 'react'
+import LotiMascot from '@/components/LotiMascot'
 
 export default function ScanScreen() {
   const navigate = useNavigate()
@@ -141,7 +142,7 @@ export default function ScanScreen() {
   if (search.state === 'loading') {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
+        <LotiMascot expression="scanning" size="lg" animated />
         <p className="text-lg text-text-secondary">Analyzing your food...</p>
       </div>
     )
@@ -161,6 +162,7 @@ export default function ScanScreen() {
           <h1 className="ml-3 text-lg font-bold text-text-primary">Photo Scan</h1>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
+          <LotiMascot expression="error" size="md" />
           <div className="rounded-xl bg-error/10 px-4 py-3">
             <p className="text-sm text-error">{search.error}</p>
           </div>
