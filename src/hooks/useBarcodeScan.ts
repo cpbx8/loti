@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
-import type { ScanResult, MealType } from '@/types/shared'
+import { handleBarcodeScan } from '@/services/scanPipeline'
+import type { ScanResult } from '@/types/shared'
 
 type BarcodeScanState = 'idle' | 'scanning' | 'looking_up' | 'done' | 'error'
 
@@ -10,31 +10,38 @@ export function useBarcodeScan() {
   const [error, setError] = useState<string | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
 
-  const lookup = useCallback(async (barcode: string, mealType?: MealType) => {
+  const lookup = useCallback(async (barcode: string) => {
     setState('looking_up')
     setError(null)
     setResult(null)
     setScannedBarcode(barcode)
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('scan-barcode', {
-        body: { barcode, meal_type: mealType },
-      })
-
-      if (fnError) {
-        const msg = (data as Record<string, unknown>)?.message as string ?? 'Failed to look up barcode'
-        setError(msg)
+      const pipelineResult = await handleBarcodeScan(barcode)
+      if (!pipelineResult) {
+        setError('Product not found for this barcode')
         setState('error')
         return
       }
 
-      if (data?.error) {
-        setError(data.message ?? 'Product not found')
-        setState('error')
-        return
-      }
-
-      setResult(data as ScanResult)
+      setResult({
+        food_name: pipelineResult.food_name,
+        food_name_en: pipelineResult.food_name_en ?? undefined,
+        glycemic_index: pipelineResult.glycemic_index,
+        glycemic_load: pipelineResult.glycemic_load,
+        traffic_light: pipelineResult.traffic_light,
+        result_traffic_light: pipelineResult.traffic_light,
+        swap_tip: pipelineResult.swap_tip ?? undefined,
+        confidence_score: pipelineResult.confidence_score,
+        data_source: pipelineResult.data_source,
+        requires_attribution: pipelineResult.requires_attribution,
+        calories_kcal: pipelineResult.calories_kcal,
+        protein_g: pipelineResult.protein_g,
+        carbs_g: pipelineResult.carbs_g,
+        fat_g: pipelineResult.fat_g,
+        fiber_g: pipelineResult.fiber_g,
+        serving_size_g: pipelineResult.serving_size_g,
+      } as unknown as ScanResult)
       setState('done')
     } catch {
       setError('Network error. Check your connection.')

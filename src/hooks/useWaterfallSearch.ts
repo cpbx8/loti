@@ -1,9 +1,8 @@
 /**
- * Unified hook for all food lookups via the waterfall search-foods endpoint.
- * Replaces useBarcodeScan, useScan (photo), and useTextScan.
+ * Unified hook for all food lookups via the AI proxy search-foods endpoint.
  */
 import { useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import * as aiProxy from '@/services/aiProxy'
 import type { FoodSearchResult, SearchResponse } from '@/types/shared'
 
 export type LookupState = 'idle' | 'loading' | 'done' | 'error'
@@ -31,33 +30,23 @@ export function useWaterfallSearch() {
     setData(null)
 
     try {
-      const { data: resp, error: fnError } = await supabase.functions.invoke('search-foods', {
-        body: {
-          type: opts.type,
-          query: opts.query,
-          image_base64: opts.image_base64,
-        },
-      })
+      const resp = await aiProxy.searchFoods({
+        type: opts.type,
+        query: opts.query ?? '',
+        image_base64: opts.image_base64,
+      }) as SearchResponse
 
-      if (fnError) {
-        const msg = (resp as Record<string, unknown>)?.error as string ?? 'Search failed'
-        setError(msg)
-        setState('error')
-        return
-      }
-
-      const sr = resp as SearchResponse
-      if (!sr.results || sr.results.length === 0) {
+      if (!resp.results || resp.results.length === 0) {
         setError('No results found')
         setState('error')
         return
       }
 
       setData({
-        results: sr.results,
-        source: sr.source,
-        cached: sr.cached,
-        latency_ms: sr.latency_ms,
+        results: resp.results,
+        source: resp.source,
+        cached: resp.cached,
+        latency_ms: resp.latency_ms,
       })
       setState('done')
     } catch {
@@ -66,7 +55,6 @@ export function useWaterfallSearch() {
     }
   }, [])
 
-  // Convenience wrappers
   const searchText = useCallback((text: string) =>
     search({ type: 'text', query: text }), [search])
 
@@ -82,7 +70,6 @@ export function useWaterfallSearch() {
     setError(null)
   }, [])
 
-  // First result shortcut
   const topResult = data?.results?.[0] ?? null
 
   return {

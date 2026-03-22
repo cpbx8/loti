@@ -112,7 +112,6 @@ export const ONBOARDING_SCREENS: ScreenDef[] = [
   { id: 'activity', label: 'Activity', skippable: true, shouldShow: () => true },
   { id: 'dietary', label: 'Dietary', skippable: true, shouldShow: () => true },
   { id: 'meal_struggles', label: 'Meals', skippable: true, shouldShow: () => true },
-  { id: 'create_account', label: 'Account', skippable: false, shouldShow: () => true },
   { id: 'summary', label: 'Summary', skippable: false, shouldShow: () => true },
 ]
 

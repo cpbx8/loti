@@ -4,7 +4,7 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import * as aiProxy from '@/services/aiProxy'
 import { useThresholds } from '@/hooks/useThresholds'
 import { useDailyLog } from '@/hooks/useDailyLog'
 import { useProfile } from '@/hooks/useProfile'
@@ -139,7 +139,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
     contextType: 'meal' | 'freetext',
     mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack',
     text?: string,
-    exclude?: string[],
+    _exclude?: string[],
   ) => {
     // Rate limit check
     if (getDailyCount() >= MAX_DAILY_SUGGESTIONS) {
@@ -180,20 +180,15 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
       const summary = getScanSummary(7, thresholds)
       const scanSummaryText = formatScanSummaryForPrompt(summary)
 
-      const { data, error: fnError } = await supabase.functions.invoke('suggest', {
-        body: {
-          context: {
-            type: contextType,
-            meal_type: mealType,
-            freetext: text,
-            exclude: exclude,
-          },
-          profile,
-          scan_summary: scanSummaryText,
-        },
+      const data = await aiProxy.suggest({
+        meal_type: mealType,
+        free_text: text,
+        health_state: profile.health_state,
+        dietary_restrictions: profile.dietary_restrictions,
+        scan_summary: scanSummaryText,
+        green_max: thresholds.greenMax,
+        yellow_max: thresholds.yellowMax,
       })
-
-      if (fnError) throw fnError
 
       if (data?.error) {
         setError(data.error)

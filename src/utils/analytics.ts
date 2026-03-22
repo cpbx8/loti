@@ -1,8 +1,6 @@
-import { supabase } from '@/lib/supabase'
-
 /**
- * Lightweight analytics — tracks events in localStorage + Supabase conversion_events.
- * Supabase writes are fire-and-forget (don't await, don't block UI).
+ * Lightweight analytics — tracks events in localStorage.
+ * No server-side tracking (local-first architecture).
  */
 
 const ANALYTICS_KEY = 'loti_analytics'
@@ -27,23 +25,12 @@ function saveAnalytics(data: AnalyticsData) {
   } catch { /* ignore */ }
 }
 
-/** Track an event locally and to Supabase (fire-and-forget) */
-export function trackEvent(event: string, eventData?: Record<string, unknown>) {
-  // Local tracking
+/** Track an event locally */
+export function trackEvent(event: string, _eventData?: Record<string, unknown>) {
   const data = getAnalytics()
   data.events[event] = (data.events[event] ?? 0) + 1
   data.last_open = new Date().toISOString()
   saveAnalytics(data)
-
-  // Supabase tracking (fire-and-forget, don't block UI)
-  supabase.auth.getUser().then(({ data: { user } }) => {
-    if (!user) return
-    supabase.from('conversion_events').insert({
-      user_id: user.id,
-      event_type: event,
-      event_data: eventData ?? null,
-    }).then(() => { /* ignore result */ })
-  })
 }
 
 // Common events

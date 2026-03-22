@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import * as aiProxy from '@/services/aiProxy'
 import type { FoodSearchResult, SearchResponse } from '@/types/shared'
 
 type SearchState = 'idle' | 'searching' | 'done' | 'error'
@@ -17,26 +17,22 @@ export function useSearch() {
 
   const doSearch = useCallback(async (term: string, id: number) => {
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('search-foods', {
-        body: { query: term, type: 'text' },
-      })
+      const data = await aiProxy.searchFoods({ query: term, type: 'text' }) as SearchResponse
 
-      // Discard stale response
       if (requestRef.current !== id) return
 
-      if (fnError || data?.error) {
-        setError(data?.error ?? 'Search failed')
+      if (data?.error) {
+        setError(data.error as string)
         setState('error')
         return
       }
 
-      const response = data as SearchResponse
-      setResults(response.results ?? [])
-      setSource(response.source ?? '')
-      setCached(response.cached ?? false)
-      setLatencyMs(response.latency_ms ?? 0)
-      setState(response.results?.length > 0 ? 'done' : 'error')
-      if (response.results?.length === 0) {
+      setResults(data.results ?? [])
+      setSource(data.source ?? '')
+      setCached(data.cached ?? false)
+      setLatencyMs(data.latency_ms ?? 0)
+      setState(data.results?.length > 0 ? 'done' : 'error')
+      if (data.results?.length === 0) {
         setError('No results found')
       }
     } catch {
@@ -46,7 +42,6 @@ export function useSearch() {
     }
   }, [])
 
-  // Auto-search on query change (debounced)
   const setQueryAndSearch = useCallback((value: string) => {
     setQuery(value)
 
@@ -66,7 +61,6 @@ export function useSearch() {
     }, 600)
   }, [doSearch])
 
-  // Manual retry
   const retry = useCallback(async () => {
     const term = query.trim()
     if (term.length < 2) return
@@ -93,7 +87,6 @@ export function useSearch() {
     setError(null)
   }, [])
 
-  // For backward compatibility: return the first result as "result"
   const result = results.length > 0 ? results[0] : null
 
   return {

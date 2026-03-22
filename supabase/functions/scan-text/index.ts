@@ -38,29 +38,6 @@ Deno.serve(async (req) => {
     const denied = validateApiKey(req)
     if (denied) return denied
 
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-
-    // Legacy auth block removed — userId no longer needed
-    const userId: string | null = null
-    if (false) {
-      } catch { /* auth failed, continue anonymously */ }
-    }
-
-    // 1b. Check scan permission (trial/premium gating)
-    if (userId) {
-      try {
-        const { data: permission } = await supabaseAdmin.rpc("check_scan_permission", { p_user_id: userId })
-        if (permission && !permission.allowed) {
-          return new Response(
-            JSON.stringify({ error: "SCAN_LIMIT_REACHED", reason: permission.reason, scans_remaining: 0 }),
-            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          )
-        }
-      } catch { /* fail open if RPC not available */ }
-    }
-
     // 2. Parse input
     const body: TextScanRequest = await req.json()
     if (!body.text || typeof body.text !== "string" || body.text.trim().length === 0) {
@@ -106,14 +83,7 @@ Deno.serve(async (req) => {
       results.push(result)
     }
 
-    // 7. Log each item (only if authenticated)
-    if (userId) {
-      for (const result of results) {
-        // logScan removed — logging handled client-side in SQLite
-      }
-    }
-
-    // 8. Return single or multi
+    // 7. Return single or multi
     if (results.length === 1) {
       return jsonResponse(results[0])
     }
@@ -300,35 +270,4 @@ function jsonResponse(data: unknown) {
   })
 }
 
-async function logScan(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-  result: ScanResult,
-  startTime: number,
-  mealType: string | null,
-  parseMethod: string,
-) {
-  await supabase.from("scan_logs").insert({
-    user_id: userId,
-    food_name: result.food_name,
-    matched_food_id: result.matched_food_id,
-    match_method: `text_${parseMethod}:${result.match_method}`,
-    input_method: "text_input",
-    quantity: result.quantity,
-    calories_kcal: result.calories_kcal,
-    protein_g: result.protein_g,
-    carbs_g: result.carbs_g,
-    fat_g: result.fat_g,
-    fiber_g: result.fiber_g,
-    result_gi: result.glycemic_index,
-    result_gl: result.glycemic_load,
-    result_traffic_light: result.traffic_light,
-    confidence_score: result.confidence === "high" ? 0.9 : result.confidence === "medium" ? 0.7 : 0.4,
-    serving_size_g: result.serving_size_g,
-    meal_type: mealType,
-    response_time_ms: Date.now() - startTime,
-  })
-
-  // Increment daily scan counter
-  await supabase.rpc("increment_scan_count", { p_user_id: userId }).catch(() => {})
-}
+// Server-side logging removed — scan logs are stored on-device (SQLite)

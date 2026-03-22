@@ -9,7 +9,6 @@ import AgeSexScreen from './onboarding/AgeSexScreen'
 import ActivityScreen from './onboarding/ActivityScreen'
 import DietaryScreen from './onboarding/DietaryScreen'
 import MealStrugglesScreen from './onboarding/MealStrugglesScreen'
-import CreateAccountScreen from './onboarding/CreateAccountScreen'
 import SummaryScreen from './onboarding/SummaryScreen'
 
 const SCREEN_COMPONENTS: Record<string, React.FC> = {
@@ -23,7 +22,6 @@ const SCREEN_COMPONENTS: Record<string, React.FC> = {
   activity: ActivityScreen,
   dietary: DietaryScreen,
   meal_struggles: MealStrugglesScreen,
-  create_account: CreateAccountScreen,
   summary: SummaryScreen,
 }
 
