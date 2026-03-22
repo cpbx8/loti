@@ -11,7 +11,7 @@ interface Props {
 
 export default function TrafficLightExplainer({ onScanTap }: Props) {
   return (
-    <div className="mx-5 mt-3 rounded-xl bg-card p-5 shadow-sm">
+    <div className="mx-5 mt-3 rounded-2xl bg-card p-5 shadow-sm">
       <div className="flex items-center gap-3 mb-4">
         <LotiMascot expression="neutral" size="sm" />
         <p className="text-sm font-semibold text-text-primary">How Loti works</p>

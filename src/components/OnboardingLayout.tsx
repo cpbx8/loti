@@ -81,7 +81,7 @@ export function OnboardingCTA({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="mt-auto w-full rounded-xl bg-primary px-4 py-3.5 text-base font-semibold text-white hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed min-h-[48px] transition-colors"
+      className="mt-auto w-full rounded-3xl bg-primary px-4 py-3.5 text-base font-semibold text-white hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed h-[52px] min-h-[48px] transition-colors active:opacity-85 active:scale-[0.98]"
     >
       {children}
     </button>

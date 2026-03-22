@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useThresholds } from '@/hooks/useThresholds'
 import { useDailyLog } from '@/hooks/useDailyLog'
+import { useProfile } from '@/hooks/useProfile'
 import { getScanSummary, formatScanSummaryForPrompt, getTodaySummaryLine } from '@/utils/scanSummary'
 import SuggestionCard from './SuggestionCard'
 import ModifierTipBanner, { getRandomTip } from './ModifierTipBanner'
@@ -111,6 +112,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
   const navigate = useNavigate()
   const thresholds = useThresholds()
   const { addEntry } = useDailyLog()
+  const { profile: serverProfile } = useProfile()
   const [state, setState] = useState<SheetState>('idle')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [excludeList, setExcludeList] = useState<string[]>([])
@@ -160,7 +162,21 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
     )
 
     try {
-      const profile = loadProfile(thresholds)
+      const profile = serverProfile
+        ? {
+            health_state: serverProfile.health_state ?? 'healthy',
+            goal: serverProfile.goal ?? 'learn',
+            a1c_value: serverProfile.a1c_value ?? null,
+            age: serverProfile.age ?? null,
+            sex: serverProfile.sex ?? 'not_specified',
+            activity_level: serverProfile.activity_level ?? 'moderate',
+            dietary_restrictions: serverProfile.dietary_restrictions ?? [],
+            meal_struggles: serverProfile.meal_struggles ?? [],
+            medications: serverProfile.medications ?? [],
+            gl_threshold_green: thresholds.greenMax,
+            gl_threshold_yellow: thresholds.yellowMax,
+          }
+        : loadProfile(thresholds)
       const summary = getScanSummary(7, thresholds)
       const scanSummaryText = formatScanSummaryForPrompt(summary)
 
@@ -195,7 +211,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
       setError('Could not get suggestions. Please try again.')
       setState('error')
     }
-  }, [thresholds])
+  }, [thresholds, serverProfile])
 
   const handleMealTap = (mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
     callSuggest('meal', mealType)
@@ -294,7 +310,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
                 <button
                   type="submit"
                   disabled={!freetext.trim()}
-                  className="rounded-xl bg-primary px-4 py-3 text-white font-medium disabled:opacity-40 min-h-[48px]"
+                  className="rounded-3xl bg-primary px-4 py-3 text-white font-medium disabled:opacity-40 min-h-[48px]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7" />
@@ -331,7 +347,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
               <div>
                 <h2 className="text-xl font-semibold text-text-primary">{contextHeader}</h2>
                 <p className="text-sm text-text-secondary mt-0.5">
-                  Based on your {loadProfile(thresholds).health_state} profile
+                  Based on your {serverProfile?.health_state ?? loadProfile(thresholds).health_state} profile
                 </p>
               </div>
 
@@ -369,7 +385,10 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
               {/* Modifier tip */}
               <ModifierTipBanner tip={tip} />
 
-              {/* Disclaimer */}
+              {/* Remaining count + Disclaimer */}
+              <p className="text-xs text-text-tertiary">
+                {MAX_DAILY_SUGGESTIONS - getDailyCount()} suggestions remaining today
+              </p>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Values are estimates. Consult a healthcare professional for medical advice.
               </p>
@@ -382,7 +401,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
               <p className="text-base text-text-secondary text-center">{error}</p>
               <button
                 onClick={handleAskAgain}
-                className="rounded-xl bg-primary px-6 py-3 text-base font-medium text-white min-h-[44px]"
+                className="rounded-3xl bg-primary px-6 py-3 text-base font-medium text-white min-h-[44px]"
               >
                 Try again
               </button>

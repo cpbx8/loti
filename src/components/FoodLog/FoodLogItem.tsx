@@ -55,7 +55,7 @@ export default function FoodLogItem({ entry, onRemove, onUpdateServing }: Props)
   }
 
   return (
-    <div className="rounded-xl bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl bg-card shadow-sm overflow-hidden">
       {/* Main row — always visible */}
       <button
         onClick={() => setExpanded(!expanded)}

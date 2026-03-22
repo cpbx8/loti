@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { ActivityLevel, Sex } from '@/contexts/OnboardingContext'
+import { useSubscription } from '@/hooks/useSubscription'
+import { useProfile } from '@/hooks/useProfile'
 
 const STORAGE_KEY = 'loti_onboarding'
 
@@ -70,10 +72,28 @@ export default function SettingsScreen() {
   const [a1cDraft, setA1cDraft] = useState('')
   const [showDietaryEditor, setShowDietaryEditor] = useState(false)
   const [showActivityEditor, setShowActivityEditor] = useState(false)
+  const sub = useSubscription()
+  const { profile: serverProfile, updateProfile: updateServerProfile } = useProfile()
 
+  // Seed local state from server profile when available
   useEffect(() => {
-    setProfile(readProfile())
-  }, [])
+    if (serverProfile) {
+      setProfile(prev => ({
+        ...prev,
+        healthState: serverProfile.health_state ?? prev.healthState,
+        goal: serverProfile.goal ?? prev.goal,
+        a1cValue: serverProfile.a1c_value ?? prev.a1cValue,
+        age: serverProfile.age ?? prev.age,
+        sex: (serverProfile.sex as Sex) ?? prev.sex,
+        activityLevel: (serverProfile.activity_level as ActivityLevel) ?? prev.activityLevel,
+        dietaryRestrictions: serverProfile.dietary_restrictions ?? prev.dietaryRestrictions,
+        mealStruggles: serverProfile.meal_struggles ?? prev.mealStruggles,
+        medications: serverProfile.medications ?? prev.medications,
+      }))
+    } else {
+      setProfile(readProfile())
+    }
+  }, [serverProfile])
 
   const updateProfile = useCallback((patch: Partial<ProfileData>) => {
     setProfile(prev => {
@@ -81,7 +101,18 @@ export default function SettingsScreen() {
       saveProfile(next)
       return next
     })
-  }, [])
+    // Sync to SQLite profile
+    const dbPatch: Record<string, unknown> = {}
+    if (patch.a1cValue !== undefined) dbPatch.a1c_value = patch.a1cValue
+    if (patch.activityLevel !== undefined) dbPatch.activity_level = patch.activityLevel
+    if (patch.dietaryRestrictions !== undefined) dbPatch.dietary_restrictions = patch.dietaryRestrictions
+    if (patch.medications !== undefined) dbPatch.medications = patch.medications
+    if (patch.age !== undefined) dbPatch.age = patch.age
+    if (patch.sex !== undefined) dbPatch.sex = patch.sex
+    if (Object.keys(dbPatch).length > 0) {
+      updateServerProfile(dbPatch).catch(console.warn)
+    }
+  }, [updateServerProfile])
 
   // A1C editing
   const startA1cEdit = () => {
@@ -138,7 +169,7 @@ export default function SettingsScreen() {
         {/* Health Profile — A1C editable */}
         <div className="mx-5 mt-4">
           <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Health Profile</h2>
-          <div className="bg-card rounded-xl px-4">
+          <div className="bg-card rounded-2xl px-4">
             <button
               onClick={startA1cEdit}
               className="flex w-full items-center justify-between py-3 min-h-[44px]"
@@ -161,7 +192,7 @@ export default function SettingsScreen() {
         {/* About You — read-only summary */}
         <div className="mx-5 mt-4">
           <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">About You</h2>
-          <div className="bg-card rounded-xl px-4">
+          <div className="bg-card rounded-2xl px-4">
             {profile.age && (
               <div className="py-3 border-b border-border">
                 <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Age</p>
@@ -196,7 +227,7 @@ export default function SettingsScreen() {
         {showMeds && profile.medications && profile.medications.length > 0 && (
           <div className="mx-5 mt-4">
             <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Medications</h2>
-            <div className="bg-card rounded-xl px-4 py-3">
+            <div className="bg-card rounded-2xl px-4 py-3">
               <div className="flex flex-wrap gap-2">
                 {profile.medications.map(m => (
                   <span key={m} className="rounded-full bg-surface border border-border px-3 py-1 text-xs font-medium text-text-primary">{m}</span>
@@ -217,7 +248,7 @@ export default function SettingsScreen() {
               {showDietaryEditor ? 'Done' : 'Edit'}
             </button>
           </div>
-          <div className="bg-card rounded-xl px-4 py-3">
+          <div className="bg-card rounded-2xl px-4 py-3">
             {!showDietaryEditor ? (
               // Display mode
               (profile.dietaryRestrictions?.length ?? 0) > 0 ? (
@@ -256,10 +287,92 @@ export default function SettingsScreen() {
           </div>
         </div>
 
+        {/* Subscription */}
+        <div className="mx-5 mt-4">
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Subscription</h2>
+          <div className="bg-card rounded-2xl px-4">
+            <div className="py-3 border-b border-border">
+              <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Status</p>
+              <p className="text-sm font-medium text-text-primary mt-0.5">
+                {sub.is_premium
+                  ? `Premium (${sub.subscription_type})`
+                  : sub.isTrialActive
+                    ? `Free Trial — ${sub.trialDaysRemaining} day${sub.trialDaysRemaining !== 1 ? 's' : ''} left`
+                    : 'Trial Expired'}
+              </p>
+            </div>
+            {!sub.is_premium && sub.isTrialActive && (
+              <div className="py-3 border-b border-border">
+                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Scans Today</p>
+                <p className="text-sm font-medium text-text-primary mt-0.5">
+                  {sub.scans_today} / {sub.dailyScanLimit} used · {sub.scansRemaining} remaining
+                </p>
+              </div>
+            )}
+            <button
+              onClick={() => navigate('/paywall')}
+              className="flex w-full items-center justify-between py-3 min-h-[44px]"
+            >
+              <span className="text-sm font-medium text-primary">
+                {sub.is_premium ? 'Manage Subscription' : 'Upgrade to Premium'}
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Dev Tools (hidden behind 5-tap on version) */}
+        <div className="mx-5 mt-4">
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Developer</h2>
+          <div className="bg-card rounded-2xl">
+            <button
+              onClick={() => {
+                localStorage.removeItem('loti_subscription')
+                window.location.reload()
+              }}
+              className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
+            >
+              <span className="text-sm text-text-primary">Reset Trial (new 5-day trial)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+            <button
+              onClick={() => {
+                sub.activatePremium('annual')
+                window.location.reload()
+              }}
+              className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
+            >
+              <span className="text-sm text-text-primary">Activate Premium (test)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => {
+                const s = JSON.parse(localStorage.getItem('loti_subscription') || '{}')
+                s.trial_expires_at = new Date(Date.now() - 86400000).toISOString()
+                s.is_premium = false
+                localStorage.setItem('loti_subscription', JSON.stringify(s))
+                window.location.reload()
+              }}
+              className="flex w-full items-center justify-between px-4 py-3.5 min-h-[44px]"
+            >
+              <span className="text-sm text-text-primary">Expire Trial (test paywall)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="mx-5 mt-6">
           <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Actions</h2>
-          <div className="bg-card rounded-xl">
+          <div className="bg-card rounded-2xl">
             <button
               onClick={() => navigate('/onboarding')}
               className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
@@ -284,7 +397,9 @@ export default function SettingsScreen() {
         {/* App info */}
         <div className="mx-5 mt-6 mb-4 text-center">
           <p className="text-xs text-text-tertiary">Loti v1.0</p>
-          <p className="text-xs text-text-tertiary mt-1">Not medical advice. Consult your doctor.</p>
+          <p className="text-[11px] leading-relaxed text-text-tertiary mt-3">
+            Loti AI is intended for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek advice from your healthcare provider before making any changes to your diabetes management or treatment plan.
+          </p>
         </div>
       </div>
 
@@ -320,7 +435,7 @@ export default function SettingsScreen() {
               </button>
               <button
                 onClick={saveA1c}
-                className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white min-h-[44px]"
+                className="flex-1 rounded-3xl bg-primary px-4 py-2.5 text-sm font-medium text-white min-h-[44px]"
               >
                 Save
               </button>

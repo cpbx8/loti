@@ -45,7 +45,7 @@ export default function SuggestionCard({
   return (
     <button
       onClick={onTap}
-      className="flex w-full overflow-hidden rounded-xl bg-card shadow-sm text-left transition-colors hover:bg-surface active:bg-surface"
+      className="flex w-full overflow-hidden rounded-2xl bg-card shadow-sm text-left transition-colors hover:bg-surface active:bg-surface"
     >
       {/* Colored left bar */}
       <div className={`w-1 flex-shrink-0 ${TL_BAR_COLOR[trafficLight]}`} />

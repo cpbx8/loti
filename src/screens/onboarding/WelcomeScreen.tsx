@@ -19,13 +19,16 @@ export default function WelcomeScreen() {
 
       <button
         onClick={next}
-        className="mt-10 w-full rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
+        className="mt-10 w-full rounded-3xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
       >
         Scan your first food
       </button>
 
       <button
-        onClick={() => goToScreen(10)}
+        onClick={() => {
+          localStorage.setItem('loti_signin_mode', 'true')
+          goToScreen(10)
+        }}
         className="mt-4 text-sm text-text-tertiary hover:text-text-secondary min-h-[44px]"
       >
         Already have an account? Sign in

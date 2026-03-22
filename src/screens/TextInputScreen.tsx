@@ -99,7 +99,7 @@ export default function TextInputScreen() {
                 selectedIndex={selected ? search.results.indexOf(selected) : 0}
               />
               {selected && (
-                <div className="mt-2 rounded-xl bg-card p-4 shadow-sm">
+                <div className="mt-2 rounded-2xl bg-card p-4 shadow-sm">
                   <FoodResultCard result={selected} />
                 </div>
               )}
@@ -121,14 +121,14 @@ export default function TextInputScreen() {
           {multiple ? (
             <button
               onClick={selected ? handleLog : handleLogAll}
-              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               {selected ? 'Log Selected' : 'Log All'}
             </button>
           ) : (
             <button
               onClick={handleLog}
-              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               Log This
             </button>
@@ -211,7 +211,7 @@ export default function TextInputScreen() {
         <button
           onClick={handleSubmit}
           disabled={input.trim().length < 2}
-          className="w-full rounded-xl bg-primary px-4 py-3 text-base font-medium text-white disabled:opacity-40 hover:bg-primary-dark min-h-[44px]"
+          className="w-full rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white disabled:opacity-40 hover:bg-primary-dark min-h-[44px]"
         >
           Look Up
         </button>

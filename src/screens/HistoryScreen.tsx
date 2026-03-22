@@ -41,16 +41,7 @@ export default function HistoryScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface">
       <header className="flex items-center border-b border-border bg-card px-5 py-3">
-        <button
-          onClick={() => navigate('/')}
-          className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
-        <h1 className="ml-3 text-lg font-bold text-text-primary">History</h1>
+        <h1 className="text-xl font-bold text-text-primary">Historial</h1>
       </header>
 
       {/* Week navigator */}
@@ -84,17 +75,17 @@ export default function HistoryScreen() {
           <div className="mb-6">
             <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Weekly Impact</p>
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-card p-3 shadow-sm text-center">
+              <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-green-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekGreen}</p>
                 <p className="text-xs text-text-secondary">Green</p>
               </div>
-              <div className="rounded-xl bg-card p-3 shadow-sm text-center">
+              <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-yellow-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekYellow}</p>
                 <p className="text-xs text-text-secondary">Yellow</p>
               </div>
-              <div className="rounded-xl bg-card p-3 shadow-sm text-center">
+              <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-red-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekRed}</p>
                 <p className="text-xs text-text-secondary">Red</p>
@@ -134,7 +125,7 @@ export default function HistoryScreen() {
           {/* This week summary */}
           <div className="mb-6">
             <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">This Week</p>
-            <div className="rounded-xl bg-card p-4 shadow-sm">
+            <div className="rounded-2xl bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-text-primary">{daysLogged}</p>
@@ -172,7 +163,7 @@ export default function HistoryScreen() {
                   <button
                     key={day.date}
                     onClick={() => navigate(`/?date=${day.date}`)}
-                    className="flex w-full items-center justify-between rounded-xl bg-card px-4 py-3 text-left shadow-sm hover:shadow-md transition-shadow min-h-[44px]"
+                    className="flex w-full items-center justify-between rounded-2xl bg-card px-4 py-3 text-left shadow-sm hover:shadow-md transition-shadow min-h-[44px]"
                   >
                     <div>
                       <p className="text-sm font-medium text-text-primary">{displayDate(day.date)}</p>

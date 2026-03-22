@@ -130,7 +130,7 @@ export default function SearchScreen() {
                 <button
                   key={result.id ?? `${result.name_es}-${i}`}
                   onClick={() => setSelected(result)}
-                  className="flex w-full items-center gap-3 rounded-xl bg-card px-4 py-3 text-left shadow-sm hover:shadow-md transition-shadow min-h-[44px]"
+                  className="flex w-full items-center gap-3 rounded-2xl bg-card px-4 py-3 text-left shadow-sm hover:shadow-md transition-shadow min-h-[44px]"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-text-primary truncate">{result.name_es}</p>
@@ -275,7 +275,7 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
         </div>
 
         {r.fiber_g != null && (
-          <div className="rounded-xl bg-card px-3 py-2 shadow-sm">
+          <div className="rounded-2xl bg-card px-3 py-2 shadow-sm">
             <p className="text-sm text-text-secondary">Fiber: <span className="font-medium text-text-primary">{r.fiber_g}g</span></p>
           </div>
         )}
@@ -290,7 +290,7 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
         {r.source === 'fatsecret' ? (
           <FatSecretAttribution />
         ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-card px-4 py-3 shadow-sm">
+          <div className="flex items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm">
             <span className={`inline-block h-3 w-3 rounded-full ${
               SOURCE_META[r.source]?.color === 'text-info' ? 'bg-info' :
               SOURCE_META[r.source]?.color === 'text-tl-green-fill' ? 'bg-tl-green-fill' :
@@ -334,7 +334,7 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
         </button>
         <button
           onClick={onLog}
-          className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+          className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
         >
           Log This
         </button>

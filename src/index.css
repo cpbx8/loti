@@ -2,23 +2,24 @@
 
 @theme {
   /* Traffic light — SACRED, only for GI ratings */
-  --color-tl-green-bg: #E8F5E9;
-  --color-tl-green-fill: #2E7D32;
-  --color-tl-green-accent: #4CAF50;
-  --color-tl-yellow-bg: #FFF8E1;
-  --color-tl-yellow-fill: #E65100;
-  --color-tl-yellow-accent: #FF9800;
-  --color-tl-red-bg: #FFEBEE;
-  --color-tl-red-fill: #C62828;
-  --color-tl-red-accent: #EF5350;
+  --color-tl-green-bg: #E8F6ED;
+  --color-tl-green-fill: #2ECC71;
+  --color-tl-green-accent: #27AE60;
+  --color-tl-yellow-bg: #FEF5E7;
+  --color-tl-yellow-fill: #F39C12;
+  --color-tl-yellow-accent: #E67E22;
+  --color-tl-red-bg: #FDECEC;
+  --color-tl-red-fill: #E74C3C;
+  --color-tl-red-accent: #C0392B;
 
-  /* Brand — axolotl pink */
-  --color-primary: #E8617A;
-  --color-primary-light: #FDE8ED;
+  /* Brand — coral-pink */
+  --color-primary: #E8636B;
+  --color-primary-light: rgba(232, 99, 107, 0.1);
+  --color-primary-lighter: rgb(255, 140, 124);
   --color-primary-dark: #C4475C;
 
-  /* Neutral */
-  --color-surface: #F8F9FA;
+  /* Neutral — warm off-white */
+  --color-surface: #FAF9F6;
   --color-card: #FFFFFF;
   --color-border: #E5E7EB;
   --color-text-primary: #1A1A1A;
@@ -31,9 +32,9 @@
   --color-error: #B71C1C;
   --color-success: #1565C0;
 
-  /* Shadows */
+  /* Shadows — card: 6% opacity, 8px blur, 2px y-offset */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 

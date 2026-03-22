@@ -99,7 +99,7 @@ export default function ScanScreen() {
                 selectedIndex={selected ? search.results.indexOf(selected) : 0}
               />
               {selected && (
-                <div className="mt-2 rounded-xl bg-card p-4 shadow-sm">
+                <div className="mt-2 rounded-2xl bg-card p-4 shadow-sm">
                   <FoodResultCard result={selected} />
                 </div>
               )}
@@ -121,14 +121,14 @@ export default function ScanScreen() {
           {multiple ? (
             <button
               onClick={selected ? handleLog : handleLogAll}
-              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               {selected ? 'Log Selected' : 'Log All'}
             </button>
           ) : (
             <button
               onClick={handleLog}
-              className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
             >
               Log This
             </button>
@@ -163,15 +163,22 @@ export default function ScanScreen() {
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           <LotiMascot expression="error" size="md" />
-          <div className="rounded-xl bg-error/10 px-4 py-3">
-            <p className="text-sm text-error">{search.error}</p>
+          <p className="text-base font-medium text-text-primary">Couldn't analyze this photo</p>
+          <p className="text-sm text-text-secondary text-center">{search.error ?? 'Try a clearer photo or type the food name instead.'}</p>
+          <div className="flex gap-3">
+            <button
+              onClick={handleScanAnother}
+              className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
+            >
+              Retake Photo
+            </button>
+            <button
+              onClick={() => navigate('/text')}
+              className="rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+            >
+              Type It In
+            </button>
           </div>
-          <button
-            onClick={handleScanAnother}
-            className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     )
@@ -263,7 +270,7 @@ export default function ScanScreen() {
           </button>
           <button
             onClick={handleConfirm}
-            className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+            className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
           >
             Analyze
           </button>

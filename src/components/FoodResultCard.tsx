@@ -36,7 +36,7 @@ function SourceBadge({ source, confidence }: { source: string; confidence: numbe
 
 function MacroCard({ label, value, unit }: { label: string; value: number | null | undefined; unit: string }) {
   return (
-    <div className="rounded-xl bg-card p-3 shadow-sm">
+    <div className="rounded-2xl bg-card p-3 shadow-sm">
       <p className="text-sm text-text-secondary">{label}</p>
       <p className="text-xl font-bold text-text-primary">
         {value != null ? Math.round(value) : '--'}
@@ -70,6 +70,9 @@ export function FoodResultCard({ result: r, showSource = true }: FoodResultCardP
         <div className="flex-1">
           <h2 className="text-xl font-bold text-text-primary">{displayName}</h2>
           {subtitle && <p className="text-sm text-text-secondary">{subtitle}</p>}
+          <p className="text-sm font-medium text-text-secondary mt-1">
+            Serving: {r.serving_description ?? `${r.serving_size}${r.serving_unit}`}
+          </p>
         </div>
         {hasTL && (
           <TrafficLightBadge rating={tl!} size="md" animated />
@@ -120,11 +123,10 @@ export function FoodResultCard({ result: r, showSource = true }: FoodResultCardP
         <MacroCard label="Fat" value={r.fat_g} unit="g" />
       </div>
 
-      {/* Serving info */}
-      <p className="text-sm text-text-tertiary">
-        Per {r.serving_description ?? `${r.serving_size}${r.serving_unit}`}
-        {r.fiber_g != null && ` · ${r.fiber_g}g fiber`}
-      </p>
+      {/* Fiber info */}
+      {r.fiber_g != null && r.fiber_g > 0 && (
+        <p className="text-sm text-text-tertiary">{r.fiber_g}g fiber per serving</p>
+      )}
 
       {/* Source attribution */}
       {showSource && (

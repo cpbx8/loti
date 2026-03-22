@@ -93,10 +93,16 @@ function OxxoHackCarousel() {
   )
 }
 
+const STORE_CONFIG: Record<string, { name: string; bg: string; border: string; accent: string }> = {
+  oxxo: { name: 'OXXO', bg: 'bg-[#8B0000]', border: 'border-[#A00000]', accent: 'text-[#F2CD00]' },
+  seven_eleven: { name: '7-Eleven', bg: 'bg-[#00653E]', border: 'border-[#004D2E]', accent: 'text-[#FF7E00]' },
+}
+
 export default function StoreGuideScreen() {
   const navigate = useNavigate()
   const { chainId = 'oxxo' } = useParams()
   const { products, loading, error, counts } = useStoreProducts(chainId)
+  const store = STORE_CONFIG[chainId] ?? STORE_CONFIG.oxxo
 
   const [trafficFilter, setTrafficFilter] = useState<TrafficFilter>('all')
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set())
@@ -192,8 +198,8 @@ export default function StoreGuideScreen() {
 
   return (
     <div className="flex flex-1 flex-col bg-surface">
-      {/* Header — OXXO branded */}
-      <header className="flex items-center border-b border-[#A00000] bg-[#8B0000] px-5 py-3">
+      {/* Header — store branded */}
+      <header className={`flex items-center border-b ${store.border} ${store.bg} px-5 py-3`}>
         <button
           onClick={() => navigate(-1)}
           className="text-sm text-white/70 hover:text-white min-h-[44px] flex items-center"
@@ -204,14 +210,14 @@ export default function StoreGuideScreen() {
           Back
         </button>
         <h1 className="ml-3 flex-1 text-lg font-bold">
-          <span className="text-[#F2CD00] font-extrabold">OXXO</span>
+          <span className={`${store.accent} font-extrabold`}>{store.name}</span>
           <span className="text-white ml-1.5">Guide</span>
         </h1>
         <span className="text-xs text-white/50">{counts.total} products</span>
       </header>
 
       {/* Search bar */}
-      <div className="px-4 pt-3 pb-2 bg-[#8B0000]">
+      <div className={`px-4 pt-3 pb-2 ${store.bg}`}>
         <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 min-h-[44px]">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -238,7 +244,7 @@ export default function StoreGuideScreen() {
       </div>
 
       {/* OXXO Hack carousel */}
-      <OxxoHackCarousel />
+      {chainId === 'oxxo' && <OxxoHackCarousel />}
 
       {/* Traffic light tabs */}
       <div className="flex border-b border-border bg-card">
@@ -324,7 +330,7 @@ export default function StoreGuideScreen() {
                   </div>
 
                   {/* Product rows */}
-                  <div className="mx-4 rounded-xl bg-card overflow-hidden divide-y divide-border">
+                  <div className="mx-4 rounded-2xl bg-card overflow-hidden divide-y divide-border">
                     {cat.products.map(product => (
                       <button
                         key={product.id}

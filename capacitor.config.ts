@@ -5,12 +5,18 @@ const config: CapacitorConfig = {
   appName: 'Loti',
   webDir: 'dist',
   server: {
-    // Enable cleartext for local dev; remove for production
     androidScheme: 'https',
+    iosScheme: 'https',
+    hostname: 'app.loti.scanner',
+    allowNavigation: ['*.supabase.co', '*.openfoodfacts.org'],
   },
   plugins: {
     Camera: {
       // iOS will use Info.plist for camera permission string
+    },
+    CapacitorSQLite: {
+      iosDatabaseLocation: 'Library/CapacitorDatabase',
+      iosIsEncryption: false,
     },
   },
 }

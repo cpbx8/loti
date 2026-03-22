@@ -1,5 +1,8 @@
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useSyncExternalStore } from 'react'
+import { initDatabase } from '@/db/database'
+import { initRevenueCat } from '@/lib/revenuecat'
+import TabBar from '@/components/TabBar'
 import DashboardScreen from '@/screens/DashboardScreen'
 import ScanScreen from '@/screens/ScanScreen'
 import SearchScreen from '@/screens/SearchScreen'
@@ -9,9 +12,14 @@ import FavoritesScreen from '@/screens/FavoritesScreen'
 import HistoryScreen from '@/screens/HistoryScreen'
 import StoreGuideScreen from '@/screens/StoreGuideScreen'
 import SettingsScreen from '@/screens/SettingsScreen'
+import PrivacyScreen from '@/screens/PrivacyScreen'
+import TermsScreen from '@/screens/TermsScreen'
+import WeeklyReportScreen from '@/screens/WeeklyReportScreen'
+import PaywallScreen from '@/screens/PaywallScreen'
 import OnboardingScreen from '@/screens/OnboardingScreen'
 
 // Reactive onboarding check — re-renders when localStorage changes
+// (works for both SQLite + localStorage, since SummaryScreen sets both)
 const onboardingListeners = new Set<() => void>()
 function subscribeOnboarding(cb: () => void) {
   onboardingListeners.add(cb)
@@ -20,7 +28,6 @@ function subscribeOnboarding(cb: () => void) {
 function getOnboardingSnapshot() {
   return localStorage.getItem('loti_onboarding_complete') === 'true'
 }
-// Patch localStorage.setItem to notify subscribers
 const _origSet = localStorage.setItem.bind(localStorage)
 localStorage.setItem = (key: string, value: string) => {
   _origSet(key, value)
@@ -37,22 +44,56 @@ function useOnboardingComplete() {
 }
 
 export default function App() {
+  const [ready, setReady] = useState(false)
   const onboarded = useOnboardingComplete()
+
+  useEffect(() => {
+    async function init() {
+      try {
+        await initDatabase()
+        await initRevenueCat()
+      } catch (err) {
+        console.warn('[Loti] Init error (non-fatal):', err)
+      }
+      setReady(true)
+    }
+    init()
+  }, [])
+
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-surface">
+        <div className="text-center">
+          <div className="text-4xl mb-3">🌊</div>
+          <p className="text-sm text-text-secondary">Loading Loti...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/onboarding" element={<OnboardingScreen />} />
-        <Route path="/" element={onboarded ? <DashboardScreen /> : <Navigate to="/onboarding" replace />} />
-        <Route path="/scan" element={<ScanScreen />} />
-        <Route path="/search" element={<SearchScreen />} />
-        <Route path="/barcode" element={<BarcodeScreen />} />
-        <Route path="/text" element={<TextInputScreen />} />
-        <Route path="/favorites" element={<FavoritesScreen />} />
-        <Route path="/history" element={<HistoryScreen />} />
-        <Route path="/store-guide/:chainId" element={<StoreGuideScreen />} />
-        <Route path="/settings" element={<SettingsScreen />} />
-      </Routes>
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col">
+          <Routes>
+            <Route path="/onboarding" element={<OnboardingScreen />} />
+            <Route path="/" element={onboarded ? <DashboardScreen /> : <Navigate to="/onboarding" replace />} />
+            <Route path="/scan" element={<ScanScreen />} />
+            <Route path="/search" element={<SearchScreen />} />
+            <Route path="/barcode" element={<BarcodeScreen />} />
+            <Route path="/text" element={<TextInputScreen />} />
+            <Route path="/favorites" element={<FavoritesScreen />} />
+            <Route path="/history" element={<HistoryScreen />} />
+            <Route path="/store-guide/:chainId" element={<StoreGuideScreen />} />
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route path="/weekly-report" element={<WeeklyReportScreen />} />
+            <Route path="/paywall" element={<PaywallScreen />} />
+            <Route path="/privacy" element={<PrivacyScreen />} />
+            <Route path="/terms" element={<TermsScreen />} />
+          </Routes>
+        </div>
+        <TabBar />
+      </div>
     </BrowserRouter>
   )
 }

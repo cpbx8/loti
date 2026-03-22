@@ -16,7 +16,7 @@ const SOURCE_INFO: Record<string, { label: string; color: string }> = {
 
 function MacroCard({ label, value, unit }: { label: string; value: number | null | undefined; unit: string }) {
   return (
-    <div className="rounded-xl bg-card p-3 shadow-sm">
+    <div className="rounded-2xl bg-card p-3 shadow-sm">
       <p className="text-sm text-text-secondary">{label}</p>
       <p className="text-xl font-bold text-text-primary">
         {value != null ? Math.round(value) : '--'}
@@ -37,7 +37,7 @@ export default function CompositeResultCard({ total, components, onLog, onScanAn
   const info = SOURCE_INFO[total.source] ?? { label: total.source, color: 'text-text-tertiary' }
 
   return (
-    <div className="rounded-xl bg-card shadow-md border-t-2 border-t-primary overflow-hidden">
+    <div className="rounded-2xl bg-card shadow-md border-t-2 border-t-primary overflow-hidden">
       <div className="flex flex-col gap-5 p-5">
         {/* Header */}
         <div>
@@ -98,7 +98,7 @@ export default function CompositeResultCard({ total, components, onLog, onScanAn
           </button>
           <button
             onClick={onLog}
-            className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark active:bg-primary-dark min-h-[44px]"
+            className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark active:bg-primary-dark min-h-[44px]"
           >
             Log This
           </button>

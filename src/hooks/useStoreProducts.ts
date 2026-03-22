@@ -1,126 +1,53 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+/**
+ * Store products hook — reads from SQLite (local-first).
+ * Falls back to bundled TypeScript arrays when SQLite unavailable.
+ */
+
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { StoreProduct } from '@/types/storeGuide'
+import { getStoreProducts } from '@/db/queries'
 import { OXXO_SEED_PRODUCTS } from '@/data/oxxoProducts'
+import { SEVEN_ELEVEN_SEED_PRODUCTS } from '@/data/sevenElevenProducts'
 
-const SEED_DATA: Record<string, StoreProduct[]> = {
+const FALLBACK_DATA: Record<string, StoreProduct[]> = {
   oxxo: OXXO_SEED_PRODUCTS,
+  seven_eleven: SEVEN_ELEVEN_SEED_PRODUCTS,
 }
-
-const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
-
-// Bump this version whenever seed data changes to invalidate stale caches
-const SEED_VERSION = 2
-
-function getCacheKey(chainId: string) {
-  return `loti_store_${chainId}`
-}
-
-interface CachedData {
-  products: StoreProduct[]
-  fetched_at: number
-  seed_version?: number
-}
-
-function readCache(chainId: string): StoreProduct[] | null {
-  try {
-    const raw = localStorage.getItem(getCacheKey(chainId))
-    if (!raw) return null
-    const cached: CachedData = JSON.parse(raw)
-    // Invalidate if seed version changed (means we shipped new bundled data)
-    if ((cached.seed_version ?? 0) < SEED_VERSION) return null
-    if (Date.now() - cached.fetched_at < CACHE_TTL) {
-      return cached.products
-    }
-    return null // stale
-  } catch {
-    return null
-  }
-}
-
-function readStaleCache(chainId: string): StoreProduct[] | null {
-  try {
-    const raw = localStorage.getItem(getCacheKey(chainId))
-    if (!raw) return null
-    return (JSON.parse(raw) as CachedData).products
-  } catch {
-    return null
-  }
-}
-
-function writeCache(chainId: string, products: StoreProduct[]) {
-  try {
-    const data: CachedData = { products, fetched_at: Date.now(), seed_version: SEED_VERSION }
-    localStorage.setItem(getCacheKey(chainId), JSON.stringify(data))
-  } catch {
-    // localStorage full or unavailable
-  }
-}
-
-// Client-safe columns only — excludes nutrition data
-const SELECT_COLUMNS = [
-  'id', 'store_chain', 'product_name', 'brand', 'category',
-  'traffic_light', 'estimated_gl', 'is_best_choice', 'swap_suggestion',
-  'why_tip', 'why_detail', 'price_mxn', 'barcode', 'serving_label', 'image_url',
-].join(', ')
 
 export function useStoreProducts(chainId: string) {
-  const [products, setProducts] = useState<StoreProduct[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchProducts = useCallback(async () => {
-    // Try fresh cache first
-    const cached = readCache(chainId)
-    if (cached) {
-      setProducts(cached)
-      setLoading(false)
-      return
-    }
-
-    // Fetch from Supabase
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('store_products')
-        .select(SELECT_COLUMNS)
-        .eq('store_chain', chainId)
-
-      if (fetchError) throw fetchError
-
-      const result = (data ?? []) as unknown as StoreProduct[]
-
-      // If DB returned empty (table not migrated yet), fall back to seed data
-      if (result.length === 0 && SEED_DATA[chainId]) {
-        const seed = SEED_DATA[chainId]
-        writeCache(chainId, seed)
-        setProducts(seed)
-        setError(null)
-      } else {
-        writeCache(chainId, result)
-        setProducts(result)
-        setError(null)
+  const query = useQuery({
+    queryKey: ['storeProducts', chainId],
+    queryFn: async () => {
+      const rows = await getStoreProducts(chainId)
+      if (rows.length > 0) {
+        // Map SQLite rows to StoreProduct type
+        return rows.map(r => ({
+          id: r.id,
+          store_chain: r.store_chain,
+          product_name: r.product_name,
+          brand: r.brand,
+          category: r.category,
+          traffic_light: r.traffic_light as StoreProduct['traffic_light'],
+          estimated_gl: r.estimated_gl,
+          is_best_choice: r.is_best_choice,
+          swap_suggestion: r.swap_suggestion,
+          why_tip: r.why_tip,
+          why_detail: r.why_detail,
+          price_mxn: r.price_mxn,
+          barcode: r.barcode,
+          serving_label: r.serving_label,
+          image_url: r.image_url,
+        })) as StoreProduct[]
       }
-    } catch {
-      // Network error — try stale cache, then bundled seed data
-      const stale = readStaleCache(chainId)
-      if (stale) {
-        setProducts(stale)
-        setError(null)
-      } else if (SEED_DATA[chainId]) {
-        setProducts(SEED_DATA[chainId])
-        writeCache(chainId, SEED_DATA[chainId])
-        setError(null)
-      } else {
-        setError('Could not load products. Check your connection.')
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [chainId])
 
-  useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+      // Fallback to bundled data
+      return FALLBACK_DATA[chainId] ?? []
+    },
+    staleTime: Infinity, // Seed data doesn't change at runtime
+  })
+
+  const products = query.data ?? FALLBACK_DATA[chainId] ?? []
 
   const counts = useMemo(() => {
     let green = 0, yellow = 0, red = 0
@@ -138,5 +65,12 @@ export function useStoreProducts(chainId: string) {
     return Array.from(set)
   }, [products])
 
-  return { products, loading, error, counts, categories, refetch: fetchProducts }
+  return {
+    products,
+    loading: query.isLoading,
+    error: query.error ? 'Could not load products.' : null,
+    counts,
+    categories,
+    refetch: () => query.refetch(),
+  }
 }

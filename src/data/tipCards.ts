@@ -516,28 +516,198 @@ export const ALL_TIPS: TipCard[] = [
     body: 'Unripe banana GI 30 → ripe banana GI 62. As fruit ripens, starch converts to sugar. Greener = better for glucose.',
     source: 'International Tables of GI 2021',
   },
+
+  // ── BATCH 3: More tips ─────────────────────────────────────
+
+  // MYTH BUSTERS
+  {
+    id: 'myth-13',
+    type: 'mythbuster',
+    headline: 'Honey is NOT better than sugar for glucose',
+    body: 'Honey GI 58 vs table sugar GI 65. Barely different. Both spike glucose. The "natural" label is misleading.',
+    trafficLights: { before: 'red' },
+    source: 'International Tables of GI 2021',
+  },
+  {
+    id: 'myth-14',
+    type: 'mythbuster',
+    headline: 'Fruit smoothies can have MORE sugar than soda',
+    body: 'Blending destroys fiber structure and concentrates sugar. A mango smoothie can have 50g+ sugar — more than Coca-Cola.',
+    trafficLights: { before: 'red' },
+  },
+  {
+    id: 'myth-15',
+    type: 'mythbuster',
+    headline: 'Gluten-free does NOT mean low glucose impact',
+    body: 'Most GF products use rice flour or corn starch — both have HIGHER GI than wheat. GF bread GI 71 vs whole wheat GI 51.',
+    trafficLights: { before: 'red' },
+    source: 'Atkinson et al. 2021',
+  },
+  {
+    id: 'myth-16',
+    type: 'mythbuster',
+    headline: 'Dried fruit is a sugar bomb in disguise',
+    body: 'Removing water concentrates sugar by 3-4x. Raisins have GI 64 and 59g sugar per 100g. Eat fresh fruit instead.',
+    trafficLights: { before: 'red' },
+    source: 'International Tables of GI 2021',
+  },
+  {
+    id: 'myth-17',
+    type: 'mythbuster',
+    headline: 'Coconut sugar is still sugar (GI 54)',
+    body: 'Marketed as "low GI" but at 54 it is only slightly lower than table sugar. Your body processes it almost the same way.',
+    trafficLights: { before: 'yellow' },
+  },
+
+  // SWAP TIPS
+  {
+    id: 'swap-13',
+    type: 'swap',
+    headline: 'Cereal → eggs for breakfast',
+    body: 'Most cereals GI 70-85. Eggs are GI 0. Switching breakfast from cereal to eggs reduces morning glucose by 40%+.',
+    trafficLights: { before: 'red', after: 'green' },
+  },
+  {
+    id: 'swap-14',
+    type: 'swap',
+    headline: 'Chips → pepitas (pumpkin seeds)',
+    body: 'Chips GI 56 → pepitas GI 10. Crunchy, salty, satisfying. Traditional Mexican snack that barely moves glucose.',
+    trafficLights: { before: 'yellow', after: 'green' },
+  },
+  {
+    id: 'swap-15',
+    type: 'swap',
+    headline: 'Ice cream → Greek yogurt with berries',
+    body: 'Ice cream GI 62 → Greek yogurt GI 11. Add berries for sweetness. Protein slows everything down.',
+    trafficLights: { before: 'red', after: 'green' },
+  },
+  {
+    id: 'swap-16',
+    type: 'swap',
+    headline: 'Bolillo → tortilla de nopal',
+    body: 'White bolillo GI 72. Nopal tortilla GI ~25. The nopal fiber creates a gel that slows absorption.',
+    trafficLights: { before: 'red', after: 'green' },
+  },
+  {
+    id: 'swap-17',
+    type: 'swap',
+    headline: 'Atole → café de olla',
+    body: 'Atole GI ~80 → café de olla (with minimal piloncillo) GI ~15. Traditional warm drink, fraction of the spike.',
+    trafficLights: { before: 'red', after: 'green' },
+  },
+
+  // MODIFIER TIPS
+  {
+    id: 'mod-14',
+    type: 'modifier',
+    headline: 'Squeeze lime on everything',
+    body: 'Citric acid reduces glycemic response by 20-30%. Mexican cuisine already does this — lean into it more.',
+    source: 'Ostman et al. 2005',
+  },
+  {
+    id: 'mod-15',
+    type: 'modifier',
+    headline: 'Chew your food longer',
+    body: 'Eating slowly (30 chews per bite) reduces glucose spike by 12%. Your body has time to signal fullness.',
+    source: 'Suzuki et al. 2005',
+  },
+  {
+    id: 'mod-16',
+    type: 'modifier',
+    headline: 'Take a cold shower after high-carb meals',
+    body: 'Cold exposure activates brown fat, which burns glucose for heat. Even a cold hand wash helps.',
+    source: 'van der Lans et al. 2013',
+  },
+  {
+    id: 'mod-17',
+    type: 'modifier',
+    headline: 'Add a side of guacamole',
+    body: 'Avocado fat slows gastric emptying by 30 minutes. Your tacos release glucose much more slowly with guac.',
+  },
+
+  // FEATURED FOODS
+  {
+    id: 'feat-11',
+    type: 'featured_food',
+    headline: 'Pepitas — the Mexican seed powerhouse',
+    body: 'Pumpkin seeds have GI of 10, loaded with magnesium (helps insulin sensitivity), zinc, and healthy fats.',
+    foodName: 'Pepitas',
+    gl: 1,
+    trafficLights: { before: 'green' },
+  },
+  {
+    id: 'feat-12',
+    type: 'featured_food',
+    headline: 'Huauzontle — forgotten superfood',
+    body: 'This ancient Aztec grain has more protein than quinoa, near-zero GI, and can be added to any dish.',
+    foodName: 'Huauzontle',
+    gl: 2,
+    trafficLights: { before: 'green' },
+  },
+  {
+    id: 'feat-13',
+    type: 'featured_food',
+    headline: 'Amaranth — the ancient grain that fights diabetes',
+    body: 'GI of 35, packed with protein and lysine. Alegría (amaranth candy) is better than most sweets for glucose.',
+    foodName: 'Amaranth',
+    gl: 6,
+    trafficLights: { before: 'green' },
+    source: 'Caselato-Sousa & Amaya-Farfán 2012',
+  },
+
+  // DID YOU KNOW
+  {
+    id: 'dyk-16',
+    type: 'did_you_know',
+    headline: 'Eating the same meal twice gives different spikes',
+    body: 'Your glucose response varies by 15-20% depending on sleep, stress, time of day, and what you ate yesterday.',
+    source: 'Zeevi et al. 2015',
+  },
+  {
+    id: 'dyk-17',
+    type: 'did_you_know',
+    headline: 'Diabetes reversal is possible with diet alone',
+    body: 'Research shows that sustained weight loss of 15kg can reverse Type 2 diabetes in 86% of people diagnosed within 6 years.',
+    source: 'DiRECT trial, Taylor et al. 2018',
+  },
+  {
+    id: 'dyk-18',
+    type: 'did_you_know',
+    headline: 'Your gut bacteria affect your glucose response',
+    body: 'Certain gut bacteria can metabolize fiber into short-chain fatty acids that improve insulin sensitivity. Feed them fiber.',
+    source: 'Sonnenburg & Bäckhed 2016',
+  },
+  {
+    id: 'dyk-19',
+    type: 'did_you_know',
+    headline: '10 minutes of strength training helps glucose for 48 hours',
+    body: 'Resistance exercise depletes muscle glycogen stores, creating a glucose sink that lasts 2 days.',
+    source: 'Colberg et al. 2016',
+  },
+  {
+    id: 'dyk-20',
+    type: 'did_you_know',
+    headline: 'Mexico\'s traditional diet was anti-diabetic',
+    body: 'Beans, nopales, quelites, chía, and amaranth formed a naturally low-GI diet. Ultra-processed food changed everything.',
+    source: 'Barquera et al. 2020',
+  },
 ]
 
-/** Seeded shuffle for deterministic daily rotation */
-function seededShuffle<T>(arr: T[], seed: number): T[] {
+/** Fisher-Yates random shuffle */
+function randomShuffle<T>(arr: T[]): T[] {
   const copy = [...arr]
-  let s = seed
   for (let i = copy.length - 1; i > 0; i--) {
-    s = (s * 1664525 + 1013904223) & 0x7fffffff
-    const j = s % (i + 1)
+    const j = Math.floor(Math.random() * (i + 1))
     ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
   return copy
 }
 
-/** Get 7 tips for today — deterministic, at least 1 of each type */
+/** Get random tips — shuffled fresh every call, at least 1 of each type */
 export function getTipsForToday(count = 7): TipCard[] {
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
-  )
+  const shuffled = randomShuffle(ALL_TIPS)
 
-  const shuffled = seededShuffle(ALL_TIPS, dayOfYear)
-
+  // Ensure at least 1 of each type
   const byType = new Map<string, TipCard[]>()
   for (const t of shuffled) {
     if (!byType.has(t.type)) byType.set(t.type, [])

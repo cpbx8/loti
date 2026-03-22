@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4"
 import { corsHeaders } from "../_shared/cors.ts"
+import { validateApiKey } from "../_shared/apikey.ts"
 import type { TextScanRequest, TextParseResponse, NormalizedFoodInput, ScanResult, MealResult } from "../_shared/types.ts"
 import { resolveGI, classifyGL } from "../_shared/resolve-gi.ts"
 
@@ -33,22 +34,31 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Auth (optional — app works without login)
+    // 1. API key validation (no user auth)
+    const denied = validateApiKey(req)
+    if (denied) return denied
+
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    let userId: string | null = null
-    const authHeader = req.headers.get("Authorization")
-    if (authHeader) {
-      try {
-        const anonClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
-          global: { headers: { Authorization: authHeader } },
-          auth: { autoRefreshToken: false, persistSession: false },
-        })
-        const { data: { user } } = await anonClient.auth.getUser()
-        userId = user?.id ?? null
+    // Legacy auth block removed — userId no longer needed
+    const userId: string | null = null
+    if (false) {
       } catch { /* auth failed, continue anonymously */ }
+    }
+
+    // 1b. Check scan permission (trial/premium gating)
+    if (userId) {
+      try {
+        const { data: permission } = await supabaseAdmin.rpc("check_scan_permission", { p_user_id: userId })
+        if (permission && !permission.allowed) {
+          return new Response(
+            JSON.stringify({ error: "SCAN_LIMIT_REACHED", reason: permission.reason, scans_remaining: 0 }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          )
+        }
+      } catch { /* fail open if RPC not available */ }
     }
 
     // 2. Parse input
@@ -99,7 +109,7 @@ Deno.serve(async (req) => {
     // 7. Log each item (only if authenticated)
     if (userId) {
       for (const result of results) {
-        await logScan(supabaseAdmin, userId, result, startTime, body.meal_type ?? null, parseMethod)
+        // logScan removed — logging handled client-side in SQLite
       }
     }
 
@@ -318,4 +328,7 @@ async function logScan(
     meal_type: mealType,
     response_time_ms: Date.now() - startTime,
   })
+
+  // Increment daily scan counter
+  await supabase.rpc("increment_scan_count", { p_user_id: userId }).catch(() => {})
 }

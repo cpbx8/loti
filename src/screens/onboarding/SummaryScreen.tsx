@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOnboarding, computeThresholds, getTrafficLightFromGL, ONBOARDING_SCREENS } from '@/contexts/OnboardingContext'
 import TrafficLightBadge from '@/components/TrafficLightBadge'
+import { upsertProfile, completeOnboarding } from '@/db/queries'
+import { startTrial } from '@/lib/revenuecat'
 
 const HEALTH_LABELS: Record<string, string> = {
   healthy: 'Healthy',
@@ -19,7 +21,7 @@ const GOAL_LABELS: Record<string, string> = {
 
 export default function SummaryScreen() {
   const navigate = useNavigate()
-  const { state, reset } = useOnboarding()
+  const { state } = useOnboarding()
   const thresholds = computeThresholds(state)
   const [visibleLines, setVisibleLines] = useState(0)
 
@@ -48,11 +50,29 @@ export default function SummaryScreen() {
     trafficLightChanged = !!oldTL && oldTL !== newTL
   }
 
-  const handleStart = () => {
-    // Clear onboarding state, mark as done
+  const handleStart = async () => {
+    // Write profile to SQLite
+    await upsertProfile({
+      health_state: state.healthState ?? 'healthy',
+      goal: state.goal ?? null,
+      diagnosis_duration: state.diagnosisDuration ?? null,
+      a1c_value: state.a1cValue ?? null,
+      age: state.age ?? null,
+      sex: state.sex ?? 'not_specified',
+      activity_level: state.activityLevel ?? 'moderate',
+      medications: state.medications ?? [],
+      dietary_restrictions: state.dietaryRestrictions ?? [],
+      meal_struggles: state.mealStruggles ?? [],
+      gl_threshold_green: thresholds.greenMax,
+      gl_threshold_yellow: thresholds.yellowMax,
+    }).catch(console.warn)
+
+    await completeOnboarding().catch(console.warn)
+    await startTrial().catch(console.warn)
+
+    // Also keep localStorage for web fallback
     localStorage.setItem('loti_onboarding_complete', 'true')
-    reset()
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
   return (
@@ -121,7 +141,7 @@ export default function SummaryScreen() {
             Your first scan has been updated with your personalized thresholds
           </p>
 
-          <div className="rounded-xl bg-card p-4 border border-border shadow-sm">
+          <div className="rounded-2xl bg-card p-4 border border-border shadow-sm">
             <div className="flex items-center gap-3">
               {newTL && <TrafficLightBadge rating={newTL} size="md" />}
               <div>
@@ -136,7 +156,7 @@ export default function SummaryScreen() {
           </div>
 
           {trafficLightChanged && oldTL && newTL && (
-            <div className="mt-3 rounded-xl bg-primary-light px-4 py-3">
+            <div className="mt-3 rounded-3xl bg-primary-light px-4 py-3">
               <p className="text-sm text-primary">
                 Based on your {HEALTH_LABELS[state.healthState ?? 'healthy']} profile, this food has been reclassified from {oldTL} to {newTL} impact.
               </p>
@@ -148,7 +168,7 @@ export default function SummaryScreen() {
       <div className="mt-auto pt-8">
         <button
           onClick={handleStart}
-          className="w-full rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
+          className="w-full rounded-3xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
         >
           Start scanning
         </button>

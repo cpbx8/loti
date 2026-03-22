@@ -31,16 +31,7 @@ export default function FavoritesScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface">
       <header className="flex items-center border-b border-border bg-card px-5 py-3">
-        <button
-          onClick={() => navigate('/')}
-          className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
-        <h1 className="ml-3 text-lg font-bold text-text-primary">Favorites</h1>
+        <h1 className="text-xl font-bold text-text-primary">Favoritos</h1>
         <span className="ml-auto text-sm text-text-tertiary">{favorites.length}</span>
       </header>
 
@@ -56,7 +47,7 @@ export default function FavoritesScreen() {
             </p>
             <button
               onClick={() => navigate('/search')}
-              className="mt-2 rounded-xl bg-primary-light px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 min-h-[44px]"
+              className="mt-2 rounded-3xl bg-primary-light px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 min-h-[44px]"
             >
               Search Foods
             </button>
@@ -186,7 +177,7 @@ function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: 
         </button>
         <button
           onClick={onLog}
-          className="flex-1 rounded-xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+          className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
         >
           Log This
         </button>
@@ -197,7 +188,7 @@ function ResultView({ result: r, onBack, onLog }: { result: ScanResult; onBack: 
 
 function MacroCard({ label, value, unit }: { label: string; value: number | null; unit: string }) {
   return (
-    <div className="rounded-xl bg-card p-3 shadow-sm">
+    <div className="rounded-2xl bg-card p-3 shadow-sm">
       <p className="text-sm text-text-secondary">{label}</p>
       <p className="text-xl font-bold text-text-primary">
         {value != null ? value : '--'}<span className="text-sm font-normal text-text-tertiary"> {unit}</span>

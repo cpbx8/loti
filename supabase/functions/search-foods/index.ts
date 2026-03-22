@@ -15,6 +15,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4"
 import { corsHeaders } from "../_shared/cors.ts"
+import { validateApiKey } from "../_shared/apikey.ts"
 import type { SearchRequest, SearchResponse, FoodSearchResult } from "../_shared/waterfall-types.ts"
 import { searchCache, searchCacheBarcode, cacheResult } from "../_shared/food-cache.ts"
 import { searchFatSecretText, searchFatSecretBarcode } from "../_shared/search-fatsecret.ts"
@@ -37,6 +38,10 @@ Deno.serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
+
+    // API key validation (no user auth)
+    const apiDenied = validateApiKey(req)
+    if (apiDenied) return apiDenied
 
     const body: SearchRequest = await req.json()
     const { query, type, image_base64 } = body

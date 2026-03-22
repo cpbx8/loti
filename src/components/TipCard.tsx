@@ -24,7 +24,7 @@ export default function TipCard({ tip }: { tip: TipCardData }) {
   const typeLabel = TYPE_LABELS[tip.type]
 
   return (
-    <div className={`flex h-[180px] w-full flex-col justify-between rounded-xl p-5 shadow-sm ${getCardBg(tip)}`}>
+    <div className={`flex min-h-[180px] w-full flex-col justify-between rounded-2xl p-5 shadow-md ${getCardBg(tip)}`}>
       <div>
         {/* Type label */}
         <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-2">
@@ -62,12 +62,12 @@ export default function TipCard({ tip }: { tip: TipCardData }) {
         )}
 
         {/* Headline */}
-        <p className="text-base font-semibold text-text-primary leading-snug line-clamp-2">
+        <p className="text-base font-semibold text-text-primary leading-snug">
           {tip.headline}
         </p>
 
         {/* Body */}
-        <p className="text-sm text-text-secondary mt-1 leading-snug line-clamp-2">
+        <p className="text-sm text-text-secondary mt-1 leading-snug">
           {tip.body}
         </p>
       </div>

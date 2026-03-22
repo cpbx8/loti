@@ -31,5 +31,9 @@ ios/App/Pods/
 android/.gradle/
 android/app/build/
 
+# Claude Code (may contain sensitive permission patterns)
+.claude/
+
 # Supabase
 supabase/.temp/
+.vercel

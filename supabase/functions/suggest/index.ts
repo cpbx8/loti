@@ -7,6 +7,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { corsHeaders } from "../_shared/cors.ts"
+import { validateApiKey } from "../_shared/apikey.ts"
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!
 const TIMEOUT_MS = 8000
@@ -70,7 +71,7 @@ RULES:
 - Suggest ONLY foods common in Mexico (Mexican cuisine, or commonly available in Mexican stores/restaurants)
 - Prioritize green-rated foods. Include at most 1 yellow. Never suggest red.
 - Each suggestion needs: food name, estimated GL per standard serving, traffic light color based on the user's thresholds, and a 1-sentence reason
-- If the user has dietary restrictions, respect them strictly
+- CRITICAL: The user has these dietary restrictions: ${profile.dietary_restrictions.length > 0 ? profile.dietary_restrictions.join(", ") : "none"}. NEVER suggest foods that violate these restrictions. For example, "Egg-free" means NO eggs, huevos, omelettes, or any dish containing eggs as an ingredient
 - If the user's recent history is heavy on red foods, acknowledge this gently and steer toward green
 - If the user mentions a craving, suggest a healthier version of that specific food, not a completely different food
 - Keep reasoning concise: 1 sentence max, focused on WHY this food is good for glucose
@@ -114,6 +115,10 @@ Deno.serve(async (req) => {
   const startTime = Date.now()
 
   try {
+    // API key validation (no user auth)
+    const denied = validateApiKey(req)
+    if (denied) return denied
+
     const body: SuggestRequest = await req.json()
 
     const systemPrompt = buildSystemPrompt(body.profile, body.scan_summary)
