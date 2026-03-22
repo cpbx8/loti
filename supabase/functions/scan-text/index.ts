@@ -8,6 +8,7 @@ import { resolveGI, classifyGL } from "../_shared/resolve-gi.ts"
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 // ─── Word-to-number maps (EN + ES) ─────────────────────────
 
@@ -47,26 +48,57 @@ Deno.serve(async (req) => {
     const startTime = Date.now()
     const rawText = body.text.trim()
 
-    // 3. Parse food items — try rule-based for quantity extraction, then GPT for complex input
-    let parsedItems = parseTextRuleBased(rawText)
-    let parseMethod: "rule_based" | "gpt_mini" = "rule_based"
+    // 3. Parse food items — GPT parses first for accurate decomposition, rule-based as fallback
+    let parsedItems: ParsedItem[] = []
+    let parseMethod: "rule_based" | "gpt_mini" = "gpt_mini"
 
-    // For multi-word or complex inputs, use GPT parser for better food names + serving estimates
-    if (parsedItems.length === 0 || rawText.includes(" ") && parsedItems.length === 1) {
-      const gptItems = await parseTextGPT(rawText, body.locale ?? "en")
-      if (gptItems.length > 0) {
-        parsedItems = gptItems
-        parseMethod = "gpt_mini"
-      }
+    // Always try GPT first — it handles complex inputs like "rice with shrimp" correctly
+    const gptItems = await parseTextGPT(rawText, body.locale ?? "en")
+    if (gptItems.length > 0) {
+      parsedItems = gptItems
+    } else {
+      // Fallback to rule-based only if GPT fails
+      parsedItems = parseTextRuleBased(rawText)
+      parseMethod = "rule_based"
     }
 
     if (parsedItems.length === 0) {
       return errorResponse(422, "PARSE_FAILED", "Could not understand the food input. Try being more specific.")
     }
 
-    // 4. Resolve each item via FatSecret → USDA → GPT estimation (NO DB fuzzy matching)
+    // 4. Build results — use GPT nutrition when available, fall back to resolveGI
     const results: ScanResult[] = []
     for (const item of parsedItems) {
+      // If GPT provided full nutrition + GI estimates, use them directly
+      if (parseMethod === "gpt_mini" && item.glycemic_index != null && item.glycemic_load != null) {
+        const totalGL = Math.round((item.glycemic_load ?? 0) * item.quantity)
+        results.push({
+          food_name: item.food_name,
+          category: "other",
+          calories_kcal: Math.round((item.calories_kcal ?? 0) * item.quantity),
+          protein_g: Math.round((item.protein_g ?? 0) * item.quantity * 10) / 10,
+          carbs_g: Math.round((item.carbs_g ?? 0) * item.quantity * 10) / 10,
+          fat_g: Math.round((item.fat_g ?? 0) * item.quantity * 10) / 10,
+          fiber_g: Math.round((item.fiber_g ?? 0) * item.quantity * 10) / 10,
+          serving_size_g: item.estimated_serving_g * item.quantity,
+          serving_label: `${item.quantity} serving${item.quantity > 1 ? "s" : ""}`,
+          glycemic_index: item.glycemic_index,
+          glycemic_load: totalGL,
+          traffic_light: classifyGL(totalGL),
+          confidence: "medium",
+          gi_source: "estimated",
+          swap_suggestion: item.swap_tip ?? null,
+          disclaimer: "AI-estimated nutrition and GI. Consult a healthcare professional.",
+          input_method: "text_input",
+          quantity: item.quantity,
+          per_unit_gl: item.glycemic_load,
+          matched_food_id: null,
+          match_method: "gpt_estimated",
+        } as ScanResult)
+        continue
+      }
+
+      // Fall back to FatSecret → GPT pipeline
       const input: NormalizedFoodInput = {
         food_name: item.food_name,
         food_name_es: null,
@@ -106,6 +138,14 @@ interface ParsedItem {
   is_mixed_meal?: boolean
   components?: Array<{ name: string; estimated_g: number }>
   modifiers?: string[]
+  glycemic_index?: number
+  glycemic_load?: number
+  swap_tip?: string | null
+  calories_kcal?: number
+  protein_g?: number
+  carbs_g?: number
+  fat_g?: number
+  fiber_g?: number
 }
 
 function parseTextRuleBased(text: string): ParsedItem[] {
@@ -164,7 +204,7 @@ function extractQuantityAndFood(segment: string): ParsedItem | null {
 // ─── GPT-4o-mini Parser ─────────────────────────────────────
 
 async function parseTextGPT(text: string, locale: string): Promise<ParsedItem[]> {
-  const systemPrompt = `You are a food input parser. Parse the user's natural language food description into structured data.
+  const systemPrompt = `You are a food input parser for a diabetes glycemic load tracker. Parse the user's natural language food description into structured data.
 
 Return ONLY valid JSON matching this schema:
 {
@@ -175,19 +215,31 @@ Return ONLY valid JSON matching this schema:
       "estimated_serving_g": number (realistic serving weight in grams),
       "modifiers": ["string"],
       "is_mixed_meal": boolean,
-      "components": [{"name": "string", "estimated_g": number}]
+      "components": [{"name": "string", "estimated_g": number}],
+      "glycemic_index": number (estimated GI),
+      "glycemic_load": number (estimated GL per serving),
+      "swap_tip": "string or null (healthier alternative if GL > 15)",
+      "calories_kcal": number,
+      "protein_g": number,
+      "carbs_g": number,
+      "fat_g": number,
+      "fiber_g": number
     }
   ],
   "parse_confidence": number (0-1)
 }
 
-Rules:
+RULES (follow ALL strictly):
 - Support both English and Spanish input
 - "a taco" = quantity 1, "2 tacos" = quantity 2
 - Estimate realistic serving_g (a taco ≈ 60-80g, a banana ≈ 120g, a cup of rice ≈ 185g)
-- For mixed meals (e.g., "burrito"), set is_mixed_meal: true and list components
-- If input is unclear, use your best judgment and set parse_confidence lower
-- food_name should be the simple, canonical name (e.g., "taco" not "corn taco with meat")
+- Each item should be a distinct dish or food the user describes. "1 cup white rice with shrimp" = 1 item. "2 tacos and a soda" = 2 items.
+- food_name should describe the dish as the user said it (e.g. "white rice with shrimp", "tacos de bistec", "agua de jamaica")
+- For mixed meals, set is_mixed_meal: true and list components
+- REQUIRED: Every item MUST include glycemic_index, glycemic_load, calories_kcal, protein_g, carbs_g, fat_g, fiber_g. Never omit these.
+- glycemic_index: estimated GI of the dish as served (account for protein/fat/fiber lowering GI)
+- glycemic_load: GL per serving = (GI × available_carbs_g) / 100
+- swap_tip: suggest a healthier alternative only if GL > 15, otherwise null
 - Always return at least one item if any food is mentioned`
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -218,14 +270,22 @@ Rules:
   if (!content) return []
 
   try {
-    const parsed: TextParseResponse = JSON.parse(content)
-    return (parsed.items ?? []).map((item) => ({
-      food_name: item.food_name,
-      quantity: item.quantity || 1,
-      estimated_serving_g: item.estimated_serving_g || 100,
-      modifiers: item.modifiers,
-      is_mixed_meal: item.is_mixed_meal,
-      components: item.components,
+    const parsed = JSON.parse(content)
+    return (parsed.items ?? []).map((item: Record<string, unknown>) => ({
+      food_name: item.food_name as string,
+      quantity: (item.quantity as number) || 1,
+      estimated_serving_g: (item.estimated_serving_g as number) || 100,
+      modifiers: item.modifiers as string[] | undefined,
+      is_mixed_meal: item.is_mixed_meal as boolean | undefined,
+      components: item.components as Array<{ name: string; estimated_g: number }> | undefined,
+      glycemic_index: item.glycemic_index as number | undefined,
+      glycemic_load: item.glycemic_load as number | undefined,
+      swap_tip: item.swap_tip as string | null | undefined,
+      calories_kcal: item.calories_kcal as number | undefined,
+      protein_g: item.protein_g as number | undefined,
+      carbs_g: item.carbs_g as number | undefined,
+      fat_g: item.fat_g as number | undefined,
+      fiber_g: item.fiber_g as number | undefined,
     }))
   } catch {
     console.error("Failed to parse GPT response:", content)

@@ -85,10 +85,9 @@ export async function handleTextScan(text: string): Promise<ScanResult> {
     }
   }
 
-  // Step 2: AI fallback
+  // Step 2: AI fallback — GPT parses first, returns items with nutrition
   const aiResult = await aiProxy.scanText({ text })
   const firstItem = aiResult.items?.[0] || aiResult
-
   const gl = (firstItem.glycemic_load ?? 0) * (firstItem.quantity || 1)
   const tl = computeTrafficLight(gl, thresholds.greenMax, thresholds.yellowMax)
 
