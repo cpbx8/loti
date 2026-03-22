@@ -398,7 +398,7 @@ export default function SettingsScreen() {
         <div className="mx-5 mt-6 mb-4 text-center">
           <p className="text-xs text-text-tertiary">Loti v1.0</p>
           <p className="text-[11px] leading-relaxed text-text-tertiary mt-3">
-            Loti AI is intended for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek advice from your healthcare provider before making any changes to your diabetes management or treatment plan.
+            Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.
           </p>
         </div>
       </div>
@@ -407,8 +407,8 @@ export default function SettingsScreen() {
       {editingA1c && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditingA1c(false)}>
           <div className="mx-6 bg-card rounded-2xl p-5 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-text-primary mb-1">Update A1C</h3>
-            <p className="text-xs text-text-secondary mb-4">Enter your latest A1C percentage (4.0 – 14.0)</p>
+            <h3 className="text-lg font-bold text-text-primary mb-1">Actualizar A1C</h3>
+            <p className="text-xs text-text-secondary mb-4">Ingresa tu porcentaje de A1C más reciente (4.0 – 14.0)</p>
             <input
               type="number"
               inputMode="decimal"
@@ -431,13 +431,13 @@ export default function SettingsScreen() {
                 onClick={() => setEditingA1c(false)}
                 className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-primary min-h-[44px]"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={saveA1c}
-                className="flex-1 rounded-3xl bg-primary px-4 py-2.5 text-sm font-medium text-white min-h-[44px]"
+                className="flex-1 btn-gradient text-sm min-h-[44px]"
               >
-                Save
+                Guardar
               </button>
             </div>
           </div>
@@ -449,7 +449,7 @@ export default function SettingsScreen() {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={() => setShowActivityEditor(false)}>
           <div className="w-full max-w-[430px] bg-card rounded-t-2xl p-5 pb-8 shadow-xl animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
-            <h3 className="text-lg font-bold text-text-primary mb-4">Activity Level</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-4">Nivel de Actividad</h3>
             <div className="space-y-2">
               {ACTIVITY_OPTIONS.map(opt => (
                 <button
@@ -486,22 +486,22 @@ export default function SettingsScreen() {
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClearConfirm(false)}>
           <div className="mx-6 bg-card rounded-2xl p-5 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-text-primary mb-2">Reset Everything?</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-2">¿Resetear todo?</h3>
             <p className="text-sm text-text-secondary mb-5">
-              This will clear your profile, food log, and all cached data. You'll need to go through onboarding again.
+              Esto eliminará tu perfil, registro de alimentos y todos los datos en caché. Tendrás que hacer el onboarding de nuevo.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-primary min-h-[44px]"
+                className="flex-1 ghost-border rounded-full px-4 py-2.5 text-sm font-medium text-text-primary min-h-[44px]"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleClearData}
                 className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white min-h-[44px]"
               >
-                Reset
+                Resetear
               </button>
             </div>
           </div>

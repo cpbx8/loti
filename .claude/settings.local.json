@@ -132,7 +132,14 @@
       "Bash(gh secret:*)",
       "Bash($B snapshot:*)",
       "Bash($B click:*)",
-      "Bash($B reload:*)"
+      "Bash($B reload:*)",
+      "Bash(grep -r \"export.*function\\\\|export.*const\" /Users/cayden/loti/src/hooks/*.ts)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(grep -r \"from.*$f\\\\|import.*$f\" src/ --include=*.ts --include=*.tsx -l)",
+      "Bash(grep -v \"$f.tsx\")",
+      "Bash(done)",
+      "Bash(grep -r \"from.*Auth/AuthForm\\\\|AuthForm\" src/ --include=*.ts --include=*.tsx -l)"
     ]
   }
 }
