@@ -65,7 +65,6 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
   const cal = r.calories * q
   const protein = r.protein_g * q
   const carbs = r.carbs_g * q
-  const _fat = r.fat_g * q
   const fiber = r.fiber_g != null ? r.fiber_g * q : null
   const gl = r.glycemic_load != null ? r.glycemic_load * q : null
 
