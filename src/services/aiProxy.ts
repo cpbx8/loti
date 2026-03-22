@@ -5,6 +5,7 @@
  */
 
 const SUPABASE_FUNCTIONS_URL = (import.meta.env.VITE_SUPABASE_URL || '') + '/functions/v1'
+const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const API_KEY = import.meta.env.VITE_LOTI_API_KEY || ''
 
 async function callEdgeFunction(functionName: string, body: unknown) {
@@ -12,6 +13,7 @@ async function callEdgeFunction(functionName: string, body: unknown) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ANON_KEY}`,
       'x-api-key': API_KEY,
     },
     body: JSON.stringify(body),
@@ -74,5 +76,26 @@ export async function suggest(body: {
   green_max?: number
   yellow_max?: number
 }) {
-  return callEdgeFunction('suggest', body)
+  // Reshape to match edge function's expected format
+  return callEdgeFunction('suggest', {
+    context: {
+      type: body.free_text ? 'freetext' : 'meal',
+      meal_type: body.meal_type,
+      freetext: body.free_text,
+    },
+    profile: {
+      health_state: body.health_state ?? 'healthy',
+      goal: 'learn',
+      a1c_value: null,
+      age: null,
+      sex: 'not_specified',
+      activity_level: 'moderate',
+      dietary_restrictions: body.dietary_restrictions ?? [],
+      meal_struggles: [],
+      medications: [],
+      gl_threshold_green: body.green_max ?? 10,
+      gl_threshold_yellow: body.yellow_max ?? 19,
+    },
+    scan_summary: body.scan_summary ?? '',
+  })
 }
