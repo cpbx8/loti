@@ -99,8 +99,8 @@ export async function getOfferings(): Promise<PurchasesOffering | null> {
 
   try {
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
-    const { offerings } = await Purchases.getOfferings()
-    return offerings.current || null
+    const result = await Purchases.getOfferings()
+    return (result as any).offerings?.current || (result as any).current || null
   } catch (err) {
     console.warn('[RevenueCat] Failed to get offerings:', err)
     return null
@@ -111,7 +111,7 @@ export async function purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
   if (!Capacitor.isNativePlatform() || !initialized) return false
 
   try {
-    const { Purchases, PURCHASES_ERROR_CODE } = await import('@revenuecat/purchases-capacitor')
+    const { Purchases } = await import('@revenuecat/purchases-capacitor')
     const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg })
     return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined
   } catch (error: any) {

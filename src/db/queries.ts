@@ -4,7 +4,7 @@
  * Returns null/defaults when SQLite is unavailable (web dev fallback).
  */
 
-import { getDb, isDbAvailable } from './database'
+import { getDb } from './database'
 
 // ─── Types ──────────────────────────────────────────────────────
 
