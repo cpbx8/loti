@@ -161,8 +161,8 @@ export default function DailyGlucoseCurve({ entries }: Props) {
         <p className="text-body text-on-surface-variant leading-relaxed">{description}</p>
       </div>
 
-      {/* ── SVG Chart ──────────────────────────────── */}
-      <div className="px-2 pb-1">
+      {/* ── SVG Chart (only when food data exists) ── */}
+      {hasData && <div className="px-2 pb-1">
         <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -288,7 +288,7 @@ export default function DailyGlucoseCurve({ entries }: Props) {
             </text>
           ))}
         </svg>
-      </div>
+      </div>}
 
       {/* ── Peak summary pill ──────────────────────── */}
       {hasData && result.peakValue > result.baseline + 5 && (
@@ -311,11 +311,9 @@ export default function DailyGlucoseCurve({ entries }: Props) {
         </div>
       )}
 
-      {/* ── Empty state message ────────────────────── */}
+      {/* ── Empty state padding ──────────────────────── */}
       {!hasData && (
-        <div className="px-5 pb-5">
-          <p className="text-body text-text-tertiary text-center">{description}</p>
-        </div>
+        <div className="pb-3"></div>
       )}
     </div>
   )
