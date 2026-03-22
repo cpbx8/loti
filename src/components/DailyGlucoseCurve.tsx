@@ -72,13 +72,12 @@ export default function DailyGlucoseCurve({ entries }: Props) {
   const yMin = 60
   const yMax = Math.max(220, result.peakValue + 20)
 
-  const toX = (minute: number) => {
-    if (result.points.length < 2) return padL
-    const minM = result.points[0].time
-    const maxM = result.points[result.points.length - 1].time
-    const range = maxM - minM || 1
-    return padL + ((minute - minM) / range) * plotW
-  }
+  // X-axis range
+  const xMin = hasData && result.points.length >= 2 ? result.points[0].time : 360   // 6am default
+  const xMax = hasData && result.points.length >= 2 ? result.points[result.points.length - 1].time : 1320 // 10pm default
+  const xRange = xMax - xMin || 1
+
+  const toX = (minute: number) => padL + ((minute - xMin) / xRange) * plotW
 
   const toY = (mgDl: number) => {
     const norm = (mgDl - yMin) / (yMax - yMin)
@@ -96,18 +95,32 @@ export default function DailyGlucoseCurve({ entries }: Props) {
   const nowX = toX(nowMinute)
   const nowY = toY(result.currentEstimate)
 
-  // Time labels
+  // Time labels — sparse, readable
   const timeLabels = useMemo(() => {
+    if (!hasData) {
+      // Empty state: show 6am–10pm with 4-hour intervals
+      return [
+        { minute: 360, label: '6am' },
+        { minute: 540, label: '9am' },
+        { minute: 720, label: '12pm' },
+        { minute: 900, label: '3pm' },
+        { minute: 1080, label: '6pm' },
+        { minute: 1260, label: '9pm' },
+      ]
+    }
     if (result.points.length < 2) return []
     const minM = result.points[0].time
     const maxM = result.points[result.points.length - 1].time
+    const range = maxM - minM
+    // Pick interval: 1hr if range < 6hrs, 2hrs if < 12hrs, 3hrs otherwise
+    const interval = range < 360 ? 60 : range < 720 ? 120 : 180
     const labels: { minute: number; label: string }[] = []
-    const startHour = Math.ceil(minM / 60) * 60
-    for (let m = startHour; m <= maxM; m += 60) {
+    const startHour = Math.ceil(minM / interval) * interval
+    for (let m = startHour; m <= maxM; m += interval) {
       labels.push({ minute: m, label: formatMinuteAsHour(m) })
     }
     return labels
-  }, [result.points])
+  }, [result.points, hasData])
 
   // Food entry markers
   const foodMarkers = entries
@@ -161,8 +174,8 @@ export default function DailyGlucoseCurve({ entries }: Props) {
         <p className="text-body text-on-surface-variant leading-relaxed">{description}</p>
       </div>
 
-      {/* ── SVG Chart (only when food data exists) ── */}
-      {hasData && <div className="px-2 pb-1">
+      {/* ── SVG Chart ──────────────────────────────── */}
+      <div className="px-2 pb-1">
         <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -288,7 +301,7 @@ export default function DailyGlucoseCurve({ entries }: Props) {
             </text>
           ))}
         </svg>
-      </div>}
+      </div>
 
       {/* ── Peak summary pill ──────────────────────── */}
       {hasData && result.peakValue > result.baseline + 5 && (
@@ -311,9 +324,9 @@ export default function DailyGlucoseCurve({ entries }: Props) {
         </div>
       )}
 
-      {/* ── Empty state padding ──────────────────────── */}
+      {/* ── Empty state bottom padding ──────────────── */}
       {!hasData && (
-        <div className="pb-3"></div>
+        <div className="pb-2"></div>
       )}
     </div>
   )
