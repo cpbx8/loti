@@ -58,41 +58,51 @@ async function getUserThresholds(): Promise<{ greenMax: number; yellowMax: numbe
 export async function handleTextScan(text: string): Promise<ScanResult> {
   const thresholds = await getUserThresholds()
 
-  // Parse quantity (e.g. "2 tacos")
-  const quantityMatch = text.match(/^(\d+)\s+(.+)/i)
-  const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1
-  const searchTerm = (quantityMatch ? quantityMatch[2] : text).trim()
+  // Step 1: GPT parses first — understands meals, quantities, mixed dishes
+  const aiResult = await aiProxy.scanText({ text })
+  const firstItem = aiResult.items?.[0] || aiResult
+  const foodName = firstItem.food_name ?? text
 
-  // Step 1: Check local DB
-  const localMatches = await searchFoodsByName(searchTerm)
-  if (localMatches.length > 0) {
-    const food = localMatches[0]
-    const adjustedGL = food.glycemic_load * quantity
+  // Step 2: Cross-reference local DB for published GI data (more reliable than AI estimates)
+  const localMatches = await searchFoodsByName(foodName)
+  const exactMatch = localMatches.find(
+    (f) => f.name.toLowerCase() === foodName.toLowerCase()
+      || f.name_en?.toLowerCase() === foodName.toLowerCase()
+  )
+
+  const quantity = firstItem.quantity || 1
+
+  if (exactMatch) {
+    // Use published GI/GL from local DB, but keep GPT's macros if local DB lacks them
+    const adjustedGL = exactMatch.glycemic_load * quantity
     const tl = computeTrafficLight(adjustedGL, thresholds.greenMax, thresholds.yellowMax)
-
     return {
-      food_name: food.name,
-      food_name_en: food.name_en,
-      glycemic_index: food.glycemic_index,
+      food_name: exactMatch.name,
+      food_name_en: exactMatch.name_en,
+      glycemic_index: exactMatch.glycemic_index,
       glycemic_load: adjustedGL,
-      per_unit_gl: food.glycemic_load,
+      per_unit_gl: exactMatch.glycemic_load,
       quantity,
       traffic_light: tl,
-      swap_tip: food.swap_tip,
-      confidence_score: food.confidence_score,
-      data_source: food.data_source,
-      food_id: food.id,
+      swap_tip: exactMatch.swap_tip,
+      confidence_score: exactMatch.confidence_score,
+      data_source: exactMatch.data_source,
+      food_id: exactMatch.id,
+      calories_kcal: firstItem.calories_kcal ?? undefined,
+      protein_g: firstItem.protein_g ?? undefined,
+      carbs_g: exactMatch.carbs_g ?? firstItem.carbs_g ?? undefined,
+      fat_g: firstItem.fat_g ?? undefined,
+      fiber_g: exactMatch.fiber_g ?? firstItem.fiber_g ?? undefined,
+      serving_size_g: exactMatch.serving_size_g ?? firstItem.serving_size_g ?? undefined,
     }
   }
 
-  // Step 2: AI fallback — GPT parses first, returns items with nutrition
-  const aiResult = await aiProxy.scanText({ text })
-  const firstItem = aiResult.items?.[0] || aiResult
-  const gl = (firstItem.glycemic_load ?? 0) * (firstItem.quantity || 1)
+  // No exact local match — use GPT result directly
+  const gl = (firstItem.glycemic_load ?? 0) * quantity
   const tl = computeTrafficLight(gl, thresholds.greenMax, thresholds.yellowMax)
 
   return {
-    food_name: firstItem.food_name ?? text,
+    food_name: foodName,
     food_name_en: firstItem.food_name_en ?? null,
     glycemic_index: firstItem.glycemic_index,
     glycemic_load: gl,

@@ -6,11 +6,11 @@ import type { TipCard as TipCardData } from '@/data/tipCards'
 import TrafficLightBadge from './TrafficLightBadge'
 
 const TYPE_LABELS: Record<TipCardData['type'], string> = {
-  mythbuster: 'MYTH BUSTER',
-  swap: 'SMART SWAP',
-  modifier: 'GLUCOSE HACK',
-  featured_food: 'FOOD OF THE DAY',
-  did_you_know: 'DID YOU KNOW',
+  mythbuster: 'MITO',
+  swap: 'INTERCAMBIO',
+  modifier: 'HÁBITO ACTIVO',
+  featured_food: 'NUTRICIÓN',
+  did_you_know: '¿SABÍAS QUE?',
 }
 
 const MODIFIER_EMOJIS: Record<string, string> = {
@@ -80,15 +80,7 @@ export default function TipCard({ tip }: { tip: TipCardData }) {
   )
 }
 
-function getCardBg(tip: TipCardData): string {
-  switch (tip.type) {
-    case 'mythbuster':
-      return 'bg-gradient-to-r from-tl-red-bg/50 to-tl-yellow-bg/50'
-    case 'swap':
-      return 'bg-gradient-to-b from-tl-red-bg/40 to-tl-green-bg/40'
-    case 'featured_food':
-      return 'bg-tl-green-bg/40'
-    default:
-      return 'bg-card'
-  }
+function getCardBg(_tip: TipCardData): string {
+  // Uniform card color for all carousel cards
+  return 'bg-card'
 }

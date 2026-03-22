@@ -54,9 +54,36 @@ export interface FoodComponent {
 export interface DecompositionResult {
   composite: boolean
   components: FoodComponent[]
+  quantity: number
+  baseName: string
+}
+
+/** Extract leading quantity from query: "3 shrimp tacos" → { qty: 3, food: "shrimp tacos" } */
+function extractQuantity(query: string): { qty: number; food: string } {
+  const m = query.match(/^(\d+(?:\.\d+)?)\s+(.+)$/i)
+  if (m) return { qty: parseFloat(m[1]), food: m[2] }
+
+  // Word quantities
+  const words: Record<string, number> = {
+    a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5,
+    un: 1, una: 1, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
+    half: 0.5, medio: 0.5, media: 0.5,
+  }
+  const first = query.split(/\s+/)[0].toLowerCase()
+  if (words[first] != null) {
+    return { qty: words[first], food: query.replace(/^\S+\s+/, '') }
+  }
+
+  // "1 cup" style — extract measurement
+  const cup = query.match(/^(\d+(?:\.\d+)?)\s+(cups?|tazas?|oz|ounces?|porciones?|servings?)\s+(?:of\s+|de\s+)?(.+)$/i)
+  if (cup) return { qty: parseFloat(cup[1]), food: cup[3] }
+
+  return { qty: 1, food: query }
 }
 
 export async function decomposeFood(query: string): Promise<DecompositionResult> {
+  const { qty, food } = extractQuantity(query)
+
   try {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -73,7 +100,7 @@ export async function decomposeFood(query: string): Promise<DecompositionResult>
         temperature: 0.1,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `Decompose: ${query}` },
+          { role: "user", content: `Decompose: ${food}` },
         ],
         response_format: { type: "json_object" },
       }),
@@ -83,24 +110,30 @@ export async function decomposeFood(query: string): Promise<DecompositionResult>
 
     if (!res.ok) {
       console.error(`[decompose] HTTP ${res.status}`)
-      return { composite: false, components: [{ name: query, name_es: query, grams: 100 }] }
+      return { composite: false, components: [{ name: food, name_es: food, grams: Math.round(100 * qty) }], quantity: qty, baseName: food }
     }
 
     const data = await res.json()
     const content = data.choices?.[0]?.message?.content
     if (!content) {
-      return { composite: false, components: [{ name: query, name_es: query, grams: 100 }] }
+      return { composite: false, components: [{ name: food, name_es: food, grams: Math.round(100 * qty) }], quantity: qty, baseName: food }
     }
 
-    const parsed = JSON.parse(content) as DecompositionResult
-    console.log(`[decompose] "${query}" → composite=${parsed.composite}, ${parsed.components.length} components`)
+    const parsed = JSON.parse(content) as { composite: boolean; components: FoodComponent[] }
+    console.log(`[decompose] "${query}" → qty=${qty}, composite=${parsed.composite}, ${parsed.components.length} components`)
 
     // Validate
     if (!parsed.components || parsed.components.length === 0) {
-      return { composite: false, components: [{ name: query, name_es: query, grams: 100 }] }
+      return { composite: false, components: [{ name: food, name_es: food, grams: 100 * qty }], quantity: qty, baseName: food }
     }
 
-    return parsed
+    // Scale component grams by quantity
+    const scaledComponents = parsed.components.map(c => ({
+      ...c,
+      grams: Math.round(c.grams * qty),
+    }))
+
+    return { ...parsed, components: scaledComponents, quantity: qty, baseName: food }
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       console.log(`[decompose] TIMEOUT for "${query}"`)

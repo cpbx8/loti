@@ -24,6 +24,7 @@ export interface FoodLogEntry {
   protein_g: number | null
   carbs_g: number | null
   fat_g: number | null
+  glycemic_index: number | null
   glycemic_load: number | null
   result_traffic_light: TrafficLight | null
   serving_size_g: number | null
@@ -96,6 +97,7 @@ function mapToEntry(row: queries.ScanLogRow): FoodLogEntry {
     protein_g: row.protein_g,
     carbs_g: row.carbs_g,
     fat_g: row.fat_g,
+    glycemic_index: row.glycemic_index ?? null,
     glycemic_load: row.glycemic_load,
     result_traffic_light: row.traffic_light as TrafficLight,
     serving_size_g: row.serving_size_g,
@@ -153,6 +155,15 @@ export function useDailyLog(date?: string) {
     },
   })
 
+  const servingMutation = useMutation({
+    mutationFn: async ({ id, count }: { id: string; count: number }) => {
+      await queries.updateScanServingCount(id, count)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dailyLog'] })
+    },
+  })
+
   const addEntry = useCallback((entry: NewLogEntry) => {
     addMutation.mutate(entry)
   }, [addMutation])
@@ -161,9 +172,9 @@ export function useDailyLog(date?: string) {
     removeMutation.mutate(id)
   }, [removeMutation])
 
-  const updateServingCount = useCallback((_id: string, _count: number) => {
-    // TODO: implement serving count update in SQLite
-  }, [])
+  const updateServingCount = useCallback((id: string, count: number) => {
+    servingMutation.mutate({ id, count })
+  }, [servingMutation])
 
   return {
     totals,

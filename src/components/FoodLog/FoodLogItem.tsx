@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FoodLogEntry } from '@/hooks/useDailyLog'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import TrafficLightBadge from '../TrafficLightBadge'
+import GlucoseSpikeCurve from '../GlucoseSpikeCurve'
 import type { TrafficLight } from '@/types/shared'
 
 interface Props {
@@ -122,6 +123,16 @@ export default function FoodLogItem({ entry, onRemove, onUpdateServing }: Props)
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Glucose spike curve */}
+          {hasGL && (
+            <GlucoseSpikeCurve
+              gi={entry.glycemic_index ?? (tl === 'red' ? 75 : tl === 'yellow' ? 60 : 40)}
+              gl={scaledGL}
+              trafficLight={tl}
+              peakMgDl={impact}
+            />
           )}
 
           {/* Serving size control */}

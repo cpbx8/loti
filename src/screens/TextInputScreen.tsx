@@ -11,6 +11,7 @@ export default function TextInputScreen() {
   const { addEntry } = useDailyLog()
   const [input, setInput] = useState('')
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
+  const [scaledResult, setScaledResult] = useState<FoodSearchResult | null>(null)
 
   const handleSubmit = () => {
     const trimmed = input.trim()
@@ -20,7 +21,7 @@ export default function TextInputScreen() {
   }
 
   const handleLog = () => {
-    const item = selected ?? search.topResult
+    const item = scaledResult ?? selected ?? search.topResult
     if (!item) return
     addEntry({
       food_name: item.name_en || item.name_es,
@@ -60,6 +61,7 @@ export default function TextInputScreen() {
   const handleTryAnother = () => {
     search.reset()
     setSelected(null)
+    setScaledResult(null)
     setInput('')
   }
 
@@ -105,7 +107,7 @@ export default function TextInputScreen() {
               )}
             </>
           ) : (
-            <FoodResultCard result={display} />
+            <FoodResultCard result={display} onQuantityChange={(_qty, scaled) => setScaledResult(scaled)} />
           )}
 
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />

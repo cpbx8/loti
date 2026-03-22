@@ -228,6 +228,18 @@ export async function insertScanLog(entry: NewScanLog): Promise<string> {
   return id
 }
 
+export async function updateScanServingCount(id: string, count: number): Promise<void> {
+  const db = getDb()
+  if (!db) {
+    const key = 'loti_food_log'
+    const existing = JSON.parse(localStorage.getItem(key) || '[]')
+    const updated = existing.map((e: any) => e.id === id ? { ...e, quantity: count } : e)
+    localStorage.setItem(key, JSON.stringify(updated))
+    return
+  }
+  await db.run('UPDATE scan_logs SET quantity = ? WHERE id = ?', [count, id])
+}
+
 export async function deleteScanLog(id: string): Promise<void> {
   const db = getDb()
   if (!db) {
@@ -292,7 +304,7 @@ export async function getDistinctScanDates(limit = 90): Promise<string[]> {
   const db = getDb()
   if (!db) {
     const all: any[] = JSON.parse(localStorage.getItem('loti_food_log') || '[]')
-    const dates = [...new Set(all.map(e => (e.scanned_at || e.timestamp || '').slice(0, 10)).filter(Boolean))]
+    const dates = [...new Set(all.map(e => toLocalDate(e.scanned_at || e.timestamp || '')).filter(d => d !== ''))]
     return dates.sort().reverse().slice(0, limit)
   }
 
@@ -360,8 +372,15 @@ export async function searchFoodsByName(query: string): Promise<FoodRow[]> {
   const db = getDb()
   if (!db) return []
 
+  // Prefer exact match first, then partial
+  const exact = await db.query(
+    'SELECT * FROM foods WHERE LOWER(name) = LOWER(?) OR LOWER(name_en) = LOWER(?) LIMIT 1',
+    [query, query],
+  )
+  if (exact.values && exact.values.length > 0) return exact.values as FoodRow[]
+
   const result = await db.query(
-    'SELECT * FROM foods WHERE name LIKE ? OR name_en LIKE ? LIMIT 10',
+    'SELECT * FROM foods WHERE name LIKE ? OR name_en LIKE ? ORDER BY LENGTH(name) ASC LIMIT 10',
     [`%${query}%`, `%${query}%`],
   )
   return (result.values || []) as FoodRow[]
@@ -492,10 +511,17 @@ function safeParseArray(value: unknown): string[] {
   return []
 }
 
+/** Convert ISO timestamp to local YYYY-MM-DD */
+function toLocalDate(isoStr: string): string {
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return isoStr.slice(0, 10)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function getLocalScansForDate(dateStr: string): ScanLogRow[] {
   const all: any[] = JSON.parse(localStorage.getItem('loti_food_log') || '[]')
   return all.filter(e => {
-    const d = (e.scanned_at || e.timestamp || '').slice(0, 10)
+    const d = toLocalDate(e.scanned_at || e.timestamp || '')
     return d === dateStr
   })
 }
@@ -503,7 +529,7 @@ function getLocalScansForDate(dateStr: string): ScanLogRow[] {
 function getLocalScansForRange(start: string, end: string): ScanLogRow[] {
   const all: any[] = JSON.parse(localStorage.getItem('loti_food_log') || '[]')
   return all.filter(e => {
-    const d = (e.scanned_at || e.timestamp || '').slice(0, 10)
+    const d = toLocalDate(e.scanned_at || e.timestamp || '')
     return d >= start && d <= end
   })
 }

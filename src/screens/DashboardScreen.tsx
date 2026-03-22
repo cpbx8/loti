@@ -4,9 +4,9 @@ import { useDailyLog, getToday } from '@/hooks/useDailyLog'
 import { useSubscription } from '@/hooks/useSubscription'
 import DateNav from '@/components/DateNav'
 import TodaySummaryBar from '@/components/TodaySummaryBar'
-import StreakBadge from '@/components/StreakBadge'
 import TrialBanner from '@/components/TrialBanner'
 import TipCarousel from '@/components/TipCarousel'
+import DailyGlucoseCurve from '@/components/DailyGlucoseCurve'
 import FoodLogList from '@/components/FoodLog/FoodLogList'
 import SuggestionSheet from '@/components/SuggestionSheet'
 import PaywallScreen from '@/screens/PaywallScreen'
@@ -52,22 +52,22 @@ export default function DashboardScreen() {
       return
     }
     if (!navigator.onLine) {
-      alert('Food suggestions need an internet connection')
+      alert('Las sugerencias necesitan conexión a internet')
       return
     }
     setSheetOpen(true)
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-surface">
-      {/* Header */}
+    <div className="flex flex-1 flex-col bg-surface min-h-0">
+      {/* ── Header: Loti brand + settings ──────────────── */}
       <header className="flex items-center justify-between bg-card px-5 py-3 border-b border-border">
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-text-secondary">{getGreeting()}</p>
-            <StreakBadge />
+        <div className="flex items-center gap-2.5">
+          {/* Profile avatar placeholder */}
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+            <span className="text-sm font-bold text-primary">🦎</span>
           </div>
-          <h1 className="text-xl font-bold text-text-primary">Escanear</h1>
+          <span className="text-lg font-bold text-primary italic">Loti</span>
         </div>
         <button
           onClick={() => navigate('/settings')}
@@ -90,91 +90,26 @@ export default function DashboardScreen() {
           {/* Trial Banner */}
           <TrialBanner onUpgrade={() => setPaywallOpen(true)} />
 
-          {/* Scan Options — 3 large buttons */}
-          <div className="mx-5 mt-4 space-y-3">
-            <button
-              onClick={() => gatedNavigate('/scan', 'scan')}
-              className="flex w-full items-center gap-4 rounded-2xl bg-card p-4 shadow-md min-h-[48px] active:opacity-85 active:scale-[0.98] transition-all"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-[15px] font-semibold text-text-primary">Tomar foto</p>
-                <p className="text-xs text-text-secondary">Escanea tu comida con la cámara</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => gatedNavigate('/barcode', 'barcode')}
-              className="flex w-full items-center gap-4 rounded-2xl bg-card p-4 shadow-md min-h-[48px] active:opacity-85 active:scale-[0.98] transition-all"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h3v16H3V4zm5 0h1v16H8V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h3v16h-3V4z" />
-                </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-[15px] font-semibold text-text-primary">Código de barras</p>
-                <p className="text-xs text-text-secondary">Buscar producto empaquetado</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => gatedNavigate('/text', 'text')}
-              className="flex w-full items-center gap-4 rounded-2xl bg-card p-4 shadow-md min-h-[48px] active:opacity-85 active:scale-[0.98] transition-all"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-[15px] font-semibold text-text-primary">Buscar alimento</p>
-                <p className="text-xs text-text-secondary">Escribe el nombre de tu comida</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+          {/* ── Greeting + Daily Summary heading ──────── */}
+          <div className="mx-5 mt-4">
+            <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">
+              {getGreeting()}
+            </p>
+            <h1 className="text-xl font-bold text-text-primary mt-0.5">Tu resumen diario</h1>
           </div>
 
-          {/* AI Suggestions button */}
-          <div className="mx-5 mt-3">
-            <button
-              onClick={openAI}
-              className="flex w-full items-center gap-4 rounded-2xl bg-primary/5 border border-primary/20 p-4 min-h-[48px] active:opacity-85 active:scale-[0.98] transition-all"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
-                </svg>
-              </div>
-              <div className="flex-1 text-left">
-                <p className="text-[15px] font-semibold text-primary">Ideas de comida con IA</p>
-                <p className="text-xs text-text-secondary">Sugerencias personalizadas</p>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Tip Carousel */}
-          <TipCarousel />
-
-          {/* Date navigation + Today's summary */}
-          <div className="mt-5">
+          {/* ── Date navigation ────────────────────────── */}
+          <div className="mt-3">
             <DateNav date={date} onChange={handleDateChange} />
+          </div>
+
+          {/* ── Glucose Status Card (centerpiece) ─────── */}
+          <div className="mt-3">
+            <DailyGlucoseCurve entries={entries} />
+          </div>
+
+          {/* ── Goal Summary Bar (compact) ────────────── */}
+          <div className="mt-3">
             <TodaySummaryBar
               entries={entries}
               onScanTap={() => gatedNavigate('/scan', 'scan')}
@@ -182,20 +117,63 @@ export default function DashboardScreen() {
             />
           </div>
 
-          {/* Recent Scans */}
-          {entries.length > 0 && (
-            <div className="mx-5 mt-3">
-              <p className="text-sm font-semibold text-text-primary mb-2">Escaneos recientes</p>
-              <FoodLogList entries={entries} onRemove={removeEntry} onUpdateServing={updateServingCount} />
+          {/* ── Daily Tips ─────────────────────────────── */}
+          <div className="mt-5">
+            <div className="mx-5 mb-2">
+              <h2 className="text-base font-bold text-text-primary">Consejos del día</h2>
             </div>
-          )}
+            <TipCarousel />
+          </div>
 
-          {/* Disclaimer */}
+          {/* ── Recent Scans ───────────────────────────── */}
+          <div className="mx-5 mt-5">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-base font-bold text-text-primary">Escaneos recientes</h2>
+              {entries.length > 0 && (
+                <button
+                  onClick={() => navigate('/history')}
+                  className="text-xs font-semibold text-primary"
+                >
+                  VER TODO
+                </button>
+              )}
+            </div>
+            {entries.length > 0 ? (
+              <FoodLogList
+                entries={entries.slice(0, 3)}
+                onRemove={removeEntry}
+                onUpdateServing={updateServingCount}
+              />
+            ) : (
+              <div className="rounded-2xl bg-card p-5 text-center shadow-sm">
+                <p className="text-2xl mb-2">🦎</p>
+                <p className="text-sm font-medium text-text-primary">No hay escaneos hoy</p>
+                <p className="text-xs text-text-secondary mt-1">
+                  Toca el botón + para escanear tu primer alimento
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* ── Disclaimer ─────────────────────────────── */}
           <p className="mx-5 mt-6 mb-4 text-[11px] leading-relaxed text-text-tertiary">
             Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.
           </p>
         </div>
       )}
+
+      {/* Floating AI button — bottom right, above tab bar */}
+      <div className="fixed z-20" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 68px)', right: '20px' }}>
+        <button
+          onClick={openAI}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg active:scale-90 transition-transform"
+          aria-label="Ideas de comida con IA"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
+          </svg>
+        </button>
+      </div>
 
       {/* AI Suggestion Sheet */}
       <SuggestionSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />

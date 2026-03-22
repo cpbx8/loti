@@ -83,25 +83,27 @@ async function lookupSingle(
   query: string,
   servingGrams?: number,
 ): Promise<{ result: FoodSearchResult | null; source: string; cached: boolean }> {
-  // Tier 0: Cache
+  // Tier 0: Cache — only accept good name matches
   const cacheResults = await searchCache(supabase, query)
-  if (cacheResults.length > 0) {
-    const r = cacheResults[0]
-    if (servingGrams && r.serving_size !== servingGrams) {
-      return { result: scaleResult(r, servingGrams), source: "cache", cached: true }
+  const goodCache = cacheResults.find(r => isGoodMatch(query, r))
+  if (goodCache) {
+    if (servingGrams && goodCache.serving_size !== servingGrams) {
+      return { result: scaleResult(goodCache, servingGrams), source: "cache", cached: true }
     }
-    return { result: r, source: "cache", cached: true }
+    return { result: goodCache, source: "cache", cached: true }
   }
 
-  // Tier 1: FatSecret
+  // Tier 1: FatSecret — pick the best name match, not just the first result
   const fsResults = await searchFatSecretText(query)
   if (fsResults.length > 0) {
-    const r = fsResults[0]
-    cacheResult(supabase, r).catch(() => {})
-    if (servingGrams && r.serving_size !== servingGrams) {
-      return { result: scaleResult(r, servingGrams), source: "fatsecret", cached: false }
+    const best = pickBestMatch(query, fsResults)
+    if (best) {
+      cacheResult(supabase, best).catch(() => {})
+      if (servingGrams && best.serving_size !== servingGrams) {
+        return { result: scaleResult(best, servingGrams), source: "fatsecret", cached: false }
+      }
+      return { result: best, source: "fatsecret", cached: false }
     }
-    return { result: r, source: "fatsecret", cached: false }
   }
 
   // Tier 2: Open Food Facts
@@ -149,14 +151,16 @@ async function waterfallText(
   }
 
   // Step 1: Decompose the food into components using GPT-4o-mini
-  // "bistec taco" → [corn tortilla 30g, bistec 80g, onion/cilantro 15g]
-  // "banana" → [banana 120g] (single, no extra cost)
+  // "3 shrimp tacos" → qty=3, [corn tortilla 90g, shrimp 240g, ...]
+  // "banana" → qty=1, [banana 120g]
   const decomp = await decomposeFood(query)
+  const displayName = decomp.quantity > 1 ? `${decomp.quantity} ${decomp.baseName}` : decomp.baseName
 
-  // Step 2: If NOT composite, try cache partial matches first, then waterfall
+  // Step 2: If NOT composite, try cache with quality check, then waterfall
   if (!decomp.composite) {
-    if (cacheResults.length > 0) {
-      const withGI = await Promise.all(cacheResults.map(estimateGI))
+    const goodCacheResults = cacheResults.filter(r => isGoodMatch(query, r))
+    if (goodCacheResults.length > 0) {
+      const withGI = await Promise.all(goodCacheResults.map(estimateGI))
       for (const r of withGI) {
         if (r.id && r.glycemic_index != null) {
           cacheResult(supabase, r).catch(() => {})
@@ -199,7 +203,7 @@ async function waterfallText(
   // Step 4: If we got components, estimate GI for each, then build combined total
   if (componentResults.length > 0) {
     const componentsWithGI = await Promise.all(componentResults.map(estimateGI))
-    const total = buildMealTotal(query, componentsWithGI)
+    const total = buildMealTotal(displayName, componentsWithGI)
     return {
       results: [total, ...componentsWithGI],
       source: primarySource,
@@ -219,16 +223,19 @@ async function waterfallSingleItem(
   query: string,
   startTime: number,
 ): Promise<SearchResponse> {
-  // Tier 1: FatSecret
+  // Tier 1: FatSecret — pick best match
   const fsResults = await searchFatSecretText(query)
   if (fsResults.length > 0) {
-    const withGI = await Promise.all(fsResults.map(estimateGI))
-    for (const r of withGI) cacheResult(supabase, r).catch(() => {})
-    return {
-      results: withGI,
-      source: "fatsecret",
-      cached: false,
-      latency_ms: Date.now() - startTime,
+    const best = pickBestMatch(query, fsResults)
+    if (best) {
+      const withGI = await estimateGI(best)
+      cacheResult(supabase, withGI).catch(() => {})
+      return {
+        results: [withGI],
+        source: "fatsecret",
+        cached: false,
+        latency_ms: Date.now() - startTime,
+      }
     }
   }
 
@@ -499,7 +506,8 @@ async function waterfallPhoto(
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-/** Check if a cache result is a good direct match for the query (not a partial/tangential match) */
+/** Check if a cache result is a good direct match for the query (not a partial/tangential match).
+ *  "shrimp" should NOT match "shrimp broth". "arroz con leche" SHOULD match "arroz con leche". */
 function isGoodMatch(query: string, result: FoodSearchResult): boolean {
   const q = query.toLowerCase()
   const nameEs = result.name_es.toLowerCase()
@@ -508,17 +516,51 @@ function isGoodMatch(query: string, result: FoodSearchResult): boolean {
   // Exact match
   if (nameEs === q || nameEn === q) return true
 
-  // Query contains the result name or vice versa
-  if (nameEs.includes(q) || q.includes(nameEs)) return true
-  if (nameEn && (nameEn.includes(q) || q.includes(nameEn))) return true
+  // Query IS the full name (query contains the result name AND they're similar length)
+  if (q.includes(nameEs) && nameEs.length >= q.length * 0.7) return true
+  if (nameEn && q.includes(nameEn) && nameEn.length >= q.length * 0.7) return true
 
-  // Check if all query words appear in the result name
-  const queryWords = q.split(/\s+/)
+  // Result name contains query — only if query is multi-word and makes up most of the name
+  const qWords = q.split(/\s+/)
   const nameWords = `${nameEs} ${nameEn}`.split(/\s+/)
-  const allWordsMatch = queryWords.every(w => nameWords.some(n => n.includes(w) || w.includes(n)))
-  if (allWordsMatch) return true
 
-  return false
+  if (qWords.length === 1) {
+    // Single word query: name must be exactly the query (already checked above)
+    return false
+  }
+
+  // Multi-word: all query words must appear in name, AND name shouldn't be much longer
+  const matchedWords = qWords.filter(w => nameWords.some(n => n === w || n.includes(w) || w.includes(n)))
+  const coverage = matchedWords.length / qWords.length
+  const nameBloat = nameWords.length / Math.max(qWords.length, 1)
+
+  return coverage >= 0.8 && nameBloat <= 2.0
+}
+
+/** Pick the FatSecret result whose name most closely matches the query.
+ *  Avoids "shrimp" → "shrimp broth" by penalizing extra words. */
+function pickBestMatch(query: string, results: FoodSearchResult[]): FoodSearchResult | null {
+  const q = query.toLowerCase().split(/\s+/)
+
+  let best: FoodSearchResult | null = null
+  let bestScore = -1
+
+  for (const r of results) {
+    const name = ((r.name_en ?? r.name_es) ?? "").toLowerCase()
+    const nameWords = name.split(/\s+/)
+
+    // Score: matched query words / total name words (prefer shorter, more precise names)
+    const matchedWords = q.filter(w => nameWords.some(n => n.includes(w) || w.includes(n))).length
+    const score = matchedWords / Math.max(nameWords.length, 1)
+
+    if (score > bestScore) {
+      bestScore = score
+      best = r
+    }
+  }
+
+  // Require at least 50% word overlap to accept
+  return bestScore >= 0.5 ? best : null
 }
 
 function normalizeQuery(query: string): string {

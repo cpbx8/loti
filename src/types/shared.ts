@@ -77,6 +77,7 @@ export interface FoodSearchResult {
   carbs_g: number
   fat_g: number
   fiber_g?: number
+  sugar_g?: number
   serving_size: number
   serving_unit: string
   serving_description?: string
