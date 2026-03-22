@@ -117,7 +117,22 @@
       "Bash(supabase secrets:*)",
       "Bash(ipconfig getifaddr:*)",
       "Skill(browse)",
-      "Skill(browse:*)"
+      "Skill(browse:*)",
+      "Bash(B=~/.claude/skills/gstack/browse/dist/browse)",
+      "Bash($B goto:*)",
+      "Bash($B screenshot:*)",
+      "Bash($B console:*)",
+      "Bash($B js:*)",
+      "Bash($B viewport:*)",
+      "Bash(curl -s -X POST \"https://nreufkieoyujxcnyjhbw.supabase.co/functions/v1/suggest\" -H \"Content-Type: application/json\" -H \"x-api-key: db263871519a5165d7b6bb969ddec0ec09c97fc71081bd8486a3e210e1407f82\" -d '{\"\"\"\"meal_type\"\"\"\":\"\"\"\"lunch\"\"\"\",\"\"\"\"health_state\"\"\"\":\"\"\"\"healthy\"\"\"\",\"\"\"\"green_max\"\"\"\":10,\"\"\"\"yellow_max\"\"\"\":19}')",
+      "Bash(curl -s -X POST \"https://nreufkieoyujxcnyjhbw.supabase.co/functions/v1/suggest\" -H \"Content-Type: application/json\" -H \"x-api-key: db263871519a5165d7b6bb969ddec0ec09c97fc71081bd8486a3e210e1407f82\" -d '{\"\"\"\"context\"\"\"\":{\"\"\"\"type\"\"\"\":\"\"\"\"meal\"\"\"\",\"\"\"\"meal_type\"\"\"\":\"\"\"\"lunch\"\"\"\"},\"\"\"\"profile\"\"\"\":{\"\"\"\"health_state\"\"\"\":\"\"\"\"healthy\"\"\"\",\"\"\"\"goal\"\"\"\":\"\"\"\"learn\"\"\"\",\"\"\"\"a1c_value\"\"\"\":null,\"\"\"\"age\"\"\"\":30,\"\"\"\"sex\"\"\"\":\"\"\"\"male\"\"\"\",\"\"\"\"activity_level\"\"\"\":\"\"\"\"moderate\"\"\"\",\"\"\"\"dietary_restrictions\"\"\"\":[],\"\"\"\"meal_struggles\"\"\"\":[],\"\"\"\"medications\"\"\"\":[],\"\"\"\"gl_threshold_green\"\"\"\":10,\"\"\"\"gl_threshold_yellow\"\"\"\":19},\"\"\"\"scan_summary\"\"\"\":\"\"\"\"No scans yet\"\"\"\"}')",
+      "Bash(curl -s -X POST \"https://nreufkieoyujxcnyjhbw.supabase.co/functions/v1/suggest\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZXVma2llb3l1anhjbnlqaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MzUwNzQsImV4cCI6MjA4OTIxMTA3NH0.c9nVPRm2S8zMrLRqgUiTLdHpOqZKnKNqotGKZON1eyU\" -H \"x-api-key: db263871519a5165d7b6bb969ddec0ec09c97fc71081bd8486a3e210e1407f82\" -d '{\"\"\"\"context\"\"\"\":{\"\"\"\"type\"\"\"\":\"\"\"\"meal\"\"\"\",\"\"\"\"meal_type\"\"\"\":\"\"\"\"lunch\"\"\"\"},\"\"\"\"profile\"\"\"\":{\"\"\"\"health_state\"\"\"\":\"\"\"\"healthy\"\"\"\",\"\"\"\"goal\"\"\"\":\"\"\"\"learn\"\"\"\",\"\"\"\"a1c_value\"\"\"\":null,\"\"\"\"age\"\"\"\":30,\"\"\"\"sex\"\"\"\":\"\"\"\"male\"\"\"\",\"\"\"\"activity_level\"\"\"\":\"\"\"\"moderate\"\"\"\",\"\"\"\"dietary_restrictions\"\"\"\":[],\"\"\"\"meal_struggles\"\"\"\":[],\"\"\"\"medications\"\"\"\":[],\"\"\"\"gl_threshold_green\"\"\"\":10,\"\"\"\"gl_threshold_yellow\"\"\"\":19},\"\"\"\"scan_summary\"\"\"\":\"\"\"\"No scans yet\"\"\"\"}')",
+      "Bash($B wait:*)",
+      "Bash(curl -s \"https://cpbx8.github.io/loti/assets/index-DMINNzop.js\")",
+      "Bash(gh secret:*)",
+      "Bash($B snapshot:*)",
+      "Bash($B click:*)",
+      "Bash($B reload:*)"
     ]
   }
 }

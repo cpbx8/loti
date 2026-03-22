@@ -48,7 +48,7 @@ export default function TabBar() {
           {/* Photo scan */}
           <button
             onClick={() => gatedNavigate('/scan')}
-            className="flex items-center gap-3 rounded-2xl bg-card px-5 py-3 shadow-lg min-w-[200px] active:scale-95 transition-transform"
+            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -65,7 +65,7 @@ export default function TabBar() {
           {/* Barcode */}
           <button
             onClick={() => gatedNavigate('/barcode')}
-            className="flex items-center gap-3 rounded-2xl bg-card px-5 py-3 shadow-lg min-w-[200px] active:scale-95 transition-transform"
+            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -81,7 +81,7 @@ export default function TabBar() {
           {/* Text search */}
           <button
             onClick={() => gatedNavigate('/text')}
-            className="flex items-center gap-3 rounded-2xl bg-card px-5 py-3 shadow-lg min-w-[200px] active:scale-95 transition-transform"
+            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -96,8 +96,8 @@ export default function TabBar() {
         </div>
       )}
 
-      {/* Tab bar — fixed to bottom */}
-      <nav className="fixed bottom-0 left-0 right-0 flex items-stretch border-t border-border bg-card z-30" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      {/* Tab bar — glass, no border */}
+      <nav className="fixed bottom-0 left-0 right-0 flex items-stretch glass z-30" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* History tab */}
         <button
           onClick={() => navigate('/history')}
@@ -117,11 +117,12 @@ export default function TabBar() {
         <div className="flex flex-1 items-center justify-center">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg -mt-5 transition-all active:scale-90 ${
+            className={`flex h-14 w-14 items-center justify-center rounded-full -mt-5 transition-all active:scale-90 ${
               menuOpen
-                ? 'bg-text-primary rotate-45'
-                : 'bg-primary'
+                ? 'bg-on-surface rotate-45'
+                : 'btn-gradient !p-0'
             }`}
+            style={!menuOpen ? { boxShadow: '0px 12px 32px rgba(166, 47, 74, 0.25)' } : { boxShadow: '0px 12px 32px rgba(26, 28, 27, 0.15)' }}
             aria-label={menuOpen ? 'Cerrar menú' : 'Agregar alimento'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

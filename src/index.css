@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Traffic light — SACRED, only for GI ratings */
+  /* ── Traffic light — SACRED, only for GI ratings ── */
   --color-tl-green-bg: #E8F6ED;
   --color-tl-green-fill: #2ECC71;
   --color-tl-green-accent: #27AE60;
@@ -12,41 +12,58 @@
   --color-tl-red-fill: #E74C3C;
   --color-tl-red-accent: #C0392B;
 
-  /* Brand — coral-pink */
-  --color-primary: #E8636B;
-  --color-primary-light: rgba(232, 99, 107, 0.1);
-  --color-primary-lighter: rgb(255, 140, 124);
-  --color-primary-dark: #C4475C;
+  /* ── Brand — Editorial Wellness ── */
+  --color-primary: #a62f4a;
+  --color-primary-container: #c74861;
+  --color-primary-light: rgba(166, 47, 74, 0.08);
+  --color-primary-lighter: #d4667a;
+  --color-primary-dark: #8a2640;
+  --color-on-primary: #ffffff;
 
-  /* Neutral — warm off-white */
-  --color-surface: #FAF9F6;
-  --color-card: #FFFFFF;
-  --color-border: #E5E7EB;
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
+  /* ── Tertiary — Stable/positive accent ── */
+  --color-tertiary: #006b32;
+
+  /* ── Surface Philosophy: warm paper stack ── */
+  --color-surface: #f9f9f7;
+  --color-surface-container-low: #f4f4f2;
+  --color-surface-container-high: #eeedeb;
+  --color-surface-container-highest: #e8e7e5;
+  --color-surface-container-lowest: #ffffff;
+
+  /* ── Semantic surfaces (legacy compat) ── */
+  --color-card: #ffffff;
+  --color-border: transparent;
+  --color-outline-variant: #debfc2;
+
+  /* ── Text: never pure black ── */
+  --color-text-primary: #1a1c1b;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-on-surface: #1a1c1b;
+  --color-on-surface-variant: #44474e;
   --color-disabled: #D1D5DB;
 
-  /* Semantic (NOT traffic light colors) */
+  /* ── Semantic (NOT traffic light) ── */
   --color-info: #2196F3;
   --color-error: #B71C1C;
   --color-success: #1565C0;
 
-  /* Shadows — card: 6% opacity, 8px blur, 2px y-offset */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* ── Shadows: ambient, extra-diffused ── */
+  --shadow-sm: 0 2px 8px rgba(26, 28, 27, 0.03);
+  --shadow-md: 0px 12px 32px rgba(26, 28, 27, 0.06);
+  --shadow-lg: 0px 16px 48px rgba(26, 28, 27, 0.08);
 }
 
+/* ── Base Typography ── */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-surface);
   color: var(--color-text-primary);
-  font-size: 1.0625rem; /* 17px base */
-  line-height: 1.5;
+  font-size: 0.875rem; /* body-md: 14px */
+  line-height: 1.6;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -65,6 +82,87 @@ html {
   overscroll-behavior: none;
 }
 
+/* ── Typography Scale ── */
+.text-display {
+  font-size: 3.5rem;    /* 56px — The Pulse: glucose value */
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+}
+
+.text-headline {
+  font-size: 1.5rem;    /* 24px — The Narrative */
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.text-title {
+  font-size: 1.125rem;  /* 18px — The Context */
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.text-body {
+  font-size: 0.875rem;  /* 14px — The Insight */
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-label {
+  font-size: 0.6875rem; /* 11px — The Data */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+}
+
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(249, 249, 247, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-dark {
+  background: rgba(26, 28, 27, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Signature Gradient Button ── */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  padding: 1rem 1.4rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.btn-gradient:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* ── Ghost Border (20% opacity, only when needed) ── */
+.ghost-border {
+  border: 1px solid rgba(222, 191, 194, 0.2);
+}
+
+/* ── Surface Cards (no borders, tonal layering) ── */
+.surface-card {
+  background: var(--color-surface-container-lowest);
+  border-radius: 1rem;
+  border: none;
+}
+
+.surface-section {
+  background: var(--color-surface-container-low);
+  border-radius: 1.25rem;
+  border: none;
+}
+
+/* ── Animations ── */
 .flex-1 {
   animation: fadeIn 0.15s ease-in;
 }

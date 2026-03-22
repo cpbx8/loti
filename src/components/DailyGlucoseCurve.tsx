@@ -9,15 +9,39 @@ import { useProfile } from '@/hooks/useProfile'
 import { computeDailyGlucose, formatMinuteAsHour, DANGER_ZONES } from '@/lib/glucoseModel'
 
 const STATUS_CONFIG = {
-  stable:   { label: 'ESTABLE',  bg: 'bg-tl-green-bg',  text: 'text-tl-green-fill',  dot: 'bg-tl-green-fill',  stroke: '#2ECC71', fill: 'rgba(46,204,113,0.15)' },
-  elevated: { label: 'ELEVADO',  bg: 'bg-tl-yellow-bg', text: 'text-tl-yellow-fill', dot: 'bg-tl-yellow-fill', stroke: '#F39C12', fill: 'rgba(243,156,18,0.15)' },
-  high:     { label: 'ALTO',     bg: 'bg-tl-red-bg',    text: 'text-tl-red-fill',    dot: 'bg-tl-red-fill',    stroke: '#E74C3C', fill: 'rgba(231,76,60,0.15)' },
+  stable:   { label: 'ESTABLE',  bg: 'bg-tl-green-bg',  text: 'text-tertiary',       dot: 'bg-tertiary',       stroke: '#006b32', fill: 'rgba(0,107,50,0.10)' },
+  elevated: { label: 'ELEVADO',  bg: 'bg-tl-yellow-bg', text: 'text-tl-yellow-fill', dot: 'bg-tl-yellow-fill', stroke: '#F39C12', fill: 'rgba(243,156,18,0.12)' },
+  high:     { label: 'ALTO',     bg: 'bg-tl-red-bg',    text: 'text-tl-red-fill',    dot: 'bg-tl-red-fill',    stroke: '#E74C3C', fill: 'rgba(231,76,60,0.12)' },
 }
 
 const TL_DOT_COLORS: Record<string, string> = {
   green: '#2ECC71',
   yellow: '#F39C12',
   red: '#E74C3C',
+}
+
+/** Catmull-Rom spline → SVG cubic bezier path for organic curves */
+function catmullRomPath(points: { x: number; y: number }[], tension = 0.3): string {
+  if (points.length < 2) return ''
+  if (points.length === 2) return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)} L ${points[1].x.toFixed(1)} ${points[1].y.toFixed(1)}`
+
+  let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(i - 1, 0)]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[Math.min(i + 2, points.length - 1)]
+
+    const cp1x = p1.x + (p2.x - p0.x) * tension
+    const cp1y = p1.y + (p2.y - p0.y) * tension
+    const cp2x = p2.x - (p3.x - p1.x) * tension
+    const cp2y = p2.y - (p3.y - p1.y) * tension
+
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
+  }
+
+  return d
 }
 
 interface Props {
@@ -63,9 +87,9 @@ export default function DailyGlucoseCurve({ entries }: Props) {
     return padTop + plotH * (1 - Math.max(0, Math.min(1, norm)))
   }
 
-  // Build smooth path
+  // Build Catmull-Rom spline path (organic, not clinical)
   const pathPoints = result.points.map(p => ({ x: toX(p.time), y: toY(p.glucose) }))
-  const pathD = pathPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+  const pathD = catmullRomPath(pathPoints)
   const fillD = pathD + ` L ${pathPoints[pathPoints.length - 1]?.x.toFixed(1) ?? padL} ${toY(yMin).toFixed(1)} L ${pathPoints[0]?.x.toFixed(1) ?? padL} ${toY(yMin).toFixed(1)} Z`
 
   // Now indicator
@@ -111,20 +135,20 @@ export default function DailyGlucoseCurve({ entries }: Props) {
     : 'Escanea tu primer alimento para ver tu curva de glucosa estimada.'
 
   return (
-    <div className="mx-5 rounded-2xl bg-card shadow-md overflow-hidden">
+    <div className="mx-5 surface-card overflow-hidden" style={{ boxShadow: '0px 12px 32px rgba(26, 28, 27, 0.06)' }}>
       {/* Top section */}
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-5 pt-5 pb-2">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Glucosa estimada</p>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-3xl font-bold text-text-primary">{result.currentEstimate}</span>
-              <span className="text-sm font-medium text-text-tertiary">mg/dL</span>
+            <p className="text-label text-on-surface-variant">Glucosa estimada</p>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-display text-on-surface">{result.currentEstimate}</span>
+              <span className="text-label text-text-tertiary font-normal normal-case tracking-normal">mg/dL</span>
             </div>
           </div>
-          <div className={`flex items-center gap-1.5 rounded-full ${config.bg} px-3 py-1`}>
+          <div className={`flex items-center gap-1.5 rounded-full ${config.bg} px-3.5 py-1.5`}>
             <div className={`h-2 w-2 rounded-full ${config.dot}`} />
-            <span className={`text-[11px] font-bold ${config.text} tracking-wide`}>{config.label}</span>
+            <span className={`text-label ${config.text}`}>{config.label}</span>
           </div>
         </div>
       </div>
@@ -216,8 +240,8 @@ export default function DailyGlucoseCurve({ entries }: Props) {
       </div>
 
       {/* Description */}
-      <div className="px-4 pb-4 pt-1">
-        <p className="text-[13px] text-text-secondary leading-snug">{description}</p>
+      <div className="px-5 pb-5 pt-2">
+        <p className="text-body text-on-surface-variant">{description}</p>
       </div>
     </div>
   )

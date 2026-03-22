@@ -19,6 +19,25 @@ import {
   DANGER_ZONES,
 } from '@/lib/glucoseModel'
 
+/** Catmull-Rom spline → SVG cubic bezier path */
+function catmullRomPath(points: { x: number; y: number }[], tension = 0.3): string {
+  if (points.length < 2) return ''
+  if (points.length === 2) return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)} L ${points[1].x.toFixed(1)} ${points[1].y.toFixed(1)}`
+  let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(i - 1, 0)]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[Math.min(i + 2, points.length - 1)]
+    const cp1x = p1.x + (p2.x - p0.x) * tension
+    const cp1y = p1.y + (p2.y - p0.y) * tension
+    const cp2x = p2.x - (p3.x - p1.x) * tension
+    const cp2y = p2.y - (p3.y - p1.y) * tension
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
+  }
+  return d
+}
+
 interface Props {
   gi: number
   gl: number
@@ -73,14 +92,14 @@ export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className 
   const toX = (t: number) => padL + (t / 180) * plotW
   const toY = (mg: number) => padTop + plotH * (1 - (mg - yMin) / (yMax - yMin))
 
-  // Build path
-  const buildPath = (points: { time: number; glucose: number }[]) =>
-    points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${toX(p.time).toFixed(1)} ${toY(p.glucose).toFixed(1)}`).join(' ')
+  // Build smooth Catmull-Rom paths
+  const toPoints = (pts: { time: number; glucose: number }[]) =>
+    pts.map(p => ({ x: toX(p.time), y: toY(p.glucose) }))
 
-  const mainPath = buildPath(data)
+  const mainPath = catmullRomPath(toPoints(data))
   const mainFill = mainPath + ` L ${toX(180)} ${toY(params.baseline)} L ${toX(0)} ${toY(params.baseline)} Z`
 
-  const swapPath = swapData ? buildPath(swapData) : null
+  const swapPath = swapData ? catmullRomPath(toPoints(swapData)) : null
 
   // Peak point
   const peakPoint = data.reduce((max, p) => p.glucose > max.glucose ? p : max, data[0])
@@ -100,8 +119,8 @@ export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className 
   const reduction = swapParams ? Math.round((1 - (swapParams.peakRise / params.peakRise)) * 100) : 0
 
   return (
-    <div className={`rounded-2xl bg-card border border-border p-3 ${className ?? ''}`}>
-      <p className="text-xs font-semibold text-text-secondary mb-1">
+    <div className={`surface-card p-4 ${className ?? ''}`}>
+      <p className="text-label text-on-surface-variant mb-2">
         Tu respuesta de glucosa estimada
       </p>
 

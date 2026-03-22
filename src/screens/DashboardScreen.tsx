@@ -60,21 +60,20 @@ export default function DashboardScreen() {
 
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-0">
-      {/* ── Header: Loti brand + settings ──────────────── */}
-      <header className="flex items-center justify-between bg-card px-5 py-3 border-b border-border">
+      {/* ── Header: glass nav ──────────────────────── */}
+      <header className="glass flex items-center justify-between px-6 py-3 sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
-          {/* Profile avatar placeholder */}
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-            <span className="text-sm font-bold text-primary">🦎</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light">
+            <span className="text-sm">🦎</span>
           </div>
-          <span className="text-lg font-bold text-primary italic">Loti</span>
+          <span className="text-title text-primary italic">Loti</span>
         </div>
         <button
           onClick={() => navigate('/settings')}
-          className="flex items-center justify-center rounded-lg p-2 text-text-secondary hover:bg-surface min-h-[48px] min-w-[48px]"
+          className="flex items-center justify-center rounded-full p-2.5 text-on-surface-variant hover:bg-surface-container-high min-h-[48px] min-w-[48px] transition-colors"
           aria-label="Settings"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -83,33 +82,31 @@ export default function DashboardScreen() {
 
       {loading ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-surface-container-high border-t-primary" />
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto pb-6">
           {/* Trial Banner */}
           <TrialBanner onUpgrade={() => setPaywallOpen(true)} />
 
-          {/* ── Greeting + Daily Summary heading ──────── */}
-          <div className="mx-5 mt-4">
-            <p className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">
-              {getGreeting()}
-            </p>
-            <h1 className="text-xl font-bold text-text-primary mt-0.5">Tu resumen diario</h1>
+          {/* ── Greeting ──────────────────────────────── */}
+          <div className="px-6 pt-6 pb-2">
+            <p className="text-label text-on-surface-variant">{getGreeting()}</p>
+            <h1 className="text-headline text-on-surface mt-1">Tu resumen diario</h1>
           </div>
 
           {/* ── Date navigation ────────────────────────── */}
-          <div className="mt-3">
+          <div className="mt-1">
             <DateNav date={date} onChange={handleDateChange} />
           </div>
 
           {/* ── Glucose Status Card (centerpiece) ─────── */}
-          <div className="mt-3">
+          <div className="mt-4">
             <DailyGlucoseCurve entries={entries} />
           </div>
 
-          {/* ── Goal Summary Bar (compact) ────────────── */}
-          <div className="mt-3">
+          {/* ── Goal Summary (tonal section) ──────────── */}
+          <div className="mx-5 mt-5 surface-section p-4">
             <TodaySummaryBar
               entries={entries}
               onScanTap={() => gatedNavigate('/scan', 'scan')}
@@ -117,22 +114,22 @@ export default function DashboardScreen() {
             />
           </div>
 
-          {/* ── Daily Tips ─────────────────────────────── */}
-          <div className="mt-5">
-            <div className="mx-5 mb-2">
-              <h2 className="text-base font-bold text-text-primary">Consejos del día</h2>
+          {/* ── Consejos del Día ───────────────────────── */}
+          <div className="mt-8">
+            <div className="px-6 mb-3">
+              <h2 className="text-headline text-on-surface">Consejos del día</h2>
             </div>
             <TipCarousel />
           </div>
 
-          {/* ── Recent Scans ───────────────────────────── */}
-          <div className="mx-5 mt-5">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-bold text-text-primary">Escaneos recientes</h2>
+          {/* ── Escaneos Recientes ─────────────────────── */}
+          <div className="px-6 mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-headline text-on-surface">Escaneos recientes</h2>
               {entries.length > 0 && (
                 <button
                   onClick={() => navigate('/history')}
-                  className="text-xs font-semibold text-primary"
+                  className="text-label text-primary"
                 >
                   VER TODO
                 </button>
@@ -145,10 +142,10 @@ export default function DashboardScreen() {
                 onUpdateServing={updateServingCount}
               />
             ) : (
-              <div className="rounded-2xl bg-card p-5 text-center shadow-sm">
-                <p className="text-2xl mb-2">🦎</p>
-                <p className="text-sm font-medium text-text-primary">No hay escaneos hoy</p>
-                <p className="text-xs text-text-secondary mt-1">
+              <div className="surface-card p-8 text-center">
+                <p className="text-3xl mb-3">🦎</p>
+                <p className="text-title text-on-surface">No hay escaneos hoy</p>
+                <p className="text-body text-on-surface-variant mt-2">
                   Toca el botón + para escanear tu primer alimento
                 </p>
               </div>
@@ -156,17 +153,18 @@ export default function DashboardScreen() {
           </div>
 
           {/* ── Disclaimer ─────────────────────────────── */}
-          <p className="mx-5 mt-6 mb-4 text-[11px] leading-relaxed text-text-tertiary">
+          <p className="px-6 mt-10 mb-6 text-label text-text-tertiary font-normal normal-case tracking-normal leading-relaxed">
             Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.
           </p>
         </div>
       )}
 
-      {/* Floating AI button — bottom right, above tab bar */}
+      {/* Floating AI button — gradient, ambient shadow */}
       <div className="fixed z-20" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 68px)', right: '20px' }}>
         <button
           onClick={openAI}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg active:scale-90 transition-transform"
+          className="btn-gradient flex h-14 w-14 items-center justify-center !p-0 !rounded-full"
+          style={{ boxShadow: '0px 12px 32px rgba(166, 47, 74, 0.25)' }}
           aria-label="Ideas de comida con IA"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">

@@ -72,19 +72,14 @@ export default function TextInputScreen() {
     const multiple = search.results.length > 1 && !composite
 
     return (
-      <div className="flex flex-1 flex-col bg-surface">
-        <header className="flex items-center border-b border-border bg-card px-5 py-3">
-          <button onClick={handleTryAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+      <div className="flex flex-1 flex-col bg-surface min-h-0">
+        <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
+          <button onClick={handleTryAnother} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-text-primary">
-            {composite ? (display.name_en || display.name_es) :
-             multiple ? `${search.results.length} Results` :
-             (display.name_en || display.name_es)}
-          </h1>
+          <h1 className="ml-2 text-title text-on-surface">Análisis de Alimento</h1>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
@@ -113,26 +108,26 @@ export default function TextInputScreen() {
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
-        <div className="flex gap-3 border-t border-border bg-card p-4">
+        <div className="flex gap-3 glass p-4 sticky bottom-0">
           <button
             onClick={handleTryAnother}
-            className="flex-1 rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-surface min-h-[44px]"
+            className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
           >
-            Try Another
+            Buscar otro
           </button>
           {multiple ? (
             <button
               onClick={selected ? handleLog : handleLogAll}
-              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 btn-gradient min-h-[48px]"
             >
-              {selected ? 'Log Selected' : 'Log All'}
+              {selected ? 'Registrar selección' : 'Registrar todo'}
             </button>
           ) : (
             <button
               onClick={handleLog}
-              className="flex-1 rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[44px]"
+              className="flex-1 btn-gradient min-h-[48px]"
             >
-              Log This
+              Registrar
             </button>
           )}
         </div>
