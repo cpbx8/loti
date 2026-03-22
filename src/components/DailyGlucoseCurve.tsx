@@ -16,8 +16,6 @@ const STATUS_CONFIG = {
 
 // Warm amber/orange curve color (matches Rork style)
 const CURVE_STROKE = '#E8A838'
-const CURVE_FILL_TOP = 'rgba(232, 168, 56, 0.25)'
-const CURVE_FILL_BOT = 'rgba(232, 168, 56, 0.02)'
 
 const TL_DOT_COLORS: Record<string, string> = {
   green: '#2ECC71',

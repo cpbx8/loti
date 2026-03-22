@@ -17,7 +17,6 @@ export default function TabBar() {
 
   const isHistory = location.pathname.startsWith('/history')
   const isFavorites = location.pathname.startsWith('/favorites')
-  const isHome = location.pathname === '/'
 
   const gatedNavigate = (path: string) => {
     setMenuOpen(false)

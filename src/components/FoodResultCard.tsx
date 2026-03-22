@@ -18,21 +18,21 @@ const IMPACT_CONFIG: Record<string, { labelEs: string; bg: string; text: string;
     bg: 'bg-tl-green-bg',
     text: 'text-tl-green-fill',
     dot: 'bg-tl-green-fill',
-    descFn: (name, _gl) => `Impacto bajo en tu glucosa.`,
+    descFn: (_name, _gl) => `Impacto bajo en tu glucosa.`,
   },
   yellow: {
     labelEs: 'MODERADO',
     bg: 'bg-tl-yellow-bg',
     text: 'text-tl-yellow-fill',
     dot: 'bg-tl-yellow-fill',
-    descFn: (name, _gl) => `Impacto moderado en tu glucosa.`,
+    descFn: (_name, _gl) => `Impacto moderado en tu glucosa.`,
   },
   red: {
     labelEs: 'ALTO IMPACTO',
     bg: 'bg-tl-red-bg',
     text: 'text-tl-red-fill',
     dot: 'bg-tl-red-fill',
-    descFn: (name, _gl) => `Impacto alto en tu glucosa. Modera la porción.`,
+    descFn: (_name, _gl) => `Impacto alto en tu glucosa. Modera la porción.`,
   },
 }
 
@@ -57,7 +57,7 @@ interface FoodResultCardProps {
 
 export function FoodResultCard({ result: r, showSource = true, onQuantityChange }: FoodResultCardProps) {
   const [quantity, setQuantity] = useState(1)
-  const displayName = r.name_es || r.name_en
+  const displayName = r.name_es || r.name_en || ''
   const thresholds = useThresholds()
 
   // Scale values by quantity
@@ -65,7 +65,7 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
   const cal = r.calories * q
   const protein = r.protein_g * q
   const carbs = r.carbs_g * q
-  const fat = r.fat_g * q
+  const _fat = r.fat_g * q
   const fiber = r.fiber_g != null ? r.fiber_g * q : null
   const gl = r.glycemic_load != null ? r.glycemic_load * q : null
 
@@ -262,7 +262,7 @@ export function FoodResultList({ results, onSelect, selectedIndex }: FoodResultL
   return (
     <div className="flex flex-col gap-2.5">
       {results.map((r, i) => {
-        const displayName = r.name_es || r.name_en
+        const displayName = r.name_es || r.name_en || ''
         const isSelected = selectedIndex === i
         const itemTL = r.glycemic_load != null
           ? getPersonalizedTrafficLight(r.glycemic_load, thresholds)

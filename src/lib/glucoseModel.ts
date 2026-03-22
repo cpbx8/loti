@@ -215,17 +215,6 @@ function entryMinuteOfDay(entry: FoodLogEntry): number {
   return d.getHours() * 60 + d.getMinutes()
 }
 
-/** Estimate GI from traffic light when GI unavailable */
-function estimateGi(entry: FoodLogEntry): number {
-  if (entry.glycemic_index != null && entry.glycemic_index > 0) return entry.glycemic_index
-  switch (entry.result_traffic_light) {
-    case 'red': return 75
-    case 'yellow': return 60
-    case 'green': return 40
-    default: return 55
-  }
-}
-
 export function computeDailyGlucose(
   entries: FoodLogEntry[],
   healthState: string,
