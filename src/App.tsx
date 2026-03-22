@@ -72,7 +72,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/loti">
       <div className="flex flex-col min-h-screen">
         <div className="flex-1 flex flex-col">
           <Routes>
