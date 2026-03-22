@@ -70,7 +70,10 @@ export default function DailyGlucoseCurve({ entries }: Props) {
 
   // Y-axis range
   const yMin = 60
-  const yMax = Math.max(220, result.peakValue + 20)
+  // Scale y-axis to fit data — don't force 220 for healthy users
+  const yMax = hasData
+    ? Math.max(result.peakValue + 25, result.baseline + 60, DANGER_ZONES.normal_ceiling + 10)
+    : result.baseline + 80  // empty state: just enough to show NORMAL line
 
   // X-axis range
   const xMin = hasData && result.points.length >= 2 ? result.points[0].time : 360   // 6am default
