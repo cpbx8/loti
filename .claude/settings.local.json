@@ -139,7 +139,8 @@
       "Bash(grep -r \"from.*$f\\\\|import.*$f\" src/ --include=*.ts --include=*.tsx -l)",
       "Bash(grep -v \"$f.tsx\")",
       "Bash(done)",
-      "Bash(grep -r \"from.*Auth/AuthForm\\\\|AuthForm\" src/ --include=*.ts --include=*.tsx -l)"
+      "Bash(grep -r \"from.*Auth/AuthForm\\\\|AuthForm\" src/ --include=*.ts --include=*.tsx -l)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f\"\"{i[''''food_name'''']}: {i[''''calories_kcal'''']} cal, {i[''''protein_g'''']}g protein, {i[''''carbs_g'''']}g carbs\"\"\\) for i in d.get\\(''''items'''',d.get\\(''''results'''',[d]\\)\\)]\")"
     ]
   }
 }

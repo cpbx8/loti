@@ -229,16 +229,19 @@ Return ONLY valid JSON matching this schema:
   "parse_confidence": number (0-1)
 }
 
-RULES (follow ALL strictly):
+CRITICAL RULES (follow ALL strictly):
 - Support both English and Spanish input
-- "a taco" = quantity 1, "2 tacos" = quantity 2
-- Estimate realistic serving_g (a taco ≈ 60-80g, a banana ≈ 120g, a cup of rice ≈ 185g)
-- Each item should be a distinct dish or food the user describes. "1 cup white rice with shrimp" = 1 item. "2 tacos and a soda" = 2 items.
-- food_name should describe the dish as the user said it (e.g. "white rice with shrimp", "tacos de bistec", "agua de jamaica")
+- "a taco" = quantity 1, "2 tacos" = quantity 2, "4 eggs" = quantity 4
+- estimated_serving_g = weight of ONE UNIT (1 egg ≈ 50g, 1 taco ≈ 70g, 1 banana ≈ 120g, 1 cup rice ≈ 185g)
+- ALL nutrition values (calories_kcal, protein_g, carbs_g, fat_g, fiber_g, glycemic_load) are PER SINGLE UNIT, NOT multiplied by quantity
+  Example: "4 eggs" → quantity: 4, calories_kcal: 72 (per 1 egg), protein_g: 6 (per 1 egg)
+  Example: "2 tacos" → quantity: 2, calories_kcal: 180 (per 1 taco), protein_g: 9 (per 1 taco)
+- Each item should be a distinct dish or food. "1 cup white rice with shrimp" = 1 item. "2 tacos and a soda" = 2 items.
+- food_name: the dish as the user said it (e.g. "white rice with shrimp", "tacos de bistec")
 - For mixed meals, set is_mixed_meal: true and list components
-- REQUIRED: Every item MUST include glycemic_index, glycemic_load, calories_kcal, protein_g, carbs_g, fat_g, fiber_g. Never omit these.
-- glycemic_index: estimated GI of the dish as served (account for protein/fat/fiber lowering GI)
-- glycemic_load: GL per serving = (GI × available_carbs_g) / 100
+- REQUIRED: Every item MUST include glycemic_index, glycemic_load, calories_kcal, protein_g, carbs_g, fat_g, fiber_g
+- glycemic_index: estimated GI of the food as served
+- glycemic_load: GL PER SINGLE SERVING = (GI × carbs_g) / 100
 - swap_tip: suggest a healthier alternative only if GL > 15, otherwise null
 - Always return at least one item if any food is mentioned`
 
