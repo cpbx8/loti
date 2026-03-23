@@ -65,6 +65,15 @@ export default function ScanScreen() {
     await camera.capture()
   }
 
+  // Auto-launch camera on mount
+  const hasLaunched = useRef(false)
+  useEffect(() => {
+    if (!hasLaunched.current && !camera.base64 && !camera.loading) {
+      hasLaunched.current = true
+      camera.capture()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-analyze when photo is captured
   useEffect(() => {
     if (camera.base64 && search.state === 'idle') {
