@@ -165,6 +165,87 @@ export async function searchGPTPhoto(imageBase64: string): Promise<FoodSearchRes
   }
 }
 
+// ─── Component-level Estimation (for composite meal fallback) ─
+
+const COMPONENT_PROMPT = `You are a nutrition estimation expert. Estimate the nutrition for a SINGLE ingredient that is part of a larger meal.
+
+Return ONLY valid JSON (no markdown, no backticks) in this exact format:
+{
+  "name_es": "Albóndigas Beyond Meat",
+  "name_en": "Beyond Meat meatballs",
+  "calories": 220,
+  "protein_g": 20,
+  "carbs_g": 6,
+  "fat_g": 14,
+  "fiber_g": 2,
+  "confidence": 0.7
+}
+
+Rules:
+- Estimate nutrition for the EXACT gram amount specified
+- If the ingredient is a branded product (Beyond Meat, Impossible, etc.), use known nutrition facts for that brand
+- If the ingredient is generic, estimate based on typical preparation
+- confidence: 0.7-0.9 for well-known foods, 0.5-0.7 for branded/specialty items
+- Return realistic numbers — do not hallucinate. If truly unknown, set confidence to 0.3`
+
+export async function estimateComponentNutrition(
+  nameEn: string,
+  nameEs: string,
+  grams: number,
+): Promise<FoodSearchResult | null> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        max_tokens: 300,
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: COMPONENT_PROMPT },
+          { role: "user", content: `Estimate nutrition for ${grams}g of: ${nameEn} (${nameEs})` },
+        ],
+        response_format: { type: "json_object" },
+      }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+
+    if (!res.ok) {
+      console.error(`[waterfall] gpt component estimate error: HTTP ${res.status}`)
+      return null
+    }
+
+    const data = await res.json()
+    const content = data.choices?.[0]?.message?.content
+    if (!content) return null
+
+    const parsed = JSON.parse(content) as GPTItem
+    console.log(`[waterfall] gpt component estimate HIT for "${nameEn}" (${grams}g)`)
+
+    return {
+      ...gptItemToResult({ ...parsed, estimated_grams: grams }),
+      name_es: parsed.name_es || nameEs,
+      name_en: parsed.name_en || nameEn,
+      serving_size: grams,
+      serving_description: `${grams}g (estimated)`,
+    }
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      console.log(`[waterfall] gpt component estimate TIMEOUT for "${nameEn}"`)
+    } else {
+      console.error(`[waterfall] gpt component estimate error for "${nameEn}":`, err)
+    }
+    return null
+  }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────
 
 interface GPTItem {

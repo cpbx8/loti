@@ -20,7 +20,7 @@ import type { SearchRequest, SearchResponse, FoodSearchResult } from "../_shared
 import { searchCache, searchCacheBarcode, cacheResult } from "../_shared/food-cache.ts"
 import { searchFatSecretText, searchFatSecretBarcode } from "../_shared/search-fatsecret.ts"
 import { searchOFFText, searchOFFBarcode } from "../_shared/search-off.ts"
-import { searchGPTText, searchGPTPhoto } from "../_shared/search-gpt.ts"
+import { searchGPTText, searchGPTPhoto, estimateComponentNutrition } from "../_shared/search-gpt.ts"
 import { decomposeFood } from "../_shared/decompose.ts"
 import { estimateGI } from "../_shared/estimate-gi.ts"
 
@@ -197,6 +197,12 @@ async function waterfallText(
     } else {
       // Last resort: estimate via GPT for this component
       console.log(`[waterfall] Component "${comp.name}" not found in tiers 0-2, using GPT`)
+      const gptResult = await estimateComponentNutrition(comp.name, comp.name_es, comp.grams)
+      if (gptResult) {
+        componentResults.push(gptResult)
+        cacheResult(supabase, gptResult).catch(() => {})
+        primarySource = "gpt4o"
+      }
     }
   }
 
