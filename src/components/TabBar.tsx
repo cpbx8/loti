@@ -40,46 +40,46 @@ export default function TabBar() {
         />
       )}
 
-      {/* Scan menu — compact horizontal pill bar */}
+      {/* Scan menu — 3 icon buttons in a compact dark bar */}
       {menuOpen && (
         <div
-          className="fixed z-50 animate-slide-up"
-          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)', left: '50%', transform: 'translateX(-50%)' }}
+          className="fixed z-50 left-0 right-0 flex justify-center px-6"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)' }}
         >
-          <div className="flex items-center gap-1 rounded-full bg-on-surface/90 backdrop-blur-md px-2 py-2 shadow-lg">
+          <div className="flex items-center gap-0 rounded-2xl bg-on-surface/90 backdrop-blur-md p-1.5 shadow-lg">
             <button
               onClick={() => gatedNavigate('/scan')}
-              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+              className="flex flex-col items-center gap-1 rounded-xl px-5 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px] min-w-[72px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-sm font-medium">{t('scan.photo')}</span>
+              <span className="text-[10px] font-medium">{t('scan.photo')}</span>
             </button>
 
-            <div className="w-px h-5 bg-white/20" />
+            <div className="w-px h-8 bg-white/15" />
 
             <button
               onClick={() => gatedNavigate('/barcode')}
-              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+              className="flex flex-col items-center gap-1 rounded-xl px-5 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px] min-w-[72px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" d="M3 4v16M7 4v16M11 4v16M15 4v16M19 4v16M5 4v16M9 4v16M13 4v16M17 4v16M21 4v16" />
               </svg>
-              <span className="text-sm font-medium whitespace-nowrap">{t('scan.barcode')}</span>
+              <span className="text-[10px] font-medium">{t('scan.barcode')}</span>
             </button>
 
-            <div className="w-px h-5 bg-white/20" />
+            <div className="w-px h-8 bg-white/15" />
 
             <button
               onClick={() => gatedNavigate('/text')}
-              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+              className="flex flex-col items-center gap-1 rounded-xl px-5 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px] min-w-[72px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              <span className="text-sm font-medium">{t('scan.text')}</span>
+              <span className="text-[10px] font-medium">{t('scan.text')}</span>
             </button>
           </div>
         </div>
