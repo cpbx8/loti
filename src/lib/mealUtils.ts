@@ -29,6 +29,7 @@ export interface MealTotals {
   fat_g: number
   fiber_g: number
   glycemic_load: number
+  /** Default traffic light based on standard GL thresholds. Use getPersonalizedTrafficLight() for user-specific thresholds. */
   traffic_light: 'green' | 'yellow' | 'red'
 }
 

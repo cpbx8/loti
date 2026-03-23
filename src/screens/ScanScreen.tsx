@@ -3,6 +3,7 @@ import { useCamera } from '@/hooks/useCamera'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
 import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
 import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
+import { useLanguage } from '@/lib/i18n'
 import EditableMealCard from '@/components/EditableMealCard'
 import type { FoodSearchResult } from '@/types/shared'
 import { useState, useEffect, useRef } from 'react'
@@ -56,6 +57,7 @@ export default function ScanScreen() {
   const camera = useCamera()
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
+  const { t } = useLanguage()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
 
   const isAnalyzing = search.state === 'loading'
@@ -173,21 +175,21 @@ export default function ScanScreen() {
               onClick={handleScanAnother}
               className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
             >
-              Escanear otro
+              {t('text.searchAnother')}
             </button>
             {multiple ? (
               <button
                 onClick={selected ? handleLog : handleLogAll}
                 className="flex-1 btn-gradient min-h-[48px]"
               >
-                {selected ? 'Registrar selección' : 'Registrar todo'}
+                {selected ? t('text.logSelected') : t('text.logAll')}
               </button>
             ) : (
               <button
                 onClick={handleLog}
                 className="flex-1 btn-gradient min-h-[48px]"
               >
-                Registrar
+                {t('text.log')}
               </button>
             )}
           </div>

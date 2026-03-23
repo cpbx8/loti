@@ -25,6 +25,7 @@ function AddIngredientRow({ onAdd }: { onAdd: (result: FoodSearchResult) => void
   }, [open])
 
   const handleSubmit = () => {
+    if (search.state === 'loading') return
     const trimmed = query.trim()
     if (trimmed.length < 2) return
     search.searchText(trimmed)
