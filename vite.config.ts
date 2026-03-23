@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-export default defineConfig({
-  base: '/loti/',
+export default defineConfig(() => ({
+  // GitHub Pages needs /loti/ base path; Capacitor needs /
+  base: process.env.CAPACITOR_BUILD === 'true' ? '/' : '/loti/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -14,4 +15,4 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
-})
+}))
