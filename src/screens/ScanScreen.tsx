@@ -145,7 +145,7 @@ export default function ScanScreen() {
 
           {composite ? (
             <EditableMealCard
-              mealName={search.results[0].name_es || search.results[0].name_en || ''}
+              total={search.results[0]}
               initialComponents={search.results.slice(1)}
               onLog={handleLogComposite}
             />

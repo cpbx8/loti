@@ -6,6 +6,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import type { FoodSearchResult } from '@/types/shared'
 import TrafficLightBadge from './TrafficLightBadge'
+import { FoodResultCard } from './FoodResultCard'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import { useLanguage } from '@/lib/i18n'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
@@ -200,18 +201,27 @@ function IngredientRow({ item, onUpdateGrams, onRemove }: IngredientRowProps) {
 // ─── Main Component ───────────────────────────────────────────
 
 interface EditableMealCardProps {
-  mealName: string
+  total: FoodSearchResult
   initialComponents: FoodSearchResult[]
   onLog: (components: FoodSearchResult[]) => void
 }
 
-export default function EditableMealCard({ mealName, initialComponents, onLog }: EditableMealCardProps) {
+export default function EditableMealCard({ total, initialComponents, onLog }: EditableMealCardProps) {
   const [components, setComponents] = useState<FoodSearchResult[]>(initialComponents)
-  const thresholds = useThresholds()
   const { t } = useLanguage()
 
+  // Build a live-updating synthetic total from current components
   const totals = useMemo(() => computeTotals(components), [components])
-  const totalTL = getPersonalizedTrafficLight(totals.glycemic_load, thresholds)
+  const liveTotal = useMemo<FoodSearchResult>(() => ({
+    ...total,
+    calories: totals.calories,
+    protein_g: totals.protein_g,
+    carbs_g: totals.carbs_g,
+    fat_g: totals.fat_g,
+    fiber_g: totals.fiber_g,
+    glycemic_load: totals.glycemic_load,
+    serving_size: components.reduce((s, c) => s + c.serving_size, 0),
+  }), [total, totals, components])
 
   const handleUpdateGrams = useCallback((index: number, newGrams: number) => {
     setComponents(prev => prev.map((c, i) =>
@@ -228,22 +238,9 @@ export default function EditableMealCard({ mealName, initialComponents, onLog }:
   }, [])
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* ── Meal totals header ── */}
-      <div className="surface-card rounded-2xl p-4">
-        <div className="flex items-start gap-3">
-          {totalTL && <TrafficLightBadge rating={totalTL} size="md" />}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-title text-on-surface">{mealName}</h2>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-              <span className="text-body font-medium text-on-surface">{Math.round(totals.calories)} kcal</span>
-              <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">CG {totals.glycemic_load}</span>
-              <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">{Math.round(totals.carbs_g)}g {t('result.carbs').toLowerCase()}</span>
-              <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">{Math.round(totals.protein_g)}g {t('result.protein').toLowerCase()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col gap-5">
+      {/* ── Full result card with GL hero, glucose curve, macros ── */}
+      <FoodResultCard result={liveTotal} showSource={false} />
 
       {/* ── Editable ingredients ── */}
       <div>
