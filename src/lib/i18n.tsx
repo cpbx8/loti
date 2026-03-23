@@ -22,10 +22,6 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.viewAll': 'VER TODO',
     'dashboard.noScans': 'No hay escaneos hoy',
     'dashboard.scanFirst': 'Escanea tu primer alimento para ver tu curva de glucosa estimada.',
-    'dashboard.currentLevel': 'NIVEL ACTUAL',
-    'dashboard.stable': 'ESTABLE',
-    'dashboard.elevated': 'ELEVADO',
-    'dashboard.high': 'ALTO',
     'dashboard.disclaimer': 'Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.',
 
     // Streak
@@ -167,6 +163,24 @@ const translations: Record<Language, Record<string, string>> = {
     'glucose.elevated': 'ELEVADA',
     'glucose.high': 'ALTA',
     'glucose.baseline': 'base',
+    'glucose.currentLevel': 'Nivel actual',
+    'glucose.statusStable': 'ESTABLE',
+    'glucose.statusElevated': 'ELEVADO',
+    'glucose.statusHigh': 'ALTO',
+    'glucose.descStable': 'Tu glucosa está estable hoy. Has mantenido un rango óptimo durante las últimas horas.',
+    'glucose.descElevated': 'Tu glucosa está algo elevada. Considera agregar fibra o proteína a tu próxima comida.',
+    'glucose.descHigh': 'Tu glucosa está alta. Intenta caminar 10 minutos o beber agua.',
+    'glucose.descEmpty': 'Escanea tu primer alimento para ver tu curva de glucosa estimada.',
+    'glucose.peakEstimate': 'Pico estimado:',
+    'glucose.peakAt': 'a los',
+    'glucose.peakMin': 'min.',
+    'glucose.returnBase': 'Vuelve a tu base en ~',
+    'glucose.returnHrs': 'hrs.',
+
+    // Traffic light labels (food log)
+    'tl.green': 'BAJO',
+    'tl.yellow': 'MEDIO',
+    'tl.red': 'ALTO',
 
     // Common
     'common.back': 'Volver',
@@ -183,10 +197,6 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.viewAll': 'VIEW ALL',
     'dashboard.noScans': 'No scans today',
     'dashboard.scanFirst': 'Scan your first food to see your estimated glucose curve.',
-    'dashboard.currentLevel': 'CURRENT LEVEL',
-    'dashboard.stable': 'STABLE',
-    'dashboard.elevated': 'ELEVATED',
-    'dashboard.high': 'HIGH',
     'dashboard.disclaimer': 'Loti AI is for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult your doctor before making changes to your diabetes management plan.',
 
     // Streak
@@ -328,6 +338,24 @@ const translations: Record<Language, Record<string, string>> = {
     'glucose.elevated': 'ELEVATED',
     'glucose.high': 'HIGH',
     'glucose.baseline': 'base',
+    'glucose.currentLevel': 'Current level',
+    'glucose.statusStable': 'STABLE',
+    'glucose.statusElevated': 'ELEVATED',
+    'glucose.statusHigh': 'HIGH',
+    'glucose.descStable': 'Your glucose is stable today. You have maintained an optimal range over the last few hours.',
+    'glucose.descElevated': 'Your glucose is slightly elevated. Consider adding fiber or protein to your next meal.',
+    'glucose.descHigh': 'Your glucose is high. Try walking 10 minutes or drinking water.',
+    'glucose.descEmpty': 'Scan your first food to see your estimated glucose curve.',
+    'glucose.peakEstimate': 'Estimated peak:',
+    'glucose.peakAt': 'at',
+    'glucose.peakMin': 'min.',
+    'glucose.returnBase': 'Returns to baseline in ~',
+    'glucose.returnHrs': 'hrs.',
+
+    // Traffic light labels (food log)
+    'tl.green': 'LOW',
+    'tl.yellow': 'MED',
+    'tl.red': 'HIGH',
 
     // Common
     'common.back': 'Back',

@@ -6,12 +6,25 @@
 import { useMemo } from 'react'
 import type { FoodLogEntry } from '@/hooks/useDailyLog'
 import { useProfile } from '@/hooks/useProfile'
+import { useLanguage } from '@/lib/i18n'
 import { computeDailyGlucose, formatMinuteAsHour, DANGER_ZONES } from '@/lib/glucoseModel'
 
-const STATUS_CONFIG = {
-  stable:   { label: 'ESTABLE',  bg: 'bg-tl-green-bg',  text: 'text-tertiary',       dot: 'bg-tertiary' },
-  elevated: { label: 'ELEVADO',  bg: 'bg-tl-yellow-bg', text: 'text-tl-yellow-fill', dot: 'bg-tl-yellow-fill' },
-  high:     { label: 'ALTO',     bg: 'bg-tl-red-bg',    text: 'text-tl-red-fill',    dot: 'bg-tl-red-fill' },
+const STATUS_STYLE = {
+  stable:   { bg: 'bg-tl-green-bg',  text: 'text-tertiary',       dot: 'bg-tertiary' },
+  elevated: { bg: 'bg-tl-yellow-bg', text: 'text-tl-yellow-fill', dot: 'bg-tl-yellow-fill' },
+  high:     { bg: 'bg-tl-red-bg',    text: 'text-tl-red-fill',    dot: 'bg-tl-red-fill' },
+}
+
+const STATUS_LABEL_KEY: Record<string, string> = {
+  stable: 'glucose.statusStable',
+  elevated: 'glucose.statusElevated',
+  high: 'glucose.statusHigh',
+}
+
+const DESC_KEY: Record<string, string> = {
+  stable: 'glucose.descStable',
+  elevated: 'glucose.descElevated',
+  high: 'glucose.descHigh',
 }
 
 // Warm amber/orange curve color (matches Rork style)
@@ -48,6 +61,7 @@ interface Props {
 
 export default function DailyGlucoseCurve({ entries }: Props) {
   const { profile } = useProfile()
+  const { t } = useLanguage()
   const healthState = profile?.health_state || 'healthy'
 
   const result = useMemo(
@@ -55,7 +69,8 @@ export default function DailyGlucoseCurve({ entries }: Props) {
     [entries, healthState]
   )
 
-  const config = STATUS_CONFIG[result.status]
+  const style = STATUS_STYLE[result.status]
+  const statusLabel = t(STATUS_LABEL_KEY[result.status])
   const hasData = entries.some(e => e.glycemic_load != null && e.glycemic_load > 0)
 
   // SVG dimensions — taller for premium feel
@@ -136,19 +151,15 @@ export default function DailyGlucoseCurve({ entries }: Props) {
 
   // Zone thresholds
   const zones = [
-    { value: DANGER_ZONES.normal_ceiling, label: 'NORMAL', color: '#2ECC71' },
-    { value: DANGER_ZONES.elevated, label: 'ELEVADA', color: '#F39C12' },
-    { value: DANGER_ZONES.high, label: 'ALTA', color: '#E74C3C' },
+    { value: DANGER_ZONES.normal_ceiling, label: t('glucose.normal'), color: '#2ECC71' },
+    { value: DANGER_ZONES.elevated, label: t('glucose.elevated'), color: '#F39C12' },
+    { value: DANGER_ZONES.high, label: t('glucose.high'), color: '#E74C3C' },
   ]
 
   // Description
   const description = hasData
-    ? result.status === 'stable'
-      ? 'Tu glucosa está estable hoy. Has mantenido un rango óptimo durante las últimas horas.'
-      : result.status === 'elevated'
-        ? 'Tu glucosa está algo elevada. Considera agregar fibra o proteína a tu próxima comida.'
-        : 'Tu glucosa está alta. Intenta caminar 10 minutos o beber agua.'
-    : 'Escanea tu primer alimento para ver tu curva de glucosa estimada.'
+    ? t(DESC_KEY[result.status])
+    : t('glucose.descEmpty')
 
   // Unique gradient ID
   const gradId = 'glucoseGrad'
@@ -159,15 +170,15 @@ export default function DailyGlucoseCurve({ entries }: Props) {
       <div className="px-5 pt-5 pb-1">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-label text-on-surface-variant">Nivel actual</p>
+            <p className="text-label text-on-surface-variant">{t('glucose.currentLevel')}</p>
             <div className="flex items-baseline gap-1.5 mt-1">
               <span className="text-display text-on-surface">{result.currentEstimate}</span>
               <span className="text-label text-text-tertiary font-normal normal-case tracking-normal">mg/dL</span>
             </div>
           </div>
-          <div className={`flex items-center gap-1.5 rounded-full ${config.bg} px-3.5 py-1.5 mt-1`}>
-            <div className={`h-2 w-2 rounded-full ${config.dot}`} />
-            <span className={`text-label ${config.text}`}>{config.label}</span>
+          <div className={`flex items-center gap-1.5 rounded-full ${style.bg} px-3.5 py-1.5 mt-1`}>
+            <div className={`h-2 w-2 rounded-full ${style.dot}`} />
+            <span className={`text-label ${style.text}`}>{statusLabel}</span>
           </div>
         </div>
       </div>
@@ -225,7 +236,7 @@ export default function DailyGlucoseCurve({ entries }: Props) {
             x={padL + plotW + 8} y={toY(result.baseline) + 3}
             fontSize={7.5} fill="#bbb" fontStyle="italic"
           >
-            base
+            {t('glucose.baseline')}
           </text>
 
           {/* Gradient fill area */}
@@ -317,10 +328,10 @@ export default function DailyGlucoseCurve({ entries }: Props) {
             </div>
             <div>
               <p className="text-body text-on-surface">
-                Pico estimado: <strong style={{ color: CURVE_STROKE }}>{result.peakValue} mg/dL</strong> a los {Math.round((result.peakMinute - (result.points[0]?.time ?? 0)))} min.
+                {t('glucose.peakEstimate')} <strong style={{ color: CURVE_STROKE }}>{result.peakValue} mg/dL</strong> {t('glucose.peakAt')} {Math.round((result.peakMinute - (result.points[0]?.time ?? 0)))} {t('glucose.peakMin')}
               </p>
               <p className="text-label text-on-surface-variant font-normal normal-case tracking-normal">
-                Vuelve a tu base en ~{Math.round(((result.peakMinute + 120) - result.peakMinute) / 60 * 10) / 10} hrs.
+                {t('glucose.returnBase')}{Math.round(((result.peakMinute + 120) - result.peakMinute) / 60 * 10) / 10} {t('glucose.returnHrs')}
               </p>
             </div>
           </div>

@@ -47,7 +47,7 @@ export default function DailyInsight({ entries }: Props) {
   if (!insight) return null
 
   return (
-    <div className="mx-5 mt-4 surface-section p-4">
+    <div className="mb-3 py-1">
       <p className="text-body text-on-surface-variant">
         {insight.highlight && insight.greenCount ? (
           <>

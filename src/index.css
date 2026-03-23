@@ -230,3 +230,19 @@ html {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Axolotl mascot wobble ── */
+@keyframes axolotl-wobble {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-4deg) translateY(-2px); }
+  75% { transform: rotate(4deg) translateY(-1px); }
+}
+
+.axolotl-wobble {
+  animation: axolotl-wobble 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axolotl-wobble { animation: none; }
+}

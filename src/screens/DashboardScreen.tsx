@@ -5,9 +5,8 @@ import { useDailyLog, getToday } from '@/hooks/useDailyLog'
 import { useStreak } from '@/hooks/useStreak'
 import { useSubscription } from '@/hooks/useSubscription'
 import DateNav from '@/components/DateNav'
-import TodaySummaryBar from '@/components/TodaySummaryBar'
 import TrialBanner from '@/components/TrialBanner'
-import TipCarousel from '@/components/TipCarousel'
+import AxolotlTip from '@/components/AxolotlTip'
 import DailyGlucoseCurve from '@/components/DailyGlucoseCurve'
 import FoodLogList from '@/components/FoodLog/FoodLogList'
 import SuggestionSheet from '@/components/SuggestionSheet'
@@ -65,24 +64,42 @@ export default function DashboardScreen() {
 
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-0">
-      {/* ── Header: glass nav ──────────────────────── */}
-      <header className="glass flex items-center justify-between px-6 py-3 sticky top-0 z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-light">
-            <span className="text-sm">🦎</span>
+      {/* ── Header: glass nav with botanical accent ── */}
+      <header className="glass sticky top-0 z-10 px-6 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            {/* Botanical logo mark — stylized leaf/flower */}
+            <div className="flex h-9 w-9 items-center justify-center">
+              <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
+                {/* Central flower */}
+                <circle cx="18" cy="18" r="4" fill="var(--color-primary)" />
+                {/* Petals */}
+                <ellipse cx="18" cy="10" rx="3.5" ry="6" fill="var(--color-primary)" opacity="0.3" />
+                <ellipse cx="18" cy="26" rx="3.5" ry="6" fill="var(--color-primary)" opacity="0.3" />
+                <ellipse cx="10" cy="18" rx="6" ry="3.5" fill="var(--color-primary)" opacity="0.3" />
+                <ellipse cx="26" cy="18" rx="6" ry="3.5" fill="var(--color-primary)" opacity="0.3" />
+                {/* Diagonal petals */}
+                <ellipse cx="12.3" cy="12.3" rx="3" ry="5.5" transform="rotate(45 12.3 12.3)" fill="var(--color-primary)" opacity="0.2" />
+                <ellipse cx="23.7" cy="12.3" rx="3" ry="5.5" transform="rotate(-45 23.7 12.3)" fill="var(--color-primary)" opacity="0.2" />
+                <ellipse cx="12.3" cy="23.7" rx="3" ry="5.5" transform="rotate(-45 12.3 23.7)" fill="var(--color-primary)" opacity="0.2" />
+                <ellipse cx="23.7" cy="23.7" rx="3" ry="5.5" transform="rotate(45 23.7 23.7)" fill="var(--color-primary)" opacity="0.2" />
+                {/* Center dot */}
+                <circle cx="18" cy="18" r="2" fill="white" opacity="0.6" />
+              </svg>
+            </div>
+            <span className="text-title text-primary italic">Loti</span>
           </div>
-          <span className="text-title text-primary italic">Loti</span>
+          <button
+            onClick={() => navigate('/settings')}
+            className="flex items-center justify-center rounded-full p-2.5 text-on-surface-variant hover:bg-surface-container-high min-h-[48px] min-w-[48px] transition-colors"
+            aria-label="Settings"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
-        <button
-          onClick={() => navigate('/settings')}
-          className="flex items-center justify-center rounded-full p-2.5 text-on-surface-variant hover:bg-surface-container-high min-h-[48px] min-w-[48px] transition-colors"
-          aria-label="Settings"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
       </header>
 
       {loading ? (
@@ -94,8 +111,13 @@ export default function DashboardScreen() {
           {/* Trial Banner */}
           <TrialBanner onUpgrade={() => setPaywallOpen(true)} />
 
+          {/* ── Date navigation (top) ────────────────── */}
+          <div className="mt-2">
+            <DateNav date={date} onChange={handleDateChange} />
+          </div>
+
           {/* ── Greeting + Streak Badge ──────────────── */}
-          <div className="px-6 pt-6 pb-2">
+          <div className="px-6 pt-3 pb-2">
             <div className="flex items-center gap-2">
               <p className="text-label text-on-surface-variant">{t(getGreetingKey())}</p>
               {streak.currentStreak > 0 ? (
@@ -118,39 +140,17 @@ export default function DashboardScreen() {
             <h1 className="text-headline text-on-surface mt-1">{t('dashboard.summary')}</h1>
           </div>
 
-          {/* ── Date navigation ────────────────────────── */}
-          <div className="mt-1">
-            <DateNav date={date} onChange={handleDateChange} />
-          </div>
-
           {/* ── Glucose Status Card (centerpiece) ─────── */}
           <div className="mt-4">
             <DailyGlucoseCurve entries={entries} />
           </div>
 
-          {/* ── Daily Insight ──────────────────────────── */}
-          <DailyInsight entries={entries} />
-
-          {/* ── Goal Summary (tonal section) ──────────── */}
-          <div className="mx-5 mt-5 surface-section p-4">
-            <TodaySummaryBar
-              entries={entries}
-              onScanTap={() => gatedNavigate('/scan', 'scan')}
-              onHistoryTap={() => navigate('/history')}
-            />
-          </div>
-
-          {/* ── Consejos del Día ───────────────────────── */}
-          <div className="mt-8">
-            <div className="px-6 mb-3">
-              <h2 className="text-headline text-on-surface">{t('dashboard.tips')}</h2>
-            </div>
-            <TipCarousel />
-          </div>
+          {/* ── Axolotl Tip ────────────────────────────── */}
+          <AxolotlTip />
 
           {/* ── Escaneos Recientes ─────────────────────── */}
           <div className="px-6 mt-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-1">
               <h2 className="text-headline text-on-surface">{t('dashboard.recent')}</h2>
               {entries.length > 0 && (
                 <button
@@ -161,6 +161,7 @@ export default function DashboardScreen() {
                 </button>
               )}
             </div>
+            <DailyInsight entries={entries} />
             {entries.length > 0 ? (
               <FoodLogList
                 entries={entries.slice(0, 3)}
