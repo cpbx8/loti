@@ -57,7 +57,7 @@
 /* ── Base Typography ── */
 body {
   margin: 0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-surface);
@@ -88,15 +88,20 @@ html {
   font-weight: 800;
   line-height: 1.0;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .text-headline {
+  font-family: "Fraunces", Georgia, serif;
+  font-optical-sizing: auto;
   font-size: 1.5rem;    /* 24px — The Narrative */
   font-weight: 600;
   line-height: 1.25;
 }
 
 .text-title {
+  font-family: "Fraunces", Georgia, serif;
+  font-optical-sizing: auto;
   font-size: 1.125rem;  /* 18px — The Context */
   font-weight: 600;
   line-height: 1.3;
