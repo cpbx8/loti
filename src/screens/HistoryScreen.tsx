@@ -40,8 +40,16 @@ export default function HistoryScreen() {
 
   return (
     <div className="flex flex-1 flex-col bg-surface">
-      <header className="flex items-center border-b border-border bg-card px-5 py-3">
-        <h1 className="text-xl font-bold text-text-primary">Historial</h1>
+      <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
+        <button
+          onClick={() => navigate('/')}
+          className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h1 className="ml-2 text-title text-on-surface">Historial</h1>
       </header>
 
       {/* Week navigator */}
