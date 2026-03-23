@@ -124,6 +124,7 @@ interface IngredientRowProps {
 
 function IngredientRow({ item, onUpdateGrams, onRemove }: IngredientRowProps) {
   const thresholds = useThresholds()
+  const { t } = useLanguage()
   const [editing, setEditing] = useState(false)
   const [gramsInput, setGramsInput] = useState(String(Math.round(item.serving_size)))
   const inputRef = useRef<HTMLInputElement>(null)
