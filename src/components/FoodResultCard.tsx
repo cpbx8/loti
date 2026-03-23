@@ -9,6 +9,7 @@ import GlucoseSpikeCurve from './GlucoseSpikeCurve'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import FatSecretAttribution from './FatSecretAttribution'
 import { estimateSwapGL } from '@/lib/glucoseModel'
+import { useFavorites } from '@/hooks/useFavorites'
 
 // ─── Impact labels ───────────────────────────────────────────
 
@@ -59,6 +60,9 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
   const [quantity, setQuantity] = useState(1)
   const displayName = r.name_es || r.name_en || ''
   const thresholds = useThresholds()
+  const { add: addFavorite, isFavorite, remove: removeFavorite, favorites } = useFavorites()
+  const foodName = r.name_en || r.name_es || ''
+  const isFav = isFavorite(foodName)
 
   // Scale values by quantity
   const q = quantity
@@ -239,6 +243,50 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
           )}
         </div>
       )}
+
+      {/* ── Favorite button ─────────────────────────── */}
+      <button
+        onClick={() => {
+          if (isFav) {
+            const fav = favorites.find(f => f.food_name.toLowerCase() === foodName.toLowerCase())
+            if (fav) removeFavorite(fav.id)
+          } else {
+            addFavorite({
+              food_name: foodName,
+              category: '',
+              calories_kcal: r.calories,
+              protein_g: r.protein_g,
+              carbs_g: r.carbs_g,
+              fat_g: r.fat_g,
+              fiber_g: r.fiber_g ?? null,
+              serving_size_g: r.serving_size,
+              serving_label: r.serving_description ?? null,
+              glycemic_index: r.glycemic_index ?? null,
+              glycemic_load: r.glycemic_load ?? null,
+              traffic_light: r.traffic_light ?? 'green',
+              confidence: r.confidence < 0.6 ? 'low' : r.confidence < 0.85 ? 'medium' : 'high',
+              gi_source: r.gi_source ?? 'estimated',
+              swap_suggestion: r.swap_suggestion ?? null,
+              disclaimer: 'AI-estimated',
+              input_method: 'text_input',
+              quantity: quantity,
+              per_unit_gl: r.glycemic_load ?? null,
+              matched_food_id: r.id ?? null,
+              match_method: r.source,
+            })
+          }
+        }}
+        className={`flex items-center justify-center gap-2 w-full rounded-full py-3 min-h-[48px] transition-colors ${
+          isFav
+            ? 'bg-primary/10 text-primary'
+            : 'ghost-border text-on-surface-variant hover:bg-surface-container-high'
+        }`}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={isFav ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <span className="text-body font-medium">{isFav ? 'En favoritos' : 'Guardar en favoritos'}</span>
+      </button>
 
       {/* ── Disclaimer ─────────────────────────────── */}
       <p className="text-label text-text-tertiary font-normal normal-case tracking-normal text-center leading-relaxed">

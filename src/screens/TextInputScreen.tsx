@@ -140,7 +140,7 @@ export default function TextInputScreen() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
-        <p className="text-lg text-text-secondary">Looking up "{input}"...</p>
+        <p className="text-lg text-text-secondary">Buscando "{input}"...</p>
       </div>
     )
   }
@@ -150,23 +150,22 @@ export default function TextInputScreen() {
     return (
       <div className="flex flex-1 flex-col bg-surface">
         <header className="flex items-center border-b border-border bg-card px-5 py-3">
-          <button onClick={() => navigate('/')} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+          <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back
           </button>
-          <h1 className="ml-3 text-lg font-bold text-text-primary">Text Input</h1>
+          <h1 className="ml-2 text-title text-on-surface">Buscar Alimento</h1>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <div className="rounded-xl bg-error/10 px-4 py-3">
-            <p className="text-sm text-error">{search.error}</p>
+          <div className="rounded-2xl bg-error/10 px-4 py-3">
+            <p className="text-body text-error">{search.error}</p>
           </div>
           <button
             onClick={handleTryAnother}
-            className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[44px]"
+            className="ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
           >
-            Try Again
+            Intentar de nuevo
           </button>
         </div>
       </div>
@@ -177,26 +176,25 @@ export default function TextInputScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface">
       <header className="flex items-center border-b border-border bg-card px-5 py-3">
-        <button onClick={() => navigate('/')} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
+        <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-text-primary">Text Input</h1>
+        <h1 className="ml-2 text-title text-on-surface">Buscar Alimento</h1>
       </header>
 
       <div className="flex flex-1 flex-col gap-4 p-5">
-        <p className="text-sm text-text-secondary">
-          Type a food name to look it up
+        <p className="text-body text-on-surface-variant">
+          Escribe lo que comiste o quieres buscar
         </p>
 
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g., tacos al pastor, cheesecake, banana"
+          placeholder="ej. tacos al pastor, cheesecake, banana"
           rows={3}
-          className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-base text-text-primary placeholder-text-tertiary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 shadow-sm"
+          className="w-full resize-none rounded-2xl bg-surface-container-low px-4 py-3 text-body text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
@@ -208,18 +206,18 @@ export default function TextInputScreen() {
         <button
           onClick={handleSubmit}
           disabled={input.trim().length < 2}
-          className="w-full rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white disabled:opacity-40 hover:bg-primary-dark min-h-[44px]"
+          className="w-full btn-gradient min-h-[48px] disabled:opacity-40"
         >
-          Look Up
+          Buscar
         </button>
 
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-medium text-text-tertiary">Examples:</p>
+          <p className="text-label text-on-surface-variant">Ejemplos:</p>
           {['tacos al pastor', 'banana', 'arroz con leche', 'cheesecake'].map((example) => (
             <button
               key={example}
               onClick={() => { setInput(example); search.reset(); setSelected(null) }}
-              className="block w-full rounded-xl border border-border bg-card px-3 py-2.5 text-left text-sm text-text-secondary hover:border-primary hover:text-primary min-h-[44px]"
+              className="block w-full surface-card px-4 py-3 text-left text-body text-on-surface hover:ring-1 hover:ring-primary/30 min-h-[44px]"
             >
               {example}
             </button>
