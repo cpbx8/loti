@@ -326,7 +326,7 @@ export default function SettingsScreen() {
               <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Estado</p>
               <p className="text-sm font-medium text-text-primary mt-0.5">
                 {sub.is_premium
-                  ? `Premium (${sub.subscription_type})`
+                  ? (sub.subscription_type ? `Premium (${sub.subscription_type})` : 'Premium')
                   : sub.isTrialActive
                     ? `Prueba gratuita — ${sub.trialDaysRemaining} día${sub.trialDaysRemaining !== 1 ? 's' : ''} restante${sub.trialDaysRemaining !== 1 ? 's' : ''}`
                     : 'Prueba expirada'}
