@@ -31,8 +31,8 @@ export default function HistoryScreen() {
   const weekTotal = allEntries.length
 
   return (
-    <div className="flex flex-1 flex-col bg-surface">
-      <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
+    <div className="flex flex-1 flex-col bg-surface min-h-0">
+      <header className="glass flex items-center px-5 py-3 z-10 flex-shrink-0">
         <button
           onClick={() => navigate('/')}
           className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center"
@@ -45,7 +45,7 @@ export default function HistoryScreen() {
       </header>
 
       {/* Week navigator */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card flex-shrink-0">
         <button onClick={goBack} className="rounded-lg p-2 text-text-secondary hover:bg-surface min-h-[44px] min-w-[44px] flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -70,7 +70,7 @@ export default function HistoryScreen() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-5 pb-24">
           {/* Weekly GI breakdown */}
           <div className="mb-6">
             <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Weekly Impact</p>

@@ -56,7 +56,7 @@ export default function DashboardScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-0">
       {/* ── Header: glass nav with botanical accent ── */}
-      <header className="glass sticky top-0 z-10 px-6 py-3">
+      <header className="glass z-10 px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {/* Botanical logo mark — stylized leaf/flower */}

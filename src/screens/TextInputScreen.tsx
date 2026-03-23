@@ -66,7 +66,7 @@ export default function TextInputScreen() {
 
     return (
       <div className="flex flex-1 flex-col bg-surface min-h-0">
-        <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
+        <header className="glass flex items-center px-5 py-3 z-10 flex-shrink-0">
           <button onClick={handleTryAnother} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
