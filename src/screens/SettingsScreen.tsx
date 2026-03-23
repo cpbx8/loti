@@ -166,7 +166,7 @@ export default function SettingsScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-xl font-bold text-text-primary">{t('settings.title')}</h1>
+        <h1 className="text-title text-on-surface">{t('settings.title')}</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto pb-10">

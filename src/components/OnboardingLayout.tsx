@@ -61,11 +61,11 @@ export default function OnboardingLayout({ children, hideProgress, hideBack }: P
 // ─── Reusable sub-components ─────────────────────────────────
 
 export function OnboardingHeadline({ children }: { children: ReactNode }) {
-  return <h1 className="mt-6 text-center text-xl font-semibold text-text-primary">{children}</h1>
+  return <h1 className="mt-6 text-center text-headline text-on-surface">{children}</h1>
 }
 
 export function OnboardingSubtext({ children }: { children: ReactNode }) {
-  return <p className="mt-2 text-center text-base text-text-secondary">{children}</p>
+  return <p className="mt-2 text-center text-body text-on-surface-variant">{children}</p>
 }
 
 export function OnboardingCTA({

@@ -9,11 +9,11 @@ export default function WelcomeScreen() {
     <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-primary/10 to-surface min-h-[100svh] px-8">
       <LotiMascot expression="welcome" size="xl" className="mb-8" />
 
-      <h1 className="text-center text-2xl font-bold text-text-primary leading-tight">
+      <h1 className="text-headline text-center text-on-surface">
         See how your food affects your glucose
       </h1>
 
-      <p className="mt-3 text-center text-base text-text-secondary leading-relaxed">
+      <p className="mt-3 text-body text-center text-on-surface-variant">
         Snap a photo. Get an instant red/yellow/green rating.
       </p>
 
