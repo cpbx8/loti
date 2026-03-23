@@ -40,7 +40,9 @@ Rules:
 - A torta = bolillo bread + filling + typical toppings
 - Enchiladas = tortilla + filling + sauce + cheese
 - Be realistic about portion sizes in grams
-- Include oils/fats if fried (e.g., "aceite para freir" for fried items)
+- Only include ingredients that are CORE to the dish — no cooking oils, seasonings, or garnishes unless the user explicitly mentioned them
+- Example: "pasta with meatballs" → [pasta, meatballs] — do NOT add olive oil, salt, garlic, or parsley
+- Example: "tacos al pastor" → [tortilla, pork al pastor, pineapple, onion, cilantro] — include typical toppings but NOT cooking oil
 - Keep it to the main components — don't list trace ingredients like salt
 - Maximum 6 components per dish
 - The name should be searchable in nutrition databases like FatSecret`
