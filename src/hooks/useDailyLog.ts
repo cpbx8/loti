@@ -213,11 +213,11 @@ function getEntriesForDate(allEntries: FoodLogEntry[], dateStr: string): FoodLog
 }
 
 function buildWeeklyData(allEntries: FoodLogEntry[], startDate: string) {
-  const days: Array<{ date: string; totals: DailyTotals }> = []
+  const days: Array<{ date: string; totals: DailyTotals; entries: FoodLogEntry[] }> = []
   for (let i = 0; i < 7; i++) {
     const d = shiftDate(startDate, i)
     const dayEntries = getEntriesForDate(allEntries, d)
-    days.push({ date: d, totals: computeTotals(dayEntries) })
+    days.push({ date: d, totals: computeTotals(dayEntries), entries: dayEntries })
   }
 
   const daysWithData = days.filter(d => d.totals.scan_count > 0)

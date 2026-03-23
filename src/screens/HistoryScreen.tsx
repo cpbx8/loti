@@ -22,16 +22,8 @@ export default function HistoryScreen() {
   const goBack = () => setWeekEnd(shiftDate(weekEnd, -7))
   const goForward = () => { if (canGoForward) setWeekEnd(shiftDate(weekEnd, 7)) }
 
-  // Compute weekly GI stats from all entries
-  const allEntries = days.flatMap(d => {
-    // We need entries — load them from localStorage for each day
-    const LOG_KEY = 'loti_food_log'
-    try {
-      const raw = localStorage.getItem(LOG_KEY)
-      const entries: FoodLogEntry[] = raw ? JSON.parse(raw) : []
-      return entries.filter(e => e.created_at.startsWith(d.date))
-    } catch { return [] }
-  })
+  // Compute weekly GI stats from all entries (from SQLite via hook)
+  const allEntries = days.flatMap(d => d.entries)
 
   const weekGreen = allEntries.filter(e => getEntryTL(e, thresholds) === 'green').length
   const weekYellow = allEntries.filter(e => getEntryTL(e, thresholds) === 'yellow').length
@@ -122,7 +114,7 @@ export default function HistoryScreen() {
                     <span className="text-xs text-text-tertiary">
                       {count > 0 ? count : ''}
                     </span>
-                    <DayBar date={day.date} thresholds={thresholds} />
+                    <DayBar entries={day.entries} thresholds={thresholds} />
                     <span className="text-xs text-text-tertiary">{dayLabel}</span>
                   </div>
                 )
@@ -162,10 +154,9 @@ export default function HistoryScreen() {
             <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Day by Day</p>
             <div className="space-y-2">
               {[...days].reverse().map(day => {
-                const dayEntries = getDayEntries(day.date)
-                const green = dayEntries.filter(e => getEntryTL(e, thresholds) === 'green').length
-                const yellow = dayEntries.filter(e => getEntryTL(e, thresholds) === 'yellow').length
-                const red = dayEntries.filter(e => getEntryTL(e, thresholds) === 'red').length
+                const green = day.entries.filter(e => getEntryTL(e, thresholds) === 'green').length
+                const yellow = day.entries.filter(e => getEntryTL(e, thresholds) === 'yellow').length
+                const red = day.entries.filter(e => getEntryTL(e, thresholds) === 'red').length
 
                 return (
                   <button
@@ -199,18 +190,8 @@ export default function HistoryScreen() {
   )
 }
 
-/** Load entries for a specific date from localStorage */
-function getDayEntries(date: string): FoodLogEntry[] {
-  try {
-    const raw = localStorage.getItem('loti_food_log')
-    const entries: FoodLogEntry[] = raw ? JSON.parse(raw) : []
-    return entries.filter(e => e.created_at.startsWith(date))
-  } catch { return [] }
-}
-
 /** Stacked GI bar for a single day */
-function DayBar({ date, thresholds }: { date: string; thresholds: { greenMax: number; yellowMax: number } }) {
-  const entries = getDayEntries(date)
+function DayBar({ entries, thresholds }: { entries: FoodLogEntry[]; thresholds: { greenMax: number; yellowMax: number } }) {
   const total = entries.length
   if (total === 0) {
     return <div className="w-full rounded-t bg-border" style={{ height: '4px' }} />
