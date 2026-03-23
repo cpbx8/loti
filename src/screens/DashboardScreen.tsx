@@ -38,15 +38,6 @@ export default function DashboardScreen() {
     else setSearchParams({ date: newDate })
   }
 
-  const gatedNavigate = (path: string, feature: 'scan' | 'barcode' | 'text') => {
-    const perm = sub.checkScanPermission()
-    if (!perm.allowed) {
-      setPaywallFeature(feature)
-      setPaywallOpen(true)
-      return
-    }
-    navigate(path)
-  }
 
   const openAI = () => {
     const perm = sub.checkScanPermission()

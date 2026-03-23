@@ -149,7 +149,14 @@
       "Skill(plan-eng-review:*)",
       "Skill(plan-design-review)",
       "Skill(plan-design-review:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(grep -r \"X-API-Key\\\\|x-api-key\\\\|apiKey\\\\|api_key\\\\|FATSECRET\\\\|OPENAI\\\\|sk-\" --include=*.ts --include=*.tsx --include=*.json --include=*.env* -l .)",
+      "Read(//opt/homebrew/Cellar/postgresql@17/17.9/bin/**)",
+      "Read(//usr/local/opt/postgresql@17/bin/**)",
+      "Bash(export PATH=\"/opt/homebrew/opt/postgresql@17/bin:$PATH\")",
+      "Bash(npx paperclipai:*)",
+      "Bash(ln -s libzstd.1.5.7.dylib /Users/cayden/.npm/_npx/43414d9b790239bb/node_modules/@embedded-postgres/darwin-arm64/native/lib/libzstd.1.dylib)",
+      "mcp__mcp-registry__search_mcp_registry"
     ]
   }
 }
