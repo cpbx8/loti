@@ -89,6 +89,9 @@ const translations: Record<Language, Record<string, string>> = {
     'result.min': 'min',
     'result.returnsBase': 'Vuelve a tu base en',
     'result.hrs': 'hrs',
+    'result.actual': 'Actual',
+    'result.alternative': 'Alternativa',
+    'result.less': 'menos',
 
     // Editable meal
     'meal.ingredients': 'Ingredientes',
@@ -279,6 +282,9 @@ const translations: Record<Language, Record<string, string>> = {
     'result.min': 'min',
     'result.returnsBase': 'Returns to baseline in',
     'result.hrs': 'hrs',
+    'result.actual': 'Actual',
+    'result.alternative': 'Alternative',
+    'result.less': 'less',
 
     // Editable meal
     'meal.ingredients': 'Ingredients',

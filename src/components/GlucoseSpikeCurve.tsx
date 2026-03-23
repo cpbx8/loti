@@ -12,6 +12,7 @@
 import { useMemo } from 'react'
 import type { TrafficLight } from '@/types/shared'
 import { useProfile } from '@/hooks/useProfile'
+import { useLanguage } from '@/lib/i18n'
 import {
   generateGlucoseCurve,
   getCurveParams,
@@ -55,6 +56,7 @@ const CURVE_COLORS: Record<TrafficLight, string> = {
 
 export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className }: Props) {
   const { profile } = useProfile()
+  const { t } = useLanguage()
   const healthState = profile?.health_state || 'healthy'
   const curveColor = CURVE_COLORS[trafficLight]
 
@@ -121,7 +123,7 @@ export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className 
   return (
     <div className={`surface-card p-4 ${className ?? ''}`}>
       <p className="text-label text-on-surface-variant mb-2">
-        Tu respuesta de glucosa estimada
+        {t('result.glucoseResponse')}
       </p>
 
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="xMidYMid meet">
@@ -179,13 +181,13 @@ export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className 
 
         {/* X axis label */}
         <text x={w / 2} y={h + 2} textAnchor="middle" fontSize={8} fill="#BBB">
-          minutos
+          {t('result.min')}
         </text>
       </svg>
 
       {/* Summary */}
       <p className="text-[12px] text-text-secondary mt-1 leading-snug">
-        Pico estimado: {Math.round(peak)} mg/dL a los {params.timeToPeak} min. Vuelve cerca de tu base en ~{returnHrs} hrs.
+        {t('result.peakEstimate')} {Math.round(peak)} mg/dL {t('result.atMinutes')} {params.timeToPeak} {t('result.min')}. {t('result.returnsBase')} ~{returnHrs} {t('result.hrs')}.
       </p>
 
       {/* Comparison legend */}
@@ -193,21 +195,21 @@ export default function GlucoseSpikeCurve({ gl, trafficLight, swapGL, className 
         <div className="mt-2 flex items-center gap-3 text-[11px]">
           <span className="flex items-center gap-1">
             <span className="inline-block h-2 w-4 rounded-sm" style={{ backgroundColor: curveColor }} />
-            Actual: {Math.round(peak)} mg/dL
+            {t('result.actual')}: {Math.round(peak)} mg/dL
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-0.5 w-4 rounded-sm bg-tl-green-fill" style={{ borderTop: '2px dashed #2ECC71' }} />
-            Alternativa: {Math.round(swapPeak)} mg/dL
+            {t('result.alternative')}: {Math.round(swapPeak)} mg/dL
           </span>
           <span className="font-semibold text-tl-green-fill">
-            → {reduction}% menos
+            → {reduction}% {t('result.less')}
           </span>
         </div>
       )}
 
       {/* Disclaimer */}
       <p className="text-[10px] text-text-tertiary mt-1.5">
-        Estimación basada en tu perfil. No reemplaza monitoreo real (CGM).
+        {t('result.disclaimer')}
       </p>
     </div>
   )
