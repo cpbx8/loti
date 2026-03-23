@@ -240,7 +240,7 @@ export default function EditableMealCard({ total, initialComponents, onLog }: Ed
   return (
     <div className="flex flex-col gap-5">
       {/* ── Full result card with GL hero, glucose curve, macros ── */}
-      <FoodResultCard result={liveTotal} showSource={false} />
+      <FoodResultCard result={liveTotal} showSource={false} compact />
 
       {/* ── Editable ingredients ── */}
       <div>
@@ -273,6 +273,11 @@ export default function EditableMealCard({ total, initialComponents, onLog }: Ed
           {t('meal.logMeal')} ({components.length})
         </button>
       )}
+
+      {/* ── Disclaimer (at very bottom) ── */}
+      <p className="text-label text-text-tertiary font-normal normal-case tracking-normal text-center leading-relaxed">
+        {t('result.disclaimer')}
+      </p>
     </div>
   )
 }

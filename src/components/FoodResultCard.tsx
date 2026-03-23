@@ -54,10 +54,11 @@ const SOURCE_INFO: Record<string, { label: string }> = {
 interface FoodResultCardProps {
   result: FoodSearchResult
   showSource?: boolean
+  compact?: boolean
   onQuantityChange?: (qty: number, scaled: FoodSearchResult) => void
 }
 
-export function FoodResultCard({ result: r, showSource = true, onQuantityChange }: FoodResultCardProps) {
+export function FoodResultCard({ result: r, showSource = true, compact = false, onQuantityChange }: FoodResultCardProps) {
   const [quantity, setQuantity] = useState(1)
   const displayName = r.name_es || r.name_en || ''
   const thresholds = useThresholds()
@@ -249,7 +250,7 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
       )}
 
       {/* ── Favorite button ─────────────────────────── */}
-      <button
+      {!compact && <button
         onClick={() => {
           if (isFav) {
             const fav = favorites.find(f => f.food_name.toLowerCase() === foodName.toLowerCase())
@@ -290,12 +291,14 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
         <span className="text-body font-medium">{isFav ? t('result.inFavorites') : t('result.saveFavorite')}</span>
-      </button>
+      </button>}
 
       {/* ── Disclaimer ─────────────────────────────── */}
-      <p className="text-label text-text-tertiary font-normal normal-case tracking-normal text-center leading-relaxed">
-        {t('result.disclaimer')}
-      </p>
+      {!compact && (
+        <p className="text-label text-text-tertiary font-normal normal-case tracking-normal text-center leading-relaxed">
+          {t('result.disclaimer')}
+        </p>
+      )}
     </div>
   )
 }
