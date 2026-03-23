@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { useCamera } from '@/hooks/useCamera'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
-import { useDailyLog } from '@/hooks/useDailyLog'
-import { FoodResultCard, FoodResultList, SearchMeta } from '@/components/FoodResultCard'
+import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
+import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
+import { useLanguage } from '@/lib/i18n'
+import EditableMealCard from '@/components/EditableMealCard'
 import type { FoodSearchResult } from '@/types/shared'
 import { useState, useEffect, useRef } from 'react'
 
@@ -55,6 +57,7 @@ export default function ScanScreen() {
   const camera = useCamera()
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
+  const { t } = useLanguage()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
 
   const isAnalyzing = search.state === 'loading'
@@ -84,17 +87,7 @@ export default function ScanScreen() {
   const handleLog = () => {
     const item = selected ?? search.topResult
     if (!item) return
-    addEntry({
-      food_name: item.name_en || item.name_es,
-      calories_kcal: item.calories,
-      protein_g: item.protein_g,
-      carbs_g: item.carbs_g,
-      fat_g: item.fat_g,
-      fiber_g: item.fiber_g ?? null,
-      glycemic_load: item.glycemic_load ?? null,
-      serving_size_g: item.serving_size,
-      input_method: 'photo_scan',
-    })
+    addEntry(toLogEntry(item, 'photo_scan'))
     camera.reset()
     search.reset()
     setSelected(null)
@@ -103,17 +96,7 @@ export default function ScanScreen() {
 
   const handleLogAll = () => {
     for (const item of search.results) {
-      addEntry({
-        food_name: item.name_en || item.name_es,
-        calories_kcal: item.calories,
-        protein_g: item.protein_g,
-        carbs_g: item.carbs_g,
-        fat_g: item.fat_g,
-        fiber_g: item.fiber_g ?? null,
-        glycemic_load: item.glycemic_load ?? null,
-        serving_size_g: item.serving_size,
-        input_method: 'photo_scan',
-      })
+      addEntry(toLogEntry(item, 'photo_scan'))
     }
     camera.reset()
     search.reset()
@@ -126,10 +109,21 @@ export default function ScanScreen() {
     setSelected(null)
   }
 
+  const handleLogComposite = (components: FoodSearchResult[]) => {
+    for (const item of components) {
+      addEntry(toLogEntry(item, 'photo_scan'))
+    }
+    camera.reset()
+    search.reset()
+    setSelected(null)
+    navigate('/')
+  }
+
   // ─── Result view ──────────────────────────────────────────
   if (search.state === 'done' && search.results.length > 0) {
     const display = selected ?? search.topResult!
-    const multiple = search.results.length > 1
+    const composite = isCompositeResult(search.results)
+    const multiple = search.results.length > 1 && !composite
 
     return (
       <div className="flex flex-1 flex-col bg-surface">
@@ -149,7 +143,13 @@ export default function ScanScreen() {
             </div>
           )}
 
-          {multiple ? (
+          {composite ? (
+            <EditableMealCard
+              mealName={search.results[0].name_es || search.results[0].name_en || ''}
+              initialComponents={search.results.slice(1)}
+              onLog={handleLogComposite}
+            />
+          ) : multiple ? (
             <>
               <FoodResultList
                 results={search.results}
@@ -169,29 +169,31 @@ export default function ScanScreen() {
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
-        <div className="flex gap-3 glass p-4 sticky bottom-0">
-          <button
-            onClick={handleScanAnother}
-            className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
-          >
-            Escanear otro
-          </button>
-          {multiple ? (
+        {!composite && (
+          <div className="flex gap-3 glass p-4 sticky bottom-0">
             <button
-              onClick={selected ? handleLog : handleLogAll}
-              className="flex-1 btn-gradient min-h-[48px]"
+              onClick={handleScanAnother}
+              className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
             >
-              {selected ? 'Registrar selección' : 'Registrar todo'}
+              {t('text.searchAnother')}
             </button>
-          ) : (
-            <button
-              onClick={handleLog}
-              className="flex-1 btn-gradient min-h-[48px]"
-            >
-              Registrar
-            </button>
-          )}
-        </div>
+            {multiple ? (
+              <button
+                onClick={selected ? handleLog : handleLogAll}
+                className="flex-1 btn-gradient min-h-[48px]"
+              >
+                {selected ? t('text.logSelected') : t('text.logAll')}
+              </button>
+            ) : (
+              <button
+                onClick={handleLog}
+                className="flex-1 btn-gradient min-h-[48px]"
+              >
+                {t('text.log')}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     )
   }

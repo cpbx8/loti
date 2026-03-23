@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { TrafficLight } from '@/types/shared'
+import type { TrafficLight, FoodSearchResult } from '@/types/shared'
 import * as queries from '@/db/queries'
 
 export interface DailyTotals {
@@ -61,6 +61,21 @@ export function shiftDate(dateStr: string, days: number): string {
   const d = new Date(dateStr + 'T12:00:00')
   d.setDate(d.getDate() + days)
   return formatDate(d)
+}
+
+/** Convert a FoodSearchResult to a NewLogEntry */
+export function toLogEntry(item: FoodSearchResult, inputMethod: string): NewLogEntry {
+  return {
+    food_name: item.name_en || item.name_es,
+    calories_kcal: item.calories,
+    protein_g: item.protein_g,
+    carbs_g: item.carbs_g,
+    fat_g: item.fat_g,
+    fiber_g: item.fiber_g ?? null,
+    glycemic_load: item.glycemic_load ?? null,
+    serving_size_g: item.serving_size,
+    input_method: inputMethod,
+  }
 }
 
 /** Check if a date string is today */
