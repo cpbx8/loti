@@ -112,7 +112,7 @@ export default function TabBar() {
                 : 'btn-gradient !p-0'
             }`}
             style={!menuOpen ? { boxShadow: '0px 12px 32px rgba(166, 47, 74, 0.25)' } : { boxShadow: '0px 12px 32px rgba(26, 28, 27, 0.15)' }}
-            aria-label={menuOpen ? 'Cerrar menú' : 'Agregar alimento'}
+            aria-label={menuOpen ? t('common.closeMenu') : t('common.addFood')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

@@ -188,7 +188,7 @@ export default function DashboardScreen() {
           onClick={openAI}
           className="btn-gradient flex h-14 w-14 items-center justify-center !p-0 !rounded-full"
           style={{ boxShadow: '0px 12px 32px rgba(166, 47, 74, 0.25)' }}
-          aria-label="Ideas de comida con IA"
+          aria-label={t('common.aiMealIdeas')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />

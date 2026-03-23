@@ -184,6 +184,9 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Common
     'common.back': 'Volver',
+    'common.closeMenu': 'Cerrar menú',
+    'common.addFood': 'Agregar alimento',
+    'common.aiMealIdeas': 'Ideas de comida con IA',
   },
 
   en: {
@@ -359,6 +362,9 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Common
     'common.back': 'Back',
+    'common.closeMenu': 'Close menu',
+    'common.addFood': 'Add food',
+    'common.aiMealIdeas': 'AI meal ideas',
   },
 }
 

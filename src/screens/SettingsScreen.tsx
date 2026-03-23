@@ -34,8 +34,8 @@ const ACTIVITY_OPTIONS: { key: ActivityLevel; label: string; subtitle: string }[
   { key: 'very_active', label: 'Very active', subtitle: 'Hard exercise 6-7 days/week' },
 ]
 
-const SEX_LABELS: Record<string, string> = {
-  male: 'Masculino', female: 'Femenino', not_specified: 'Prefiero no decir',
+const SEX_LABEL_KEYS: Record<string, string> = {
+  male: 'settings.sexMale', female: 'settings.sexFemale', not_specified: 'settings.sexNotSpecified',
 }
 
 function readProfile(): ProfileData {
@@ -210,7 +210,7 @@ export default function SettingsScreen() {
                 <p className="text-sm font-medium text-text-primary mt-0.5">
                   {profile.a1cValue != null
                     ? `${profile.a1cValue}% · ${a1cRange(profile.a1cValue)}`
-                    : "Sin definir"}
+                    : t('settings.notSet')}
                 </p>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -222,29 +222,29 @@ export default function SettingsScreen() {
 
         {/* Sobre Ti — read-only summary */}
         <div className="mx-5 mt-4">
-          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Sobre Ti</h2>
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.aboutYou')}</h2>
           <div className="bg-card rounded-2xl px-4">
             {profile.age && (
               <div className="py-3 border-b border-border">
-                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Edad</p>
-                <p className="text-sm font-medium text-text-primary mt-0.5">{profile.age} años</p>
+                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.age')}</p>
+                <p className="text-sm font-medium text-text-primary mt-0.5">{profile.age} {t('settings.yearsOld')}</p>
               </div>
             )}
             {profile.sex && (
               <div className="py-3 border-b border-border">
-                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Sexo</p>
-                <p className="text-sm font-medium text-text-primary mt-0.5">{SEX_LABELS[profile.sex] ?? profile.sex}</p>
+                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.sex')}</p>
+                <p className="text-sm font-medium text-text-primary mt-0.5">{t(SEX_LABEL_KEYS[profile.sex] ?? '') || profile.sex}</p>
               </div>
             )}
-            {/* Nivel de Actividad — tappable to edit */}
+            {/* {t('settings.activityLevel')} — tappable to edit */}
             <button
               onClick={() => setShowActivityEditor(true)}
               className="flex w-full items-center justify-between py-3 min-h-[44px]"
             >
               <div>
-                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Nivel de Actividad</p>
+                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.activityLevel')}</p>
                 <p className="text-sm font-medium text-text-primary mt-0.5">
-                  {ACTIVITY_OPTIONS.find(a => a.key === profile.activityLevel)?.label ?? 'Sin definir'}
+                  {ACTIVITY_OPTIONS.find(a => a.key === profile.activityLevel)?.label ?? t('settings.notSet')}
                 </p>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -271,12 +271,12 @@ export default function SettingsScreen() {
         {/* Restricciones Alimentarias — editable */}
         <div className="mx-5 mt-4">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Restricciones Alimentarias</h2>
+            <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.dietaryRestrictions')}</h2>
             <button
               onClick={() => setShowDietaryEditor(e => !e)}
               className="text-xs font-semibold text-primary"
             >
-              {showDietaryEditor ? 'Listo' : 'Editar'}
+              {showDietaryEditor ? t('settings.done') : t('settings.edit')}
             </button>
           </div>
           <div className="bg-card rounded-2xl px-4 py-3">
@@ -289,7 +289,7 @@ export default function SettingsScreen() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-text-tertiary">Sin restricciones — toca Editar para agregar</p>
+                <p className="text-sm text-text-tertiary">{t('settings.noRestrictions')}</p>
               )
             ) : (
               // Edit mode — toggleable chips
@@ -313,30 +313,30 @@ export default function SettingsScreen() {
               </div>
             )}
             <p className="text-[10px] text-text-tertiary mt-2">
-              Las sugerencias de IA y recomendaciones respetan estas restricciones.
+              {t('settings.restrictionsNote')}
             </p>
           </div>
         </div>
 
         {/* Subscription */}
         <div className="mx-5 mt-4">
-          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Suscripción</h2>
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.subscription')}</h2>
           <div className="bg-card rounded-2xl px-4">
             <div className="py-3 border-b border-border">
-              <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Estado</p>
+              <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.status')}</p>
               <p className="text-sm font-medium text-text-primary mt-0.5">
                 {sub.is_premium
-                  ? (sub.subscription_type ? `Premium (${sub.subscription_type})` : 'Premium')
+                  ? (sub.subscription_type ? `${t('settings.premium')} (${sub.subscription_type})` : t('settings.premium'))
                   : sub.isTrialActive
-                    ? `Prueba gratuita — ${sub.trialDaysRemaining} día${sub.trialDaysRemaining !== 1 ? 's' : ''} restante${sub.trialDaysRemaining !== 1 ? 's' : ''}`
-                    : 'Prueba expirada'}
+                    ? `${t('settings.freeTrial')} — ${sub.trialDaysRemaining} ${t('settings.daysLeft')}`
+                    : t('settings.trialExpired')}
               </p>
             </div>
             {!sub.is_premium && sub.isTrialActive && (
               <div className="py-3 border-b border-border">
-                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Escaneos Hoy</p>
+                <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">{t('settings.scansToday')}</p>
                 <p className="text-sm font-medium text-text-primary mt-0.5">
-                  {sub.scans_today} / {sub.dailyScanLimit} usados · {sub.scansRemaining} restantes
+                  {sub.scans_today} / {sub.dailyScanLimit} {t('settings.used')} · {sub.scansRemaining} {t('settings.remaining')}
                 </p>
               </div>
             )}
@@ -345,7 +345,7 @@ export default function SettingsScreen() {
               className="flex w-full items-center justify-between py-3 min-h-[44px]"
             >
               <span className="text-sm font-medium text-primary">
-                {sub.is_premium ? 'Administrar suscripción' : 'Mejorar a Premium'}
+                {sub.is_premium ? t('settings.manageSubscription') : t('settings.upgradePremium')}
               </span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -356,7 +356,7 @@ export default function SettingsScreen() {
 
         {/* Dev Tools (hidden behind 5-tap on version) */}
         <div className="mx-5 mt-4">
-          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Desarrollador</h2>
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.developer')}</h2>
           <div className="bg-card rounded-2xl">
             <button
               onClick={() => {
@@ -365,7 +365,7 @@ export default function SettingsScreen() {
               }}
               className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
             >
-              <span className="text-sm text-text-primary">Reiniciar prueba (5 días nuevos)</span>
+              <span className="text-sm text-text-primary">{t('settings.resetTrial')}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
@@ -377,7 +377,7 @@ export default function SettingsScreen() {
               }}
               className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
             >
-              <span className="text-sm text-text-primary">Activar Premium (prueba)</span>
+              <span className="text-sm text-text-primary">{t('settings.activatePremium')}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
@@ -392,7 +392,7 @@ export default function SettingsScreen() {
               }}
               className="flex w-full items-center justify-between px-4 py-3.5 min-h-[44px]"
             >
-              <span className="text-sm text-text-primary">Expirar prueba (probar paywall)</span>
+              <span className="text-sm text-text-primary">{t('settings.expireTrial')}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -402,13 +402,13 @@ export default function SettingsScreen() {
 
         {/* Actions */}
         <div className="mx-5 mt-6">
-          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Acciones</h2>
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.actions')}</h2>
           <div className="bg-card rounded-2xl">
             <button
               onClick={() => navigate('/onboarding')}
               className="flex w-full items-center justify-between px-4 py-3.5 border-b border-border min-h-[44px]"
             >
-              <span className="text-sm text-text-primary">Repetir onboarding</span>
+              <span className="text-sm text-text-primary">{t('settings.redoOnboarding')}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -417,7 +417,7 @@ export default function SettingsScreen() {
               onClick={() => setShowClearConfirm(true)}
               className="flex w-full items-center justify-between px-4 py-3.5 min-h-[44px]"
             >
-              <span className="text-sm text-red-500">Borrar datos y resetear</span>
+              <span className="text-sm text-red-500">{t('settings.clearData')}</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -475,12 +475,12 @@ export default function SettingsScreen() {
         </div>
       )}
 
-      {/* Nivel de Actividad editor modal */}
+      {/* {t('settings.activityLevel')} editor modal */}
       {showActivityEditor && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={() => setShowActivityEditor(false)}>
           <div className="w-full max-w-[430px] bg-card rounded-t-2xl p-5 pb-8 shadow-xl animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
-            <h3 className="text-lg font-bold text-text-primary mb-4">Nivel de Actividad</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-4">{t('settings.activityLevel')}</h3>
             <div className="space-y-2">
               {ACTIVITY_OPTIONS.map(opt => (
                 <button
