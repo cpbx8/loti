@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
-import { useDailyLog } from '@/hooks/useDailyLog'
+import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
 import { useLanguage } from '@/lib/i18n'
-import { FoodResultCard, FoodResultList, CompositeResultCard, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
+import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
+import EditableMealCard from '@/components/EditableMealCard'
 import type { FoodSearchResult } from '@/types/shared'
 
 export default function TextInputScreen() {
@@ -25,17 +26,7 @@ export default function TextInputScreen() {
   const handleLog = () => {
     const item = scaledResult ?? selected ?? search.topResult
     if (!item) return
-    addEntry({
-      food_name: item.name_en || item.name_es,
-      calories_kcal: item.calories,
-      protein_g: item.protein_g,
-      carbs_g: item.carbs_g,
-      fat_g: item.fat_g,
-      fiber_g: item.fiber_g ?? null,
-      glycemic_load: item.glycemic_load ?? null,
-      serving_size_g: item.serving_size,
-      input_method: 'text_input',
-    })
+    addEntry(toLogEntry(item, 'text_input'))
     search.reset()
     setSelected(null)
     setInput('')
@@ -44,16 +35,16 @@ export default function TextInputScreen() {
 
   const handleLogAll = () => {
     for (const item of search.results) {
-      addEntry({
-        food_name: item.name_en || item.name_es,
-        calories_kcal: item.calories,
-        protein_g: item.protein_g,
-        carbs_g: item.carbs_g,
-        fat_g: item.fat_g,
-        fiber_g: item.fiber_g ?? null,
-        serving_size_g: item.serving_size,
-        input_method: 'text_input',
-      })
+      addEntry(toLogEntry(item, 'text_input'))
+    }
+    search.reset()
+    setInput('')
+    navigate('/')
+  }
+
+  const handleLogComposite = (components: FoodSearchResult[]) => {
+    for (const item of components) {
+      addEntry(toLogEntry(item, 'text_input'))
     }
     search.reset()
     setInput('')
@@ -86,9 +77,10 @@ export default function TextInputScreen() {
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
           {composite ? (
-            <CompositeResultCard
-              total={search.results[0]}
-              components={search.results.slice(1)}
+            <EditableMealCard
+              mealName={search.results[0].name_es || search.results[0].name_en || ''}
+              initialComponents={search.results.slice(1)}
+              onLog={handleLogComposite}
             />
           ) : multiple ? (
             <>
@@ -110,6 +102,7 @@ export default function TextInputScreen() {
           <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
         </div>
 
+        {!composite && (
         <div className="flex gap-3 glass p-4 sticky bottom-0">
           <button
             onClick={handleTryAnother}
@@ -133,6 +126,7 @@ export default function TextInputScreen() {
             </button>
           )}
         </div>
+        )}
       </div>
     )
   }

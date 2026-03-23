@@ -90,6 +90,18 @@ const translations: Record<Language, Record<string, string>> = {
     'result.returnsBase': 'Vuelve a tu base en',
     'result.hrs': 'hrs',
 
+    // Editable meal
+    'meal.ingredients': 'Ingredientes',
+    'meal.addIngredient': 'Agregar ingrediente',
+    'meal.searchPlaceholder': 'Buscar ingrediente...',
+    'meal.search': 'Buscar',
+    'meal.noResults': 'Sin resultados',
+    'meal.logMeal': 'Registrar comida',
+    'meal.emptyTitle': 'Sin ingredientes',
+    'meal.emptyDesc': 'Agrega lo que comiste para ver el impacto',
+    'meal.searchError': 'Error al buscar. Intenta de nuevo.',
+    'meal.editPortion': 'Editar porción',
+
     // Favorites
     'favorites.title': 'Favoritos',
     'favorites.empty': 'Aún no tienes favoritos',
@@ -267,6 +279,18 @@ const translations: Record<Language, Record<string, string>> = {
     'result.min': 'min',
     'result.returnsBase': 'Returns to baseline in',
     'result.hrs': 'hrs',
+
+    // Editable meal
+    'meal.ingredients': 'Ingredients',
+    'meal.addIngredient': 'Add ingredient',
+    'meal.searchPlaceholder': 'Search ingredient...',
+    'meal.search': 'Search',
+    'meal.noResults': 'No results found',
+    'meal.logMeal': 'Log meal',
+    'meal.emptyTitle': 'No ingredients',
+    'meal.emptyDesc': 'Add what you ate to see the impact',
+    'meal.searchError': 'Search failed. Try again.',
+    'meal.editPortion': 'Edit portion',
 
     // Favorites
     'favorites.title': 'Favorites',
