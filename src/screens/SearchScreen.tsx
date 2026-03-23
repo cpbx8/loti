@@ -78,7 +78,7 @@ export default function SearchScreen() {
           </svg>
           Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-text-primary">Search Food</h1>
+        <h1 className="ml-3 text-title text-on-surface">Search Food</h1>
       </header>
 
       <div className="p-4">
@@ -249,7 +249,7 @@ function ResultView({ result: r, source, cached, latencyMs, isFav, onToggleFav, 
           </svg>
           Back
         </button>
-        <h1 className="ml-3 text-lg font-bold text-text-primary truncate">{r.name_es}</h1>
+        <h1 className="ml-3 text-title text-on-surface truncate">{r.name_es}</h1>
         <button
           onClick={onToggleFav}
           className="ml-auto p-2 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"

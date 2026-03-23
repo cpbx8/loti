@@ -41,7 +41,7 @@ export default function CompositeResultCard({ total, components, onLog, onScanAn
       <div className="flex flex-col gap-5 p-5">
         {/* Header */}
         <div>
-          <h2 className="text-xl font-semibold text-text-primary">Your Meal</h2>
+          <h2 className="text-title text-on-surface">Your Meal</h2>
           <p className="text-sm text-text-secondary mt-0.5">
             {total.name_en || total.name_es}
           </p>

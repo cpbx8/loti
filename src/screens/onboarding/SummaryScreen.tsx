@@ -77,7 +77,7 @@ export default function SummaryScreen() {
 
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-[100svh] px-6 pb-8">
-      <h1 className="mt-12 text-center text-2xl font-bold text-text-primary">
+      <h1 className="mt-12 text-center text-headline text-on-surface">
         Your Loti profile is ready
       </h1>
 

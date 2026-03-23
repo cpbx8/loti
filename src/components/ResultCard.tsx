@@ -43,7 +43,7 @@ export default function ResultCard({ result: r, onScanAnother, onLog }: ResultCa
       <div className="flex flex-col gap-5 p-5">
         {/* Food name */}
         <div>
-          <h2 className="text-xl font-semibold text-text-primary">{displayName}</h2>
+          <h2 className="text-title text-on-surface">{displayName}</h2>
           {subtitle && <p className="text-sm text-text-secondary mt-0.5">{subtitle}</p>}
           <p className="text-sm text-text-tertiary mt-1">
             Per {r.serving_description ?? `${r.serving_size}${r.serving_unit}`}

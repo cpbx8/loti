@@ -84,7 +84,7 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
       </div>
 
       {/* Headline */}
-      <h1 className="text-xl font-bold text-text-primary text-center">{headline}</h1>
+      <h1 className="text-title text-on-surface text-center">{headline}</h1>
       <p className="text-sm text-text-secondary text-center mt-1 mb-6">{subtext}</p>
 
       {/* Feature list */}

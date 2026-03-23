@@ -273,7 +273,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
           {/* ── Idle State ─────────────────────────────── */}
           {state === 'idle' && (
             <div className="flex flex-col gap-5">
-              <h2 className="text-xl font-semibold text-text-primary">What should I eat?</h2>
+              <h2 className="text-title text-on-surface">What should I eat?</h2>
 
               {/* Quick-select grid */}
               <div className="grid grid-cols-2 gap-3">
@@ -340,7 +340,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
             <div className="flex flex-col gap-4">
               {/* Context header */}
               <div>
-                <h2 className="text-xl font-semibold text-text-primary">{contextHeader}</h2>
+                <h2 className="text-title text-on-surface">{contextHeader}</h2>
                 <p className="text-sm text-text-secondary mt-0.5">
                   Based on your {serverProfile?.health_state ?? loadProfile(thresholds).health_state} profile
                 </p>
