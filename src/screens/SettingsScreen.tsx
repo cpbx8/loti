@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { ActivityLevel, Sex } from '@/contexts/OnboardingContext'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useProfile } from '@/hooks/useProfile'
+import { useLanguage } from '@/lib/i18n'
 
 const STORAGE_KEY = 'loti_onboarding'
 
@@ -58,11 +59,7 @@ function saveProfile(profile: ProfileData) {
   } catch { /* ignore */ }
 }
 
-function a1cRange(value: number): string {
-  if (value < 5.7) return 'Normal'
-  if (value <= 6.4) return 'Rango prediabético'
-  return 'Rango diabético'
-}
+// a1cRange is now inline using t() — see component body
 
 export default function SettingsScreen() {
   const navigate = useNavigate()
@@ -74,6 +71,13 @@ export default function SettingsScreen() {
   const [showActivityEditor, setShowActivityEditor] = useState(false)
   const sub = useSubscription()
   const { profile: serverProfile, updateProfile: updateServerProfile } = useProfile()
+  const { language, setLanguage, t } = useLanguage()
+
+  const a1cRange = (value: number): string => {
+    if (value < 5.7) return t('settings.a1cNormal')
+    if (value <= 6.4) return t('settings.a1cPrediabetic')
+    return t('settings.a1cDiabetic')
+  }
 
   // Seed local state from server profile when available
   useEffect(() => {
@@ -162,13 +166,40 @@ export default function SettingsScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-xl font-bold text-text-primary">Settings</h1>
+        <h1 className="text-xl font-bold text-text-primary">{t('settings.title')}</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto pb-10">
-        {/* Perfil de Salud — A1C editable */}
+        {/* Language Toggle */}
         <div className="mx-5 mt-4">
-          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Perfil de Salud</h2>
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.language')}</h2>
+          <div className="bg-card rounded-2xl p-1 flex">
+            <button
+              onClick={() => setLanguage('es')}
+              className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors min-h-[40px] ${
+                language === 'es'
+                  ? 'bg-primary text-white'
+                  : 'text-text-secondary hover:bg-surface'
+              }`}
+            >
+              Español
+            </button>
+            <button
+              onClick={() => setLanguage('en')}
+              className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors min-h-[40px] ${
+                language === 'en'
+                  ? 'bg-primary text-white'
+                  : 'text-text-secondary hover:bg-surface'
+              }`}
+            >
+              English
+            </button>
+          </div>
+        </div>
+
+        {/* {t('settings.healthProfile')} — A1C editable */}
+        <div className="mx-5 mt-4">
+          <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.healthProfile')}</h2>
           <div className="bg-card rounded-2xl px-4">
             <button
               onClick={startA1cEdit}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useLanguage } from '@/lib/i18n'
 
 /** Routes where the tab bar should be hidden */
 const HIDDEN_ROUTES = ['/onboarding', '/settings', '/paywall', '/scan', '/barcode', '/text', '/search', '/weekly-report', '/privacy', '/terms']
@@ -10,6 +11,7 @@ export default function TabBar() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const sub = useSubscription()
+  const { t } = useLanguage()
 
   const isHidden = HIDDEN_ROUTES.some(r => location.pathname.startsWith(r)) ||
     location.pathname.startsWith('/store-guide')
@@ -72,7 +74,7 @@ export default function TabBar() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-text-primary">Código de barras</p>
+              <p className="text-sm font-semibold text-text-primary">{t('scan.barcode')}</p>
               <p className="text-[11px] text-text-secondary">Producto empaquetado</p>
             </div>
           </button>
@@ -108,7 +110,7 @@ export default function TabBar() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span className={`text-[10px] font-medium ${isHistory ? 'text-primary' : 'text-text-tertiary'}`}>
-            Historial
+            {t('tab.history')}
           </span>
         </button>
 
@@ -141,7 +143,7 @@ export default function TabBar() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
           <span className={`text-[10px] font-medium ${isFavorites ? 'text-primary' : 'text-text-tertiary'}`}>
-            Favoritos
+            {t('tab.favorites')}
           </span>
         </button>
       </nav>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
 import { useDailyLog } from '@/hooks/useDailyLog'
+import { useLanguage } from '@/lib/i18n'
 import { FoodResultCard, FoodResultList, CompositeResultCard, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
 import type { FoodSearchResult } from '@/types/shared'
 
@@ -9,6 +10,7 @@ export default function TextInputScreen() {
   const navigate = useNavigate()
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
+  const { t } = useLanguage()
   const [input, setInput] = useState('')
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
   const [scaledResult, setScaledResult] = useState<FoodSearchResult | null>(null)
@@ -79,7 +81,7 @@ export default function TextInputScreen() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="ml-2 text-title text-on-surface">Análisis de Alimento</h1>
+          <h1 className="ml-2 text-title text-on-surface">{t('text.analysis')}</h1>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
@@ -113,21 +115,21 @@ export default function TextInputScreen() {
             onClick={handleTryAnother}
             className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
           >
-            Buscar otro
+            {t('text.searchAnother')}
           </button>
           {multiple ? (
             <button
               onClick={selected ? handleLog : handleLogAll}
               className="flex-1 btn-gradient min-h-[48px]"
             >
-              {selected ? 'Registrar selección' : 'Registrar todo'}
+              {selected ? t('text.logSelected') : t('text.logAll')}
             </button>
           ) : (
             <button
               onClick={handleLog}
               className="flex-1 btn-gradient min-h-[48px]"
             >
-              Registrar
+              {t('text.log')}
             </button>
           )}
         </div>
@@ -140,7 +142,7 @@ export default function TextInputScreen() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-6">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" />
-        <p className="text-lg text-text-secondary">Buscando "{input}"...</p>
+        <p className="text-lg text-text-secondary">{t('text.searching')} "{input}"...</p>
       </div>
     )
   }
@@ -155,7 +157,7 @@ export default function TextInputScreen() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="ml-2 text-title text-on-surface">Buscar Alimento</h1>
+          <h1 className="ml-2 text-title text-on-surface">{t('text.title')}</h1>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           <div className="rounded-2xl bg-error/10 px-4 py-3">
@@ -165,7 +167,7 @@ export default function TextInputScreen() {
             onClick={handleTryAnother}
             className="ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
           >
-            Intentar de nuevo
+            {t('text.tryAgain')}
           </button>
         </div>
       </div>
@@ -181,18 +183,18 @@ export default function TextInputScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="ml-2 text-title text-on-surface">Buscar Alimento</h1>
+        <h1 className="ml-2 text-title text-on-surface">{t('text.title')}</h1>
       </header>
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <p className="text-body text-on-surface-variant">
-          Escribe lo que comiste o quieres buscar
+          {t('text.description')}
         </p>
 
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="ej. tacos al pastor, cheesecake, banana"
+          placeholder={t('text.placeholder')}
           rows={3}
           className="w-full resize-none rounded-2xl bg-surface-container-low px-4 py-3 text-body text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
           onKeyDown={(e) => {
@@ -208,11 +210,11 @@ export default function TextInputScreen() {
           disabled={input.trim().length < 2}
           className="w-full btn-gradient min-h-[48px] disabled:opacity-40"
         >
-          Buscar
+          {t('text.search')}
         </button>
 
         <div className="mt-4 space-y-2">
-          <p className="text-label text-on-surface-variant">Ejemplos:</p>
+          <p className="text-label text-on-surface-variant">{t('text.examples')}</p>
           {['tacos al pastor', 'banana', 'arroz con leche', 'cheesecake'].map((example) => (
             <button
               key={example}

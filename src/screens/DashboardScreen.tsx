@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLanguage } from '@/lib/i18n'
 import { useDailyLog, getToday } from '@/hooks/useDailyLog'
 import { useSubscription } from '@/hooks/useSubscription'
 import DateNav from '@/components/DateNav'
@@ -11,11 +12,11 @@ import FoodLogList from '@/components/FoodLog/FoodLogList'
 import SuggestionSheet from '@/components/SuggestionSheet'
 import PaywallScreen from '@/screens/PaywallScreen'
 
-function getGreeting(): string {
+function getGreetingKey(): string {
   const h = new Date().getHours()
-  if (h < 12) return 'Buenos días'
-  if (h < 18) return 'Buenas tardes'
-  return 'Buenas noches'
+  if (h < 12) return 'greeting.morning'
+  if (h < 18) return 'greeting.afternoon'
+  return 'greeting.evening'
 }
 
 export default function DashboardScreen() {
@@ -27,6 +28,7 @@ export default function DashboardScreen() {
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState<'scan' | 'barcode' | 'text' | 'ai_assistant' | undefined>()
   const sub = useSubscription()
+  const { t } = useLanguage()
 
   const handleDateChange = (newDate: string) => {
     setDate(newDate)
@@ -91,8 +93,8 @@ export default function DashboardScreen() {
 
           {/* ── Greeting ──────────────────────────────── */}
           <div className="px-6 pt-6 pb-2">
-            <p className="text-label text-on-surface-variant">{getGreeting()}</p>
-            <h1 className="text-headline text-on-surface mt-1">Tu resumen diario</h1>
+            <p className="text-label text-on-surface-variant">{t(getGreetingKey())}</p>
+            <h1 className="text-headline text-on-surface mt-1">{t('dashboard.summary')}</h1>
           </div>
 
           {/* ── Date navigation ────────────────────────── */}
@@ -117,7 +119,7 @@ export default function DashboardScreen() {
           {/* ── Consejos del Día ───────────────────────── */}
           <div className="mt-8">
             <div className="px-6 mb-3">
-              <h2 className="text-headline text-on-surface">Consejos del día</h2>
+              <h2 className="text-headline text-on-surface">{t('dashboard.tips')}</h2>
             </div>
             <TipCarousel />
           </div>
@@ -125,13 +127,13 @@ export default function DashboardScreen() {
           {/* ── Escaneos Recientes ─────────────────────── */}
           <div className="px-6 mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-headline text-on-surface">Escaneos recientes</h2>
+              <h2 className="text-headline text-on-surface">{t('dashboard.recent')}</h2>
               {entries.length > 0 && (
                 <button
                   onClick={() => navigate('/history')}
                   className="text-label text-primary"
                 >
-                  VER TODO
+                  {t('dashboard.viewAll')}
                 </button>
               )}
             </div>
@@ -144,7 +146,7 @@ export default function DashboardScreen() {
             ) : (
               <div className="surface-card p-8 text-center">
                 <p className="text-3xl mb-3">🦎</p>
-                <p className="text-title text-on-surface">No hay escaneos hoy</p>
+                <p className="text-title text-on-surface">{t('dashboard.noScans')}</p>
                 <p className="text-body text-on-surface-variant mt-2">
                   Toca el botón + para escanear tu primer alimento
                 </p>
@@ -154,7 +156,7 @@ export default function DashboardScreen() {
 
           {/* ── Disclaimer ─────────────────────────────── */}
           <p className="px-6 mt-10 mb-6 text-label text-text-tertiary font-normal normal-case tracking-normal leading-relaxed">
-            Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.
+            {t('dashboard.disclaimer')}
           </p>
         </div>
       )}

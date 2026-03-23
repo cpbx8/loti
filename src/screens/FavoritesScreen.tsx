@@ -5,11 +5,13 @@ import type { Favorite } from '@/hooks/useFavorites'
 import type { ScanResult } from '@/types/shared'
 import { useDailyLog } from '@/hooks/useDailyLog'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
+import { useLanguage } from '@/lib/i18n'
 
 export default function FavoritesScreen() {
   const navigate = useNavigate()
   const { favorites, remove, touch } = useFavorites()
   const { addEntry } = useDailyLog()
+  const { t } = useLanguage()
   const [selected, setSelected] = useState<Favorite | null>(null)
 
   const handleSelect = (fav: Favorite) => {
@@ -45,7 +47,7 @@ export default function FavoritesScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface">
       <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
-        <h1 className="text-title text-on-surface">Favoritos</h1>
+        <h1 className="text-title text-on-surface">{t('favorites.title')}</h1>
         <span className="ml-auto text-body text-on-surface-variant">{favorites.length}</span>
       </header>
 
@@ -57,15 +59,15 @@ export default function FavoritesScreen() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
-            <p className="text-body font-medium text-on-surface">Aún no tienes favoritos</p>
+            <p className="text-body font-medium text-on-surface">{t('favorites.empty')}</p>
             <p className="text-body text-on-surface-variant">
-              Escanea un alimento y toca el corazón para guardarlo aquí
+              {t('favorites.emptyDesc')}
             </p>
             <button
               onClick={() => navigate('/text')}
               className="mt-2 btn-gradient min-h-[48px] px-6"
             >
-              Buscar alimentos
+              {t('favorites.searchFoods')}
             </button>
           </div>
         ) : (

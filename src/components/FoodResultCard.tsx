@@ -10,6 +10,7 @@ import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThreshold
 import FatSecretAttribution from './FatSecretAttribution'
 import { estimateSwapGL } from '@/lib/glucoseModel'
 import { useFavorites } from '@/hooks/useFavorites'
+import { useLanguage } from '@/lib/i18n'
 
 // ─── Impact labels ───────────────────────────────────────────
 
@@ -61,6 +62,7 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
   const displayName = r.name_es || r.name_en || ''
   const thresholds = useThresholds()
   const { add: addFavorite, isFavorite, remove: removeFavorite, favorites } = useFavorites()
+  const { t } = useLanguage()
   const foodName = r.name_en || r.name_es || ''
   const isFav = isFavorite(foodName)
 
@@ -75,6 +77,8 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
   // Traffic light
   const tl = gl != null ? getPersonalizedTrafficLight(gl, thresholds) : r.traffic_light
   const hasTL = tl != null
+  const impactLabel = tl === 'green' ? t('result.lowImpact') : tl === 'yellow' ? t('result.moderate') : t('result.highImpact')
+  const impactDesc = tl === 'green' ? t('result.lowDesc') : tl === 'yellow' ? t('result.moderateDesc') : t('result.highDesc')
   const impact = hasTL ? IMPACT_CONFIG[tl!] : null
 
   // Swap GL for comparison curve
@@ -104,7 +108,7 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
           {impact && (
             <div className={`inline-flex items-center gap-1.5 rounded-full ${impact.bg} px-3 py-1`}>
               <div className={`h-2 w-2 rounded-full ${impact.dot}`} />
-              <span className={`text-label ${impact.text}`}>{impact.labelEs}</span>
+              <span className={`text-label ${impact.text}`}>{impactLabel}</span>
             </div>
           )}
         </div>
@@ -122,14 +126,14 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
             <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">CG</span>
           </div>
           <p className="text-body text-on-surface-variant mt-1">
-            {impact?.descFn(displayName, gl)}
+            {impactDesc}
           </p>
         </div>
       )}
 
       {/* ── Quantity adjuster ──────────────────────── */}
       <div className="flex items-center justify-between surface-card p-4">
-        <span className="text-body font-medium text-on-surface-variant">Porción</span>
+        <span className="text-body font-medium text-on-surface-variant">{t('result.portion')}</span>
         <div className="flex items-center gap-3">
           <button
             onClick={() => adjustQty(-0.5)}
@@ -163,28 +167,28 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
       {/* ── Macros 2×2 grid ────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
         <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">Calorías</p>
+          <p className="text-label text-on-surface-variant">{t('result.calories')}</p>
           <p className="text-headline text-on-surface mt-1">
             {Math.round(cal)}
             <span className="text-body text-on-surface-variant ml-1">kcal</span>
           </p>
         </div>
         <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">Carbohidratos</p>
+          <p className="text-label text-on-surface-variant">{t('result.carbs')}</p>
           <p className="text-headline text-on-surface mt-1">
             {Math.round(carbs)}
             <span className="text-body text-on-surface-variant ml-1">g</span>
           </p>
         </div>
         <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">Fibra</p>
+          <p className="text-label text-on-surface-variant">{t('result.fiber')}</p>
           <p className="text-headline text-on-surface mt-1">
             {fiber != null ? (Math.round(fiber * 10) / 10) : '--'}
             <span className="text-body text-on-surface-variant ml-1">g</span>
           </p>
         </div>
         <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">Proteína</p>
+          <p className="text-label text-on-surface-variant">{t('result.protein')}</p>
           <p className="text-headline text-on-surface mt-1">
             {Math.round(protein)}
             <span className="text-body text-on-surface-variant ml-1">g</span>
@@ -200,7 +204,7 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
               <span className="text-sm">🔄</span>
             </div>
             <div>
-              <p className="text-body font-semibold text-on-surface">Consejo de Intercambio</p>
+              <p className="text-body font-semibold text-on-surface">{t('result.swapTip')}</p>
               <p className="text-body text-on-surface-variant mt-1 leading-snug">
                 {r.swap_suggestion}
               </p>
@@ -217,13 +221,13 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
               <span className="text-sm">💡</span>
             </div>
             <div>
-              <p className="text-body font-semibold text-on-surface">Consejo Pro</p>
+              <p className="text-body font-semibold text-on-surface">{t('result.proTip')}</p>
               <p className="text-body text-on-surface-variant mt-1 leading-snug">
                 {tl === 'green'
-                  ? 'Acompáñalo con proteína para una comida completa y equilibrada.'
+                  ? t('result.proTipGreen')
                   : tl === 'yellow'
-                    ? 'Agrega verduras o ensalada para aumentar la fibra y reducir el impacto.'
-                    : 'Come la proteína y verduras primero, deja los carbohidratos para el final.'}
+                    ? t('result.proTipYellow')
+                    : t('result.proTipRed')}
               </p>
             </div>
           </div>
@@ -285,12 +289,12 @@ export function FoodResultCard({ result: r, showSource = true, onQuantityChange 
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={isFav ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
-        <span className="text-body font-medium">{isFav ? 'En favoritos' : 'Guardar en favoritos'}</span>
+        <span className="text-body font-medium">{isFav ? t('result.inFavorites') : t('result.saveFavorite')}</span>
       </button>
 
       {/* ── Disclaimer ─────────────────────────────── */}
       <p className="text-label text-text-tertiary font-normal normal-case tracking-normal text-center leading-relaxed">
-        Estimación basada en tu perfil. No reemplaza monitoreo real (CGM).
+        {t('result.disclaimer')}
       </p>
     </div>
   )
@@ -348,12 +352,13 @@ interface CompositeResultCardProps {
 
 export function CompositeResultCard({ total, components }: CompositeResultCardProps) {
   const thresholds = useThresholds()
+  const { t } = useLanguage()
   return (
     <div className="flex flex-col gap-5">
       <FoodResultCard result={total} showSource={false} />
 
       <div>
-        <p className="text-label text-on-surface-variant mb-3">Desglose</p>
+        <p className="text-label text-on-surface-variant mb-3">{t('result.breakdown')}</p>
         <div className="flex flex-col gap-2">
           {components.map((c, i) => {
             const compTL = c.glycemic_load != null
