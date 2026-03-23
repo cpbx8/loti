@@ -46,9 +46,9 @@ export interface NewLogEntry {
   input_method: string
 }
 
-/** Format a Date to YYYY-MM-DD */
+/** Format a Date to YYYY-MM-DD in local timezone */
 export function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
 /** Get today's date string */
