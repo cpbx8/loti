@@ -538,9 +538,26 @@ function isGoodMatch(query: string, result: FoodSearchResult): boolean {
 }
 
 /** Pick the FatSecret result whose name most closely matches the query.
- *  Avoids "shrimp" → "shrimp broth" by penalizing extra words. */
+ *  Avoids "shrimp" → "shrimp broth" by penalizing extra words.
+ *  Avoids "beyond meatballs" → "chicken meatballs" by penalizing contradicting words. */
 function pickBestMatch(query: string, results: FoodSearchResult[]): FoodSearchResult | null {
   const q = query.toLowerCase().split(/\s+/)
+
+  // Words that indicate a specific variant — if the query has one,
+  // reject results that substitute a different variant
+  const VARIANT_GROUPS = [
+    ["beyond", "impossible", "plant", "vegan", "veggie", "soy", "tofu"],
+    ["chicken", "pollo"],
+    ["beef", "res", "steak", "bistec"],
+    ["pork", "cerdo", "carnitas"],
+    ["turkey", "pavo"],
+    ["fish", "pescado", "salmon", "tuna", "atun"],
+    ["shrimp", "camaron", "camarones"],
+    ["lamb", "cordero"],
+  ]
+
+  // Find which variant group (if any) the query belongs to
+  const queryVariant = VARIANT_GROUPS.find(group => q.some(w => group.includes(w)))
 
   let best: FoodSearchResult | null = null
   let bestScore = -1
@@ -548,6 +565,19 @@ function pickBestMatch(query: string, results: FoodSearchResult[]): FoodSearchRe
   for (const r of results) {
     const name = ((r.name_en ?? r.name_es) ?? "").toLowerCase()
     const nameWords = name.split(/\s+/)
+
+    // Reject if query specifies a variant but result has a DIFFERENT variant
+    if (queryVariant) {
+      const queryVariantWords = q.filter(w => queryVariant.includes(w))
+      const nameVariantWords = nameWords.filter(w =>
+        VARIANT_GROUPS.some(group => group.includes(w))
+      )
+      // If result introduces a protein/variant word that's NOT in the query's group, skip
+      if (nameVariantWords.length > 0) {
+        const hasConflict = nameVariantWords.some(w => !queryVariant.includes(w))
+        if (hasConflict) continue
+      }
+    }
 
     // Score: matched query words / total name words (prefer shorter, more precise names)
     const matchedWords = q.filter(w => nameWords.some(n => n.includes(w) || w.includes(n))).length
