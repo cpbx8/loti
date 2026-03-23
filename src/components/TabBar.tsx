@@ -40,60 +40,48 @@ export default function TabBar() {
         />
       )}
 
-      {/* Scan menu popup — 3 options above the + button */}
+      {/* Scan menu — compact horizontal pill bar */}
       {menuOpen && (
         <div
-          className="fixed z-50 flex flex-col items-center gap-2"
-          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', left: '50%', transform: 'translateX(-50%)' }}
+          className="fixed z-50 animate-slide-up"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)', left: '50%', transform: 'translateX(-50%)' }}
         >
-          {/* Photo scan */}
-          <button
-            onClick={() => gatedNavigate('/scan')}
-            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <div className="flex items-center gap-1 rounded-full bg-on-surface/90 backdrop-blur-md px-2 py-2 shadow-lg">
+            <button
+              onClick={() => gatedNavigate('/scan')}
+              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-text-primary">Tomar foto</p>
-              <p className="text-[11px] text-text-secondary">Escanea con la cámara</p>
-            </div>
-          </button>
+              <span className="text-sm font-medium">{t('scan.photo')}</span>
+            </button>
 
-          {/* Barcode */}
-          <button
-            onClick={() => gatedNavigate('/barcode')}
-            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h3v16H3V4zm5 0h1v16H8V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h3v16h-3V4z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-text-primary">{t('scan.barcode')}</p>
-              <p className="text-[11px] text-text-secondary">Producto empaquetado</p>
-            </div>
-          </button>
+            <div className="w-px h-5 bg-white/20" />
 
-          {/* Text search */}
-          <button
-            onClick={() => gatedNavigate('/text')}
-            className="flex items-center gap-3 surface-card px-5 py-3 shadow-md min-w-[200px] active:scale-95 transition-transform"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <button
+              onClick={() => gatedNavigate('/barcode')}
+              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" d="M3 4v16M7 4v16M11 4v16M15 4v16M19 4v16M5 4v16M9 4v16M13 4v16M17 4v16M21 4v16" />
               </svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-text-primary">Buscar alimento</p>
-              <p className="text-[11px] text-text-secondary">Escribe el nombre</p>
-            </div>
-          </button>
+              <span className="text-sm font-medium whitespace-nowrap">{t('scan.barcode')}</span>
+            </button>
+
+            <div className="w-px h-5 bg-white/20" />
+
+            <button
+              onClick={() => gatedNavigate('/text')}
+              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span className="text-sm font-medium">{t('scan.text')}</span>
+            </button>
+          </div>
         </div>
       )}
 
