@@ -140,7 +140,16 @@
       "Bash(grep -v \"$f.tsx\")",
       "Bash(done)",
       "Bash(grep -r \"from.*Auth/AuthForm\\\\|AuthForm\" src/ --include=*.ts --include=*.tsx -l)",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f\"\"{i[''''food_name'''']}: {i[''''calories_kcal'''']} cal, {i[''''protein_g'''']}g protein, {i[''''carbs_g'''']}g carbs\"\"\\) for i in d.get\\(''''items'''',d.get\\(''''results'''',[d]\\)\\)]\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f\"\"{i[''''food_name'''']}: {i[''''calories_kcal'''']} cal, {i[''''protein_g'''']}g protein, {i[''''carbs_g'''']}g carbs\"\"\\) for i in d.get\\(''''items'''',d.get\\(''''results'''',[d]\\)\\)]\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST \"https://nreufkieoyujxcnyjhbw.supabase.co/functions/v1/scan-text\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZXVma2llb3l1anhjbnlqaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MzUwNzQsImV4cCI6MjA4OTIxMTA3NH0.c9nVPRm2S8zMrLRqgUiTLdHpOqZKnKNqotGKZON1eyU\" -H \"x-api-key: db263871519a5165d7b6bb969ddec0ec09c97fc71081bd8486a3e210e1407f82\" -d '{\"\"text\"\": \"\"rice\"\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST \"https://nreufkieoyujxcnyjhbw.supabase.co/functions/v1/scan-text\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZXVma2llb3l1anhjbnlqaGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MzUwNzQsImV4cCI6MjA4OTIxMTA3NH0.c9nVPRm2S8zMrLRqgUiTLdHpOqZKnKNqotGKZON1eyU\" -H \"x-api-key: ced02cf4e88fd77e422a379ed4f2654fc3c40dc95fe8d4dc4f7608be840254a0\" -d '{\"\"text\"\": \"\"rice\"\"}')",
+      "Bash(grep -c \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\" src/**/*.tsx src/**/*.ts src/hooks/*.ts src/services/*.ts)",
+      "Bash(grep -v \":0$\")",
+      "Skill(plan-eng-review)",
+      "Skill(plan-eng-review:*)",
+      "Skill(plan-design-review)",
+      "Skill(plan-design-review:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

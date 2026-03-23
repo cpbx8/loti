@@ -169,12 +169,8 @@ export default function DashboardScreen() {
                 onUpdateServing={updateServingCount}
               />
             ) : (
-              <div className="surface-card p-8 text-center">
-                <p className="text-3xl mb-3">🦎</p>
-                <p className="text-title text-on-surface">{t('dashboard.noScans')}</p>
-                <p className="text-body text-on-surface-variant mt-2">
-                  {t('dashboard.scanFirsti18n')}
-                </p>
+              <div className="py-6 text-center">
+                <p className="text-sm text-text-tertiary">{t('dashboard.noScans')}</p>
               </div>
             )}
           </div>
