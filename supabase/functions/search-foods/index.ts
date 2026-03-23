@@ -184,19 +184,19 @@ async function waterfallText(
   let anyCached = false
 
   for (const comp of decomp.components) {
-    // Try English name first (better for FatSecret), fall back to Spanish
-    let lookup = await lookupSingle(supabase, comp.name, comp.grams)
-    if (!lookup.result) {
-      lookup = await lookupSingle(supabase, comp.name_es, comp.grams)
-    }
+    // Try cache first (our own verified data), skip FatSecret/OFF for components
+    // — FatSecret returns wrong matches for branded/specialty ingredients
+    // (e.g. "beyond meatballs" → "Cevapcici Meatballs")
+    const cacheHit = (await searchCache(supabase, comp.name)).find(r => isGoodMatch(comp.name, r))
+      ?? (await searchCache(supabase, comp.name_es)).find(r => isGoodMatch(comp.name_es, r))
 
-    if (lookup.result) {
-      componentResults.push(lookup.result)
-      if (lookup.cached) anyCached = true
-      if (!lookup.cached) primarySource = lookup.source
+    if (cacheHit) {
+      const scaled = cacheHit.serving_size !== comp.grams ? scaleResult(cacheHit, comp.grams) : cacheHit
+      componentResults.push(scaled)
+      anyCached = true
     } else {
-      // Last resort: estimate via GPT for this component
-      console.log(`[waterfall] Component "${comp.name}" not found in tiers 0-2, using GPT`)
+      // GPT estimates nutrition for this specific component
+      console.log(`[waterfall] Component "${comp.name}" — using GPT estimation (${comp.grams}g)`)
       const gptResult = await estimateComponentNutrition(comp.name, comp.name_es, comp.grams)
       if (gptResult) {
         componentResults.push(gptResult)
