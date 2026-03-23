@@ -132,7 +132,11 @@ async function waterfallText(
 
   // Only use cache as fast-path if result is a confident direct match
   // (avoids "bistec taco" matching "bistec de res" and skipping decomposition)
-  const isDirectMatch = cacheResults.length > 0 && isGoodMatch(query, cacheResults[0])
+  // Also skip cache if the result is a cached composite total — we need to re-decompose
+  // to return individual components for the editable meal card
+  const isDirectMatch = cacheResults.length > 0
+    && isGoodMatch(query, cacheResults[0])
+    && !cacheResults[0].serving_description?.startsWith('Total (')
 
   if (isDirectMatch) {
     const withGI = await Promise.all(cacheResults.map(estimateGI))
