@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLanguage } from '@/lib/i18n'
 import { useDailyLog, getToday } from '@/hooks/useDailyLog'
+import { useStreak } from '@/hooks/useStreak'
 import { useSubscription } from '@/hooks/useSubscription'
 import DateNav from '@/components/DateNav'
 import TodaySummaryBar from '@/components/TodaySummaryBar'
@@ -10,6 +11,7 @@ import TipCarousel from '@/components/TipCarousel'
 import DailyGlucoseCurve from '@/components/DailyGlucoseCurve'
 import FoodLogList from '@/components/FoodLog/FoodLogList'
 import SuggestionSheet from '@/components/SuggestionSheet'
+import DailyInsight from '@/components/DailyInsight'
 import PaywallScreen from '@/screens/PaywallScreen'
 
 function getGreetingKey(): string {
@@ -24,6 +26,7 @@ export default function DashboardScreen() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [date, setDate] = useState(() => searchParams.get('date') ?? getToday())
   const { entries, loading, removeEntry, updateServingCount } = useDailyLog(date)
+  const streak = useStreak()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState<'scan' | 'barcode' | 'text' | 'ai_assistant' | undefined>()
@@ -91,9 +94,27 @@ export default function DashboardScreen() {
           {/* Trial Banner */}
           <TrialBanner onUpgrade={() => setPaywallOpen(true)} />
 
-          {/* ── Greeting ──────────────────────────────── */}
+          {/* ── Greeting + Streak Badge ──────────────── */}
           <div className="px-6 pt-6 pb-2">
-            <p className="text-label text-on-surface-variant">{t(getGreetingKey())}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-label text-on-surface-variant">{t(getGreetingKey())}</p>
+              {streak.currentStreak > 0 ? (
+                <span
+                  className={`text-body font-semibold text-primary${streak.currentStreak >= 7 ? ' streak-glow' : ''}`}
+                  aria-label={`Current streak: ${streak.currentStreak} days`}
+                >
+                  {streak.currentStreak >= 30
+                    ? `🏆 ${t('streak.milestone30')}`
+                    : streak.currentStreak >= 7
+                      ? `🎉 ${t('streak.milestone7')}`
+                      : `🔥 ${t('streak.days').replace('{{count}}', String(streak.currentStreak))}`}
+                </span>
+              ) : (
+                <span className="text-body text-on-surface-variant">
+                  {t('streak.start')}
+                </span>
+              )}
+            </div>
             <h1 className="text-headline text-on-surface mt-1">{t('dashboard.summary')}</h1>
           </div>
 
@@ -106,6 +127,9 @@ export default function DashboardScreen() {
           <div className="mt-4">
             <DailyGlucoseCurve entries={entries} />
           </div>
+
+          {/* ── Daily Insight ──────────────────────────── */}
+          <DailyInsight entries={entries} />
 
           {/* ── Goal Summary (tonal section) ──────────── */}
           <div className="mx-5 mt-5 surface-section p-4">
@@ -148,7 +172,7 @@ export default function DashboardScreen() {
                 <p className="text-3xl mb-3">🦎</p>
                 <p className="text-title text-on-surface">{t('dashboard.noScans')}</p>
                 <p className="text-body text-on-surface-variant mt-2">
-                  Toca el botón + para escanear tu primer alimento
+                  {t('dashboard.scanFirsti18n')}
                 </p>
               </div>
             )}

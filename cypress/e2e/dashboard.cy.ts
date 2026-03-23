@@ -135,6 +135,63 @@ describe('Dashboard / Home Screen', () => {
     })
   })
 
+  describe('Daily Insight', () => {
+    it('hidden when no entries', () => {
+      // No entries seeded — insight should not be visible
+      cy.contains(/green foods today|All green|great start|green food tomorrow/i).should('not.exist')
+    })
+
+    it('shows "great start" with single entry', () => {
+      cy.window().then((win) => {
+        const entries = [{
+          id: 'single-1', food_name: 'Apple', traffic_light: 'green', glycemic_load: 4,
+          created_at: new Date().toISOString(), serving_count: 1, input_method: 'text',
+          calories_kcal: 95, protein_g: 0.5, carbs_g: 25, fat_g: 0.3, serving_size_g: 180, fiber_g: 4,
+        }]
+        win.localStorage.setItem('loti_food_log', JSON.stringify(entries))
+      })
+      cy.reload()
+      cy.contains(/great start|buen comienzo/i).should('be.visible')
+    })
+
+    it('shows all-green celebration with all green foods', () => {
+      cy.window().then((win) => {
+        const entries = [
+          { id: 'g1', food_name: 'Apple', traffic_light: 'green', glycemic_load: 4, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 95, protein_g: 0.5, carbs_g: 25, fat_g: 0.3, serving_size_g: 180, fiber_g: 4 },
+          { id: 'g2', food_name: 'Salad', traffic_light: 'green', glycemic_load: 3, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 50, protein_g: 2, carbs_g: 8, fat_g: 1, serving_size_g: 150, fiber_g: 3 },
+        ]
+        win.localStorage.setItem('loti_food_log', JSON.stringify(entries))
+      })
+      cy.reload()
+      cy.contains(/all green|todo verde/i).should('be.visible')
+    })
+
+    it('shows green count with mixed foods', () => {
+      cy.window().then((win) => {
+        const entries = [
+          { id: 'm1', food_name: 'Apple', traffic_light: 'green', glycemic_load: 4, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 95, protein_g: 0.5, carbs_g: 25, fat_g: 0.3, serving_size_g: 180, fiber_g: 4 },
+          { id: 'm2', food_name: 'Cake', traffic_light: 'red', glycemic_load: 25, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 300, protein_g: 3, carbs_g: 45, fat_g: 12, serving_size_g: 100, fiber_g: 1 },
+          { id: 'm3', food_name: 'Rice', traffic_light: 'yellow', glycemic_load: 15, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 200, protein_g: 4, carbs_g: 40, fat_g: 1, serving_size_g: 150, fiber_g: 1 },
+        ]
+        win.localStorage.setItem('loti_food_log', JSON.stringify(entries))
+      })
+      cy.reload()
+      cy.contains(/1.*green|1.*verde/i).should('be.visible')
+    })
+
+    it('shows encouragement with all red foods', () => {
+      cy.window().then((win) => {
+        const entries = [
+          { id: 'r1', food_name: 'Cake', traffic_light: 'red', glycemic_load: 30, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 400, protein_g: 3, carbs_g: 55, fat_g: 15, serving_size_g: 120, fiber_g: 0 },
+          { id: 'r2', food_name: 'Soda', traffic_light: 'red', glycemic_load: 28, created_at: new Date().toISOString(), serving_count: 1, input_method: 'text', calories_kcal: 150, protein_g: 0, carbs_g: 40, fat_g: 0, serving_size_g: 350, fiber_g: 0 },
+        ]
+        win.localStorage.setItem('loti_food_log', JSON.stringify(entries))
+      })
+      cy.reload()
+      cy.contains(/green food|alimento verde/i).should('be.visible')
+    })
+  })
+
   describe('Weekly Report Card', () => {
     it('shows when enough data exists', () => {
       // Seed food log with enough entries

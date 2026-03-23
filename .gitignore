@@ -28,6 +28,7 @@ npm-debug.log*
 
 # Capacitor
 ios/App/Pods/
+ios/App/App/public/assets/
 android/.gradle/
 android/app/build/
 

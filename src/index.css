@@ -203,5 +203,25 @@ html {
   position: absolute;
 }
 
+/* ── Streak milestone glow ── */
+@keyframes streak-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; filter: brightness(1.2); }
+}
+
+.streak-glow {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-lighter));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: streak-pulse 0.6s ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streak-glow {
+    animation: none;
+  }
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

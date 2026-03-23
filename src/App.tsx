@@ -2,6 +2,8 @@ import { useState, useEffect, useSyncExternalStore } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { initDatabase } from '@/db/database'
 import { initRevenueCat } from '@/lib/revenuecat'
+import { cleanupOldAnalytics, trackEvent } from '@/db/queries'
+import { scheduleNotifications } from '@/services/notifications'
 import TabBar from '@/components/TabBar'
 import DashboardScreen from '@/screens/DashboardScreen'
 import ScanScreen from '@/screens/ScanScreen'
@@ -52,6 +54,11 @@ export default function App() {
       try {
         await initDatabase()
         await initRevenueCat()
+        // Post-init: analytics cleanup + notifications (non-blocking)
+        cleanupOldAnalytics().catch(() => {})
+        trackEvent('app_open').catch(() => {})
+        const lang = (localStorage.getItem('loti_language') as 'es' | 'en') || 'es'
+        scheduleNotifications(lang).catch(() => {})
       } catch (err) {
         console.warn('[Loti] Init error (non-fatal):', err)
       }

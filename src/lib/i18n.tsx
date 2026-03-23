@@ -28,6 +28,20 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.high': 'ALTO',
     'dashboard.disclaimer': 'Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.',
 
+    // Streak
+    'streak.start': '¡Comienza tu racha!',
+    'streak.days': 'racha de {{count}} día(s)',
+    'streak.milestone7': '¡1 semana! 🎉',
+    'streak.milestone30': '¡1 mes! 🏆',
+
+    // Daily insight
+    'insight.allGreen': '¡Todo verde hoy! 🌿 Excelente',
+    'insight.greenCount': '{{count}} alimentos verdes hoy',
+    'insight.bestDay': '— ¡tu mejor día!',
+    'insight.encourageGreen': 'Intenta agregar un alimento verde mañana',
+    'insight.greatStart': '¡Buen comienzo! Sigue registrando para ver tu resumen',
+    'dashboard.scanFirsti18n': 'Toca el botón + para escanear tu primer alimento',
+
     // Tab bar
     'tab.history': 'Historial',
     'tab.favorites': 'Favoritos',
@@ -174,6 +188,20 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.elevated': 'ELEVATED',
     'dashboard.high': 'HIGH',
     'dashboard.disclaimer': 'Loti AI is for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult your doctor before making changes to your diabetes management plan.',
+
+    // Streak
+    'streak.start': 'Start your streak!',
+    'streak.days': '{{count}}-day streak',
+    'streak.milestone7': '1 week! 🎉',
+    'streak.milestone30': '1 month! 🏆',
+
+    // Daily insight
+    'insight.allGreen': 'All green today! 🌿 Amazing',
+    'insight.greenCount': '{{count}} green foods today',
+    'insight.bestDay': '— your best day!',
+    'insight.encourageGreen': 'Try adding a green food tomorrow',
+    'insight.greatStart': 'Great start! Keep logging to see your daily insight',
+    'dashboard.scanFirsti18n': 'Tap the + button to scan your first food',
 
     // Tab bar
     'tab.history': 'History',

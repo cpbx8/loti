@@ -51,10 +51,37 @@ describe('Streaks & Glucose Goals', () => {
       cy.contains(/2 day/i).should('be.visible')
     })
 
-    it('no entries shows no streak', () => {
+    it('no entries shows start message', () => {
       cy.visit('/')
-      // Should not show a streak number or show 0
-      cy.contains(/\d+ day streak/i).should('not.exist')
+      cy.contains(/start your streak|comienza tu racha/i).should('be.visible')
+    })
+
+    it('shows milestone celebration at 7-day streak', () => {
+      cy.window().then((win) => {
+        const entries: any[] = []
+        for (let i = 0; i < 7; i++) {
+          const d = new Date()
+          d.setDate(d.getDate() - i)
+          entries.push({
+            id: `streak-${i}`,
+            food_name: `Day ${i} Food`,
+            traffic_light: 'green',
+            glycemic_load: 5,
+            created_at: d.toISOString(),
+            serving_count: 1,
+            input_method: 'text',
+            calories_kcal: 100,
+            protein_g: 5,
+            carbs_g: 15,
+            fat_g: 2,
+            serving_size_g: 100,
+            fiber_g: 3,
+          })
+        }
+        win.localStorage.setItem('loti_food_log', JSON.stringify(entries))
+      })
+      cy.visit('/')
+      cy.contains(/1 week|1 semana/i).should('be.visible')
     })
   })
 

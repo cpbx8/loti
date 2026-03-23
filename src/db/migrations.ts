@@ -119,6 +119,17 @@ CREATE TABLE IF NOT EXISTS store_products (
 CREATE INDEX IF NOT EXISTS idx_store_barcode ON store_products(barcode);
 CREATE INDEX IF NOT EXISTS idx_store_chain ON store_products(store_chain);
 
+-- Analytics events (local-first, 90-day rolling window)
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id TEXT PRIMARY KEY,
+  event_name TEXT NOT NULL,
+  properties TEXT DEFAULT '{}',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_name ON analytics_events(event_name);
+CREATE INDEX IF NOT EXISTS idx_analytics_date ON analytics_events(created_at);
+
 -- Barcode cache (caches external API lookups)
 CREATE TABLE IF NOT EXISTS barcode_cache (
   barcode TEXT PRIMARY KEY,

@@ -501,6 +501,48 @@ export function computeTrafficLight(
   return 'red'
 }
 
+// ─── ANALYTICS ─────────────────────────────────────────────────
+
+export async function trackEvent(eventName: string, properties?: Record<string, unknown>): Promise<void> {
+  const db = getDb()
+  if (!db) return
+
+  try {
+    await db.run(
+      'INSERT INTO analytics_events (id, event_name, properties) VALUES (?, ?, ?)',
+      [crypto.randomUUID(), eventName, JSON.stringify(properties ?? {})],
+    )
+  } catch (err) {
+    console.warn('[Loti Analytics] Failed to track event:', err)
+  }
+}
+
+export async function getEventCount(eventName: string, sinceDays = 30): Promise<number> {
+  const db = getDb()
+  if (!db) return 0
+
+  try {
+    const result = await db.query(
+      "SELECT COUNT(*) as count FROM analytics_events WHERE event_name = ? AND created_at >= datetime('now', ?)",
+      [eventName, `-${sinceDays} days`],
+    )
+    return result.values?.[0]?.count ?? 0
+  } catch {
+    return 0
+  }
+}
+
+export async function cleanupOldAnalytics(): Promise<void> {
+  const db = getDb()
+  if (!db) return
+
+  try {
+    await db.run("DELETE FROM analytics_events WHERE created_at < datetime('now', '-90 days')")
+  } catch (err) {
+    console.warn('[Loti Analytics] Cleanup failed:', err)
+  }
+}
+
 // ─── HELPERS ────────────────────────────────────────────────────
 
 function safeParseArray(value: unknown): string[] {
