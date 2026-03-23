@@ -126,7 +126,7 @@ export default function ScanScreen() {
     const multiple = search.results.length > 1 && !composite
 
     return (
-      <div className="flex flex-1 flex-col bg-surface">
+      <div className="flex flex-1 flex-col bg-surface min-h-0">
         <header className="glass flex items-center px-5 py-3 sticky top-0 z-10">
           <button onClick={handleScanAnother} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -136,7 +136,7 @@ export default function ScanScreen() {
           <h1 className="ml-2 text-title text-on-surface">Análisis de Alimento</h1>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5 pb-24">
           {camera.previewUrl && (
             <div className="w-24 h-24 overflow-hidden rounded-xl self-center shadow-sm">
               <img src={camera.previewUrl} alt="Scanned food" className="h-full w-full object-cover" />
@@ -157,9 +157,7 @@ export default function ScanScreen() {
                 selectedIndex={selected ? search.results.indexOf(selected) : 0}
               />
               {selected && (
-                <div className="mt-2 rounded-2xl bg-card p-4 shadow-sm">
-                  <FoodResultCard result={selected} />
-                </div>
+                <FoodResultCard result={selected} />
               )}
             </>
           ) : (
