@@ -36,16 +36,20 @@ export default function SuggestionCard({
 
   const handleLog = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (onLog) {
+    e.preventDefault()
+    if (onLog && !logged) {
       onLog()
       setLogged(true)
     }
   }
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onTap}
-      className="flex w-full overflow-hidden rounded-2xl bg-card shadow-sm text-left transition-colors hover:bg-surface active:bg-surface"
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onTap() }}
+      className="flex w-full overflow-hidden rounded-2xl bg-card shadow-sm text-left transition-colors hover:bg-surface active:bg-surface cursor-pointer"
     >
       {/* Colored left bar */}
       <div className={`w-1 flex-shrink-0 ${TL_BAR_COLOR[trafficLight]}`} />
@@ -63,11 +67,11 @@ export default function SuggestionCard({
           <p className="text-sm text-text-secondary mt-1 line-clamp-2">{reasoning}</p>
         </div>
 
-        {/* Log button */}
+        {/* Log button — must be a real <button> to work inside parent <button> */}
         {onLog && (
-          <div
+          <button
+            type="button"
             onClick={handleLog}
-            role="button"
             className={`flex-shrink-0 self-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-all min-h-[32px] flex items-center gap-1 ${
               logged
                 ? 'bg-tl-green-bg text-tl-green-fill'
@@ -89,9 +93,9 @@ export default function SuggestionCard({
                 Log
               </>
             )}
-          </div>
+          </button>
         )}
       </div>
-    </button>
+    </div>
   )
 }
