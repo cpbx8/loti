@@ -68,10 +68,11 @@ export default function ScanScreen() {
     await camera.capture()
   }
 
-  // Auto-launch camera on mount
+  // Auto-launch camera on mount (native only — web blocks programmatic file input)
   const hasLaunched = useRef(false)
   useEffect(() => {
-    if (!hasLaunched.current && !camera.base64 && !camera.loading) {
+    const isNative = !!(window as any).Capacitor?.isNativePlatform?.() // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (!hasLaunched.current && !camera.base64 && !camera.loading && isNative) {
       hasLaunched.current = true
       camera.capture()
     }
@@ -345,14 +346,15 @@ export default function ScanScreen() {
       {/* Bottom controls */}
       <div className="relative z-10 pb-8 pt-4 px-6">
         <div className="flex items-center justify-center gap-8">
-          {/* Flash / gallery placeholder left */}
+          {/* Gallery upload */}
           <button
-            onClick={() => navigate('/text')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm"
-            aria-label="Buscar texto"
+            onClick={() => camera.uploadFromGallery()}
+            disabled={camera.loading || isAnalyzing}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm disabled:opacity-50"
+            aria-label="Upload from gallery"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
 
@@ -361,7 +363,7 @@ export default function ScanScreen() {
             onClick={handleCapture}
             disabled={camera.loading || isAnalyzing}
             className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-white/90 bg-white/20 backdrop-blur-sm transition-transform active:scale-90 disabled:opacity-50"
-            aria-label="Tomar foto"
+            aria-label="Take photo"
           >
             <div className={`h-[56px] w-[56px] rounded-full ${isAnalyzing ? 'bg-primary animate-pulse' : 'bg-white'}`} />
           </button>
@@ -370,7 +372,7 @@ export default function ScanScreen() {
           <button
             onClick={() => navigate('/barcode')}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm"
-            aria-label="Código de barras"
+            aria-label="Barcode scan"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h3v16H3V4zm5 0h1v16H8V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h3v16h-3V4z" />

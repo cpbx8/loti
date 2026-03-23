@@ -111,6 +111,25 @@ export function useCamera() {
     fileInputRef.current.click()
   }, [processPhoto])
 
+  /** Upload from gallery / file picker (no camera capture attribute) */
+  const uploadFromGallery = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    // No capture attribute — opens gallery/file picker instead of camera
+    input.style.display = 'none'
+    input.addEventListener('change', () => {
+      const file = input.files?.[0]
+      if (file) {
+        const url = URL.createObjectURL(file)
+        processPhoto(file, url)
+      }
+      document.body.removeChild(input)
+    })
+    document.body.appendChild(input)
+    input.click()
+  }, [processPhoto])
+
   /** Main capture — tries native first, falls back to web */
   const capture = useCallback(async () => {
     if (isNativeCapacitor()) {
@@ -125,5 +144,5 @@ export function useCamera() {
     setState({ previewUrl: null, base64: null, loading: false, error: null })
   }, [])
 
-  return { ...state, capture, reset }
+  return { ...state, capture, uploadFromGallery, reset }
 }
