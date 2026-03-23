@@ -392,6 +392,7 @@ export function isCompositeResult(results: FoodSearchResult[]): boolean {
 }
 
 export function SearchMeta({ source, cached, latencyMs }: { source: string; cached: boolean; latencyMs: number }) {
+  if (import.meta.env.PROD) return null
   return (
     <div className="flex items-center gap-2 text-label text-on-surface-variant font-normal normal-case tracking-normal">
       {cached && <span className="surface-card px-2 py-0.5 text-info">cache</span>}
