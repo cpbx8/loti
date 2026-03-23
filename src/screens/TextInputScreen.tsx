@@ -75,7 +75,7 @@ export default function TextInputScreen() {
           <h1 className="ml-2 text-title text-on-surface">{t('text.analysis')}</h1>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5 pb-24">
           {composite ? (
             <EditableMealCard
               total={search.results[0]}
@@ -144,7 +144,7 @@ export default function TextInputScreen() {
   // ─── Error ────────────────────────────────────────────────
   if (search.state === 'error') {
     return (
-      <div className="flex flex-1 flex-col bg-surface">
+      <div className="flex flex-1 flex-col bg-surface min-h-0">
         <header className="flex items-center border-b border-border bg-card px-5 py-3">
           <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -170,7 +170,7 @@ export default function TextInputScreen() {
 
   // ─── Idle: text input form ────────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-surface">
+    <div className="flex flex-1 flex-col bg-surface min-h-0">
       <header className="flex items-center border-b border-border bg-card px-5 py-3">
         <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

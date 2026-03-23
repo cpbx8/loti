@@ -200,7 +200,7 @@ export default function ScanScreen() {
   // ─── Error ────────────────────────────────────────────────
   if (search.state === 'error') {
     return (
-      <div className="flex flex-1 flex-col bg-surface">
+      <div className="flex flex-1 flex-col bg-surface min-h-0">
         <header className="flex items-center border-b border-border bg-card px-5 py-3">
           <button onClick={handleScanAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
