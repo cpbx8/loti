@@ -387,7 +387,7 @@ export function CompositeResultCard({ total, components }: CompositeResultCardPr
 }
 
 export function isCompositeResult(results: FoodSearchResult[]): boolean {
-  if (results.length < 3) return false
+  if (results.length < 2) return false
   return results[0].serving_description?.startsWith('Total (') ?? false
 }
 
