@@ -9,24 +9,6 @@ import { useProfile } from '@/hooks/useProfile'
 import { useLanguage } from '@/lib/i18n'
 import { computeDailyGlucose, formatMinuteAsHour, DANGER_ZONES } from '@/lib/glucoseModel'
 
-const STATUS_STYLE = {
-  stable:   { bg: 'bg-tl-green-bg',  text: 'text-tertiary',       dot: 'bg-tertiary' },
-  elevated: { bg: 'bg-tl-yellow-bg', text: 'text-tl-yellow-fill', dot: 'bg-tl-yellow-fill' },
-  high:     { bg: 'bg-tl-red-bg',    text: 'text-tl-red-fill',    dot: 'bg-tl-red-fill' },
-}
-
-const STATUS_LABEL_KEY: Record<string, string> = {
-  stable: 'glucose.statusStable',
-  elevated: 'glucose.statusElevated',
-  high: 'glucose.statusHigh',
-}
-
-const DESC_KEY: Record<string, string> = {
-  stable: 'glucose.descStable',
-  elevated: 'glucose.descElevated',
-  high: 'glucose.descHigh',
-}
-
 // Warm amber/orange curve color (matches Rork style)
 const CURVE_STROKE = '#E8A838'
 
@@ -69,8 +51,6 @@ export default function DailyGlucoseCurve({ entries }: Props) {
     [entries, healthState]
   )
 
-  const style = STATUS_STYLE[result.status]
-  const statusLabel = t(STATUS_LABEL_KEY[result.status])
   const hasData = entries.some(e => e.glycemic_load != null && e.glycemic_load > 0)
 
   // SVG dimensions — taller for premium feel
@@ -156,40 +136,13 @@ export default function DailyGlucoseCurve({ entries }: Props) {
     { value: DANGER_ZONES.high, label: t('glucose.high'), color: '#E74C3C' },
   ]
 
-  // Description
-  const description = hasData
-    ? t(DESC_KEY[result.status])
-    : t('glucose.descEmpty')
-
   // Unique gradient ID
   const gradId = 'glucoseGrad'
 
   return (
-    <div className="mx-5 surface-card overflow-hidden" style={{ boxShadow: '0px 12px 32px rgba(26, 28, 27, 0.06)' }}>
-      {/* ── Top: glucose value + status badge ────── */}
-      <div className="px-5 pt-5 pb-1">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-label text-on-surface-variant">{t('glucose.currentLevel')}</p>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-display text-on-surface">{result.currentEstimate}</span>
-              <span className="text-label text-text-tertiary font-normal normal-case tracking-normal">mg/dL</span>
-            </div>
-          </div>
-          <div className={`flex items-center gap-1.5 rounded-full ${style.bg} px-3.5 py-1.5 mt-1`}>
-            <div className={`h-2 w-2 rounded-full ${style.dot}`} />
-            <span className={`text-label ${style.text}`}>{statusLabel}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Description ────────────────────────────── */}
-      <div className="px-5 pb-3">
-        <p className="text-body text-on-surface-variant leading-relaxed">{description}</p>
-      </div>
-
+    <div className="surface-card overflow-hidden" style={{ boxShadow: '0px 12px 32px rgba(26, 28, 27, 0.06)' }}>
       {/* ── SVG Chart ──────────────────────────────── */}
-      <div className="px-2 pb-1">
+      <div className="px-2 pt-3 pb-1">
         <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">

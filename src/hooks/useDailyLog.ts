@@ -15,6 +15,7 @@ export interface DailyTotals {
   total_fat_g: number
   total_fiber_g: number
   scan_count: number
+  averageGL: number | null
 }
 
 export interface FoodLogEntry {
@@ -93,6 +94,10 @@ export function displayDate(dateStr: string): string {
 }
 
 function computeTotals(entries: FoodLogEntry[]): DailyTotals {
+  const glEntries = entries.filter(e => e.glycemic_load != null && e.glycemic_load > 0)
+  const avgGL = glEntries.length > 0
+    ? glEntries.reduce((s, e) => s + e.glycemic_load!, 0) / glEntries.length
+    : null
   return {
     total_calories: entries.reduce((s, e) => s + (e.calories_kcal ?? 0), 0),
     total_protein_g: entries.reduce((s, e) => s + (e.protein_g ?? 0), 0),
@@ -100,6 +105,7 @@ function computeTotals(entries: FoodLogEntry[]): DailyTotals {
     total_fat_g: entries.reduce((s, e) => s + (e.fat_g ?? 0), 0),
     total_fiber_g: entries.reduce((s, e) => s + ((e as FoodLogEntry & { fiber_g?: number }).fiber_g ?? 0), 0),
     scan_count: entries.length,
+    averageGL: avgGL != null ? Math.round(avgGL * 10) / 10 : null,
   }
 }
 

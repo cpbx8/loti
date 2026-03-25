@@ -38,6 +38,20 @@ const translations: Record<Language, Record<string, string>> = {
     'insight.greatStart': '¡Buen comienzo! Sigue registrando para ver tu resumen',
     'dashboard.scanFirsti18n': 'Toca el botón + para escanear tu primer alimento',
 
+    // Dashboard hero
+    'dashboard.hero.label': 'Tu Glucosa Hoy',
+    'dashboard.meals.label': 'Comidas de Hoy',
+    'dashboard.mood.green.1': 'Todo bajo control',
+    'dashboard.mood.green.2': 'Excelente',
+    'dashboard.mood.green.3': 'Así se hace',
+    'dashboard.mood.yellow.1': 'No está mal — puedes mejorar',
+    'dashboard.mood.yellow.2': 'Cuida la siguiente',
+    'dashboard.mood.red.1': 'Día difícil — mañana es nuevo',
+    'dashboard.mood.empty': 'Sin comidas registradas',
+    'dashboard.empty.greeting': '¿Qué vamos a desayunar?',
+    'dashboard.empty.subtitle': 'Escanea o busca tu primera comida y te sigo la glucosa todo el día.',
+    'dashboard.empty.cta': 'Escanear comida',
+
     // Tab bar
     'tab.history': 'Historial',
     'tab.favorites': 'Favoritos',
@@ -251,6 +265,20 @@ const translations: Record<Language, Record<string, string>> = {
     'insight.encourageGreen': 'Try adding a green food tomorrow',
     'insight.greatStart': 'Great start! Keep logging to see your daily insight',
     'dashboard.scanFirsti18n': 'Tap the + button to scan your first food',
+
+    // Dashboard hero
+    'dashboard.hero.label': "Today's Glucose",
+    'dashboard.meals.label': "Today's Meals",
+    'dashboard.mood.green.1': 'Smooth sailing',
+    'dashboard.mood.green.2': 'Looking great',
+    'dashboard.mood.green.3': 'Steady as she goes',
+    'dashboard.mood.yellow.1': 'Not bad — room to improve',
+    'dashboard.mood.yellow.2': 'Watch the next one',
+    'dashboard.mood.red.1': "Rough day — tomorrow's a fresh start",
+    'dashboard.mood.empty': 'No meals logged yet',
+    'dashboard.empty.greeting': "What's for breakfast?",
+    'dashboard.empty.subtitle': "Scan or search your first meal and I'll track your glucose all day.",
+    'dashboard.empty.cta': 'Scan a meal',
 
     // Tab bar
     'tab.history': 'History',
