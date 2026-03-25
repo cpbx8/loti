@@ -34,22 +34,18 @@ function useProgress(active: boolean) {
   return progress
 }
 
-/** Cycling identification text during scan */
-const SCAN_PHASES = [
-  'Procesando imagen…',
-  'Identificando alimentos…',
-  'Analizando nutrición…',
-  'Calculando impacto glucémico…',
-]
+/** Cycling Loti analysis messages during scan */
+const LOTI_PHASES = ['scan.analyzing1', 'scan.analyzing2', 'scan.analyzing3', 'scan.analyzing4'] as const
 
-function useScanPhase(active: boolean) {
+function useLotiPhase(active: boolean) {
   const [phase, setPhase] = useState(0)
+  const { t } = useLanguage()
   useEffect(() => {
     if (!active) { setPhase(0); return }
-    const timer = setInterval(() => setPhase(p => (p + 1) % SCAN_PHASES.length), 2000)
+    const timer = setInterval(() => setPhase(p => (p + 1) % LOTI_PHASES.length), 2500)
     return () => clearInterval(timer)
   }, [active])
-  return SCAN_PHASES[phase]
+  return t(LOTI_PHASES[phase])
 }
 
 export default function ScanScreen() {
@@ -62,21 +58,11 @@ export default function ScanScreen() {
 
   const isAnalyzing = search.state === 'loading'
   const progress = useProgress(isAnalyzing)
-  const scanPhase = useScanPhase(isAnalyzing)
+  const scanPhase = useLotiPhase(isAnalyzing)
 
   const handleCapture = async () => {
     await camera.capture()
   }
-
-  // Auto-launch camera on mount (native only — web blocks programmatic file input)
-  const hasLaunched = useRef(false)
-  useEffect(() => {
-    const isNative = !!(window as any).Capacitor?.isNativePlatform?.() // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (!hasLaunched.current && !camera.base64 && !camera.loading && isNative) {
-      hasLaunched.current = true
-      camera.capture()
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-analyze when photo is captured
   useEffect(() => {
@@ -134,7 +120,7 @@ export default function ScanScreen() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="ml-2 text-title text-on-surface">Análisis de Alimento</h1>
+          <h1 className="ml-2 text-title text-on-surface">{t('text.analysis')}</h1>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5 pb-24">
@@ -206,9 +192,9 @@ export default function ScanScreen() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Atrás
+            {t('common.back')}
           </button>
-          <h1 className="ml-3 text-lg font-bold text-text-primary">Escaneo</h1>
+          <h1 className="ml-3 text-lg font-bold text-text-primary">{t('scan.photo')}</h1>
         </header>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
@@ -216,20 +202,20 @@ export default function ScanScreen() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <p className="text-base font-medium text-text-primary">No pudimos analizar esta foto</p>
-          <p className="text-sm text-text-secondary text-center">{search.error ?? 'Intenta con una foto más clara o escribe el nombre del alimento.'}</p>
+          <p className="text-base font-medium text-text-primary">{t('scan.errorTitle')}</p>
+          <p className="text-sm text-text-secondary text-center">{search.error ?? t('scan.errorSub')}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={handleScanAnother}
               className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[48px]"
             >
-              Reintentar
+              {t('scan.tryAgain')}
             </button>
             <button
               onClick={() => navigate('/text')}
               className="rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[48px]"
             >
-              Escribir alimento
+              {t('scan.errorTypeInstead')}
             </button>
           </div>
         </div>
@@ -237,148 +223,127 @@ export default function ScanScreen() {
     )
   }
 
-  // ─── Camera / Capture view (main scanner UI) ───────────────
-  return (
-    <div className="flex flex-1 flex-col bg-black relative overflow-hidden">
-      {/* Photo preview or dark background */}
-      {camera.previewUrl ? (
-        <div className="absolute inset-0">
-          <img src={camera.previewUrl} alt="Captured food" className="h-full w-full object-cover" />
-          {/* Dark overlay during analysis */}
-          {isAnalyzing && <div className="absolute inset-0 bg-black/40" />}
-        </div>
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" />
-      )}
-
-      {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 pt-4 pb-2">
-        <button
-          onClick={() => { camera.reset(); search.reset(); navigate('/') }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
-          aria-label="Cerrar"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        {/* "ESCANEO EN VIVO" badge */}
-        <div className="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-sm px-4 py-1.5">
-          <div className={`h-2 w-2 rounded-full ${isAnalyzing ? 'bg-primary animate-pulse' : 'bg-white/60'}`} />
-          <span className="text-xs font-semibold text-white tracking-wider uppercase">
-            {isAnalyzing ? 'Escaneo en vivo' : 'Escanear'}
-          </span>
+  // ─── Analyzing overlay ────────────────────────────────────
+  if (camera.previewUrl && isAnalyzing) {
+    return (
+      <div className="flex flex-1 flex-col bg-surface min-h-0">
+        <div className="flex items-center px-4 pt-4 pb-2 flex-shrink-0">
+          <button
+            onClick={handleScanAnother}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high"
+            aria-label={t('common.back')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-on-surface" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
         </div>
 
-        <div className="w-10" /> {/* Spacer for symmetry */}
-      </div>
+        {camera.previewUrl && (
+          <div className="w-full overflow-hidden rounded-2xl mx-auto px-4" style={{ aspectRatio: '4/3', maxHeight: '40vh' }}>
+            <img src={camera.previewUrl} alt="Scanned food" className="w-full h-full object-cover rounded-2xl" />
+          </div>
+        )}
 
-      {/* Center: scan frame with corner brackets */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-12">
-        <div className="relative w-full aspect-square max-w-[280px]">
-          {/* Corner brackets */}
-          <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-primary/70 rounded-tl-lg" />
-          <div className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-primary/70 rounded-tr-lg" />
-          <div className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-primary/70 rounded-bl-lg" />
-          <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-primary/70 rounded-br-lg" />
-
-          {/* Scan line animation */}
-          {isAnalyzing && (
-            <div className="absolute inset-x-4 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-scan-line" />
-          )}
-
-          {/* Center prompt when no photo */}
-          {!camera.previewUrl && !isAnalyzing && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-white/50 text-sm text-center px-4">
-                Toma una foto de tu comida
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Identification banner (shows during analysis) */}
-      {isAnalyzing && (
-        <div className="relative z-10 mx-6 mb-4">
-          <div className="rounded-2xl bg-white/95 backdrop-blur-md px-4 py-3 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-primary truncate">
-                  {scanPhase}
-                </p>
-                {/* Progress bar */}
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="flex flex-1 flex-col items-center px-5 pt-4 gap-4">
+          <div className="w-full rounded-2xl bg-white p-5 shadow-sm loti-message-enter">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">🔍</span>
+              <div className="flex-1">
+                <p className="text-body font-semibold text-on-surface">{scanPhase}</p>
+                <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
+                <p className="text-[10px] font-semibold text-on-surface-variant mt-1 text-right">
+                  {Math.round(progress)}%
+                </p>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-1.5">
-              <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">
-                Procesando imagen
-              </p>
-              <p className="text-[10px] font-semibold text-primary">
-                {Math.round(progress)}%
-              </p>
-            </div>
           </div>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Error banner */}
-      {camera.error && (
-        <div className="relative z-10 mx-6 mb-4">
-          <div className="rounded-2xl bg-error/90 backdrop-blur-md px-4 py-3">
-            <p className="text-sm text-white">{camera.error}</p>
+  // ─── Loti's Kitchen Entry Screen ──────────────────────────
+  return (
+    <div className="flex flex-1 flex-col bg-surface min-h-0">
+      {/* Close button */}
+      <div className="flex items-center px-4 pt-4 pb-2 flex-shrink-0">
+        <button
+          onClick={() => { camera.reset(); search.reset(); navigate('/') }}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high"
+          aria-label={t('common.closeMenu')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-on-surface" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Loti greeting */}
+      <div className="flex flex-col items-center pt-8 pb-6 px-6">
+        <span className="text-[64px] leading-none">🦎</span>
+        <h1 className="text-title text-on-surface mt-4">{t('scan.greeting')}</h1>
+        <p className="text-body text-on-surface-variant mt-1">{t('scan.greetingSub')}</p>
+      </div>
+
+      {/* Action cards */}
+      <div className="flex gap-4 px-6">
+        {/* Take Photo */}
+        <button
+          onClick={handleCapture}
+          disabled={camera.loading}
+          className="flex-1 flex flex-col items-center gap-3 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 min-h-[140px] justify-center"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </div>
-        </div>
-      )}
+          <div className="text-center">
+            <p className="text-body font-semibold text-on-surface">{t('scan.takePhoto')}</p>
+            <p className="text-caption text-on-surface-variant mt-0.5">{t('scan.takePhotoSub')}</p>
+          </div>
+        </button>
 
-      {/* Bottom controls */}
-      <div className="relative z-10 pb-8 pt-4 px-6">
-        <div className="flex items-center justify-center gap-8">
-          {/* Gallery upload */}
-          <button
-            onClick={() => camera.uploadFromGallery()}
-            disabled={camera.loading || isAnalyzing}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm disabled:opacity-50"
-            aria-label="Upload from gallery"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        {/* From Gallery */}
+        <button
+          onClick={() => camera.uploadFromGallery()}
+          disabled={camera.loading}
+          className="flex-1 flex flex-col items-center gap-3 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 min-h-[140px] justify-center"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-          </button>
+          </div>
+          <div className="text-center">
+            <p className="text-body font-semibold text-on-surface">{t('scan.fromGallery')}</p>
+            <p className="text-caption text-on-surface-variant mt-0.5">{t('scan.fromGallerySub')}</p>
+          </div>
+        </button>
+      </div>
 
-          {/* Main capture button */}
-          <button
-            onClick={handleCapture}
-            disabled={camera.loading || isAnalyzing}
-            className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-white/90 bg-white/20 backdrop-blur-sm transition-transform active:scale-90 disabled:opacity-50"
-            aria-label="Take photo"
-          >
-            <div className={`h-[56px] w-[56px] rounded-full ${isAnalyzing ? 'bg-primary animate-pulse' : 'bg-white'}`} />
-          </button>
-
-          {/* Barcode button right */}
-          <button
-            onClick={() => navigate('/barcode')}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm"
-            aria-label="Barcode scan"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h3v16H3V4zm5 0h1v16H8V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h3v16h-3V4z" />
-            </svg>
-          </button>
+      {/* Camera error */}
+      {camera.error && (
+        <div className="mx-6 mt-4 rounded-2xl bg-error/10 p-4">
+          <p className="text-body text-error text-center">{t('scan.permissionNeeded')}</p>
         </div>
+      )}
+
+      {/* "Or type what you ate" link */}
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={() => navigate('/text')}
+          className="text-body text-primary font-medium hover:underline min-h-[44px] flex items-center"
+        >
+          {t('scan.typeInstead')}
+        </button>
       </div>
     </div>
   )
