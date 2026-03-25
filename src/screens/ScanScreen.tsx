@@ -144,79 +144,85 @@ export default function ScanScreen() {
     navigate('/')
   }
 
-  // ─── Result view ──────────────────────────────────────────
-  if (search.state === 'done' && search.results.length > 0 && showSheet) {
+  // ─── Bottom Sheet Result view ─────────────────────────────
+  if (showSheet && search.state === 'done' && search.results.length > 0) {
     const display = selected ?? search.topResult!
     const composite = isCompositeResult(search.results)
     const multiple = search.results.length > 1 && !composite
 
     return (
-      <div className="flex flex-1 flex-col bg-surface min-h-0">
-        <header className="glass flex items-center px-5 py-3 z-10 flex-shrink-0">
-          <button onClick={handleScanAnother} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="ml-2 text-title text-on-surface">{t('text.analysis')}</h1>
-        </header>
-
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5 pb-24">
-          {camera.previewUrl && (
-            <div className="w-24 h-24 overflow-hidden rounded-xl self-center shadow-sm">
-              <img src={camera.previewUrl} alt="Scanned food" className="h-full w-full object-cover" />
-            </div>
-          )}
-
-          {composite ? (
-            <EditableMealCard
-              total={search.results[0]}
-              initialComponents={search.results.slice(1)}
-              onLog={handleLogComposite}
-            />
-          ) : multiple ? (
-            <>
-              <FoodResultList
-                results={search.results}
-                onSelect={setSelected}
-                selectedIndex={selected ? search.results.indexOf(selected) : 0}
-              />
-              {selected && (
-                <FoodResultCard result={selected} />
-              )}
-            </>
-          ) : (
-            <FoodResultCard result={display} />
-          )}
-
-          <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
-        </div>
-
-        {!composite && (
-          <div className="flex gap-3 glass p-4 sticky bottom-0">
-            <button
-              onClick={handleScanAnother}
-              className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
-            >
-              {t('text.searchAnother')}
-            </button>
-            {multiple ? (
-              <button
-                onClick={selected ? handleLog : handleLogAll}
-                className="flex-1 btn-gradient min-h-[48px]"
-              >
-                {selected ? t('text.logSelected') : t('text.logAll')}
-              </button>
-            ) : (
-              <button
-                onClick={handleLog}
-                className="flex-1 btn-gradient min-h-[48px]"
-              >
-                {t('text.log')}
-              </button>
-            )}
+      <div className="flex flex-1 flex-col bg-surface min-h-0 relative">
+        {/* Shrunk photo at top */}
+        {camera.previewUrl && (
+          <div className="w-full overflow-hidden" style={{ maxHeight: '25vh' }}>
+            <img src={camera.previewUrl} alt="Scanned food" className="w-full h-full object-cover" />
           </div>
         )}
+
+        {/* Bottom sheet */}
+        <div
+          className="flex flex-1 flex-col bg-white rounded-t-3xl -mt-4 relative z-10 animate-sheet-up min-h-0"
+          role="dialog"
+          aria-label={t('text.analysis')}
+        >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
+            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 pb-24">
+            {composite ? (
+              <EditableMealCard
+                total={search.results[0]}
+                initialComponents={search.results.slice(1)}
+                onLog={handleLogComposite}
+              />
+            ) : multiple ? (
+              <>
+                <FoodResultList
+                  results={search.results}
+                  onSelect={setSelected}
+                  selectedIndex={selected ? search.results.indexOf(selected) : 0}
+                />
+                {selected && (
+                  <FoodResultCard result={selected} />
+                )}
+              </>
+            ) : (
+              <FoodResultCard result={display} />
+            )}
+
+            <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
+          </div>
+
+          {/* Pinned action buttons */}
+          {!composite && (
+            <div className="flex gap-3 glass p-4 sticky bottom-0 flex-shrink-0">
+              <button
+                onClick={handleScanAnother}
+                className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
+              >
+                {t('text.searchAnother')}
+              </button>
+              {multiple ? (
+                <button
+                  onClick={selected ? handleLog : handleLogAll}
+                  className="flex-1 btn-gradient min-h-[48px]"
+                >
+                  {selected ? t('text.logSelected') : t('text.logAll')}
+                </button>
+              ) : (
+                <button
+                  onClick={handleLog}
+                  className="flex-1 btn-gradient min-h-[48px]"
+                >
+                  {t('text.log')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     )
   }
