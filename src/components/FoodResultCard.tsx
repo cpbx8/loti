@@ -37,6 +37,14 @@ const IMPACT_CONFIG: Record<string, { labelEs: string; bg: string; text: string;
   },
 }
 
+// ─── Accent bar colors ───────────────────────────────────────
+
+const ACCENT_COLORS: Record<string, string> = {
+  green: '#2ECC71',
+  yellow: '#F39C12',
+  red: '#E74C3C',
+}
+
 // ─── Source Badge ─────────────────────────────────────────────
 
 const SOURCE_INFO: Record<string, { label: string }> = {
@@ -80,79 +88,88 @@ export function FoodResultCard({ result: r, showSource = true, compact = false }
   // Swap GL for comparison curve
   const swapGL = (tl === 'yellow' || tl === 'red') && gl ? estimateSwapGL(gl) : null
 
-  return (
-    <div className="flex flex-col gap-5">
-      {/* ── Result header + impact badge ────────────── */}
-      <div>
-        <div className="flex items-center justify-between">
-          <p className="text-label text-on-surface-variant">Resultado de escaneo</p>
-          {impact && (
-            <div className={`inline-flex items-center gap-1.5 rounded-full ${impact.bg} px-3 py-1`}>
-              <div className={`h-2 w-2 rounded-full ${impact.dot}`} />
-              <span className={`text-label ${impact.text}`}>{impactLabel}</span>
-            </div>
+  // No-GL fallback: just food name + macros + source
+  if (!hasTL || gl == null || gl === 0) {
+    return (
+      <div className="flex flex-col gap-5">
+        <div>
+          <h2 className="text-headline text-on-surface">{displayName}</h2>
+          {r.name_en && r.name_es && r.name_en !== r.name_es && (
+            <p className="text-body text-on-surface-variant mt-0.5">{r.name_en}</p>
           )}
         </div>
-        <h2 className="text-headline text-on-surface mt-2">{displayName}</h2>
-        {r.name_en && r.name_es && r.name_en !== r.name_es && (
-          <p className="text-body text-on-surface-variant mt-0.5">{r.name_en}</p>
+
+        {/* Macros row */}
+        <p className="text-body text-on-surface-variant">
+          {Math.round(cal)} kcal &middot; {Math.round(carbs)}g {t('result.carbs').toLowerCase()} &middot;{' '}
+          {fiber != null ? `${Math.round(fiber * 10) / 10}g ${t('result.fiber').toLowerCase()}` : ''}{fiber != null ? ' \u00b7 ' : ''}
+          {Math.round(protein)}g {t('result.protein').toLowerCase()}
+        </p>
+
+        {/* Source */}
+        {showSource && (
+          <div className="flex items-center gap-2">
+            {r.source === 'fatsecret' ? (
+              <FatSecretAttribution />
+            ) : (
+              <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">
+                {SOURCE_INFO[r.source]?.label ?? r.source}
+                {r.confidence < 1 && ` \u00b7 ${Math.round(r.confidence * 100)}%`}
+              </span>
+            )}
+          </div>
         )}
       </div>
+    )
+  }
 
-      {/* ── GL hero card ───────────────────────────── */}
-      {hasTL && gl != null && (
-        <div className="surface-section p-5">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-display text-on-surface">{Math.round(gl)}</span>
-            <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">CG</span>
+  return (
+    <div className="flex flex-col gap-5">
+      {/* ── Unified Hero Card ────────────────────────── */}
+      <div className="overflow-hidden rounded-2xl surface-card">
+        {/* Accent bar */}
+        <div className="h-1 w-full" style={{ backgroundColor: ACCENT_COLORS[tl!] || '#9ca3af' }} />
+
+        {/* Content area */}
+        <div className="p-5 flex flex-col gap-4">
+          {/* Food name */}
+          <div>
+            <h2 className="text-headline text-on-surface">{displayName}</h2>
+            {r.name_en && r.name_es && r.name_en !== r.name_es && (
+              <p className="text-body text-on-surface-variant mt-0.5">{r.name_en}</p>
+            )}
           </div>
-          <p className="text-body text-on-surface-variant mt-1">
-            {impactDesc}
-          </p>
-        </div>
-      )}
 
-      {/* ── Glucose response curve ──────────────────── */}
-      {hasTL && gl != null && gl > 0 && (
-        <GlucoseSpikeCurve
-          gi={r.glycemic_index ?? (tl === 'red' ? 75 : tl === 'yellow' ? 60 : 40)}
-          gl={gl}
-          trafficLight={tl!}
-          swapGL={swapGL}
-        />
-      )}
+          {/* Verdict row */}
+          <div className="flex items-center gap-3">
+            <TrafficLightBadge rating={tl!} size="md" />
+            <div className="flex-1 min-w-0">
+              <p className={`text-label font-bold uppercase ${impact!.text}`}>{impactLabel}</p>
+              <p className="text-body text-on-surface-variant">{impactDesc}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-3xl font-bold font-serif text-on-surface leading-none">{Math.round(gl)}</p>
+              <p className="text-label text-on-surface-variant">CG</p>
+            </div>
+          </div>
 
-      {/* ── Macros 2×2 grid ────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">{t('result.calories')}</p>
-          <p className="text-headline text-on-surface mt-1">
-            {Math.round(cal)}
-            <span className="text-body text-on-surface-variant ml-1">kcal</span>
-          </p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">{t('result.carbs')}</p>
-          <p className="text-headline text-on-surface mt-1">
-            {Math.round(carbs)}
-            <span className="text-body text-on-surface-variant ml-1">g</span>
-          </p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">{t('result.fiber')}</p>
-          <p className="text-headline text-on-surface mt-1">
-            {fiber != null ? (Math.round(fiber * 10) / 10) : '--'}
-            <span className="text-body text-on-surface-variant ml-1">g</span>
-          </p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-label text-on-surface-variant">{t('result.protein')}</p>
-          <p className="text-headline text-on-surface mt-1">
-            {Math.round(protein)}
-            <span className="text-body text-on-surface-variant ml-1">g</span>
-          </p>
+          {/* Glucose curve (embedded) */}
+          <GlucoseSpikeCurve
+            gi={r.glycemic_index ?? (tl === 'red' ? 75 : tl === 'yellow' ? 60 : 40)}
+            gl={gl}
+            trafficLight={tl!}
+            swapGL={swapGL}
+            className="!bg-transparent !p-0 !shadow-none !rounded-none"
+          />
         </div>
       </div>
+
+      {/* ── Macros row ───────────────────────────────── */}
+      <p className="text-body text-on-surface-variant">
+        {Math.round(cal)} kcal &middot; {Math.round(carbs)}g {t('result.carbs').toLowerCase()} &middot;{' '}
+        {fiber != null ? `${Math.round(fiber * 10) / 10}g ${t('result.fiber').toLowerCase()}` : ''}{fiber != null ? ' \u00b7 ' : ''}
+        {Math.round(protein)}g {t('result.protein').toLowerCase()}
+      </p>
 
       {/* ── Swap tip card ──────────────────────────── */}
       {r.swap_suggestion && (
@@ -200,7 +217,7 @@ export function FoodResultCard({ result: r, showSource = true, compact = false }
           ) : (
             <span className="text-label text-on-surface-variant font-normal normal-case tracking-normal">
               {SOURCE_INFO[r.source]?.label ?? r.source}
-              {r.confidence < 1 && ` · ${Math.round(r.confidence * 100)}%`}
+              {r.confidence < 1 && ` \u00b7 ${Math.round(r.confidence * 100)}%`}
             </span>
           )}
         </div>
