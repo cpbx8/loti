@@ -263,7 +263,7 @@ export default function SettingsScreen() {
         {/* Medicamentos — read-only */}
         {showMeds && profile.medications && profile.medications.length > 0 && (
           <div className="mx-5 mt-4">
-            <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Medicamentos</h2>
+            <h2 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">{t('settings.medications')}</h2>
             <div className="bg-card rounded-2xl px-4 py-3">
               <div className="flex flex-wrap gap-2">
                 {profile.medications.map(m => (
@@ -435,7 +435,7 @@ export default function SettingsScreen() {
         <div className="mx-5 mt-6 mb-4 text-center">
           <p className="text-xs text-text-tertiary">Loti v1.0</p>
           <p className="text-[11px] leading-relaxed text-text-tertiary mt-3">
-            Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.
+            {t('settings.disclaimer')}
           </p>
         </div>
       </div>
@@ -444,8 +444,8 @@ export default function SettingsScreen() {
       {editingA1c && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditingA1c(false)}>
           <div className="mx-6 bg-card rounded-2xl p-5 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-text-primary mb-1">Actualizar A1C</h3>
-            <p className="text-xs text-text-secondary mb-4">Ingresa tu porcentaje de A1C más reciente (4.0 – 14.0)</p>
+            <h3 className="text-lg font-bold text-text-primary mb-1">{t('settings.updateA1c')}</h3>
+            <p className="text-xs text-text-secondary mb-4">{t('settings.enterA1c')}</p>
             <input
               type="number"
               inputMode="decimal"
@@ -468,13 +468,13 @@ export default function SettingsScreen() {
                 onClick={() => setEditingA1c(false)}
                 className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-primary min-h-[44px]"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={saveA1c}
                 className="flex-1 btn-gradient text-sm min-h-[44px]"
               >
-                Guardar
+                {t('common.save')}
               </button>
             </div>
           </div>

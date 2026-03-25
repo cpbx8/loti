@@ -4,6 +4,7 @@ import { useWeeklyHistory, getToday, shiftDate, displayDate } from '@/hooks/useD
 import type { FoodLogEntry } from '@/hooks/useDailyLog'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import type { TrafficLight } from '@/types/shared'
+import { useLanguage } from '@/lib/i18n'
 
 function getEntryTL(e: FoodLogEntry, thresholds: { greenMax: number; yellowMax: number }): TrafficLight {
   if (e.glycemic_load != null) return getPersonalizedTrafficLight(e.glycemic_load, thresholds)
@@ -12,6 +13,7 @@ function getEntryTL(e: FoodLogEntry, thresholds: { greenMax: number; yellowMax: 
 
 export default function HistoryScreen() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const thresholds = useThresholds()
   const [weekEnd, setWeekEnd] = useState(getToday())
   const { days, loading, daysLogged } = useWeeklyHistory(weekEnd)
@@ -41,7 +43,7 @@ export default function HistoryScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="ml-2 text-title text-on-surface">Historial</h1>
+        <h1 className="ml-2 text-title text-on-surface">{t('history.title')}</h1>
       </header>
 
       {/* Week navigator */}

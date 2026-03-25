@@ -196,6 +196,17 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.done': 'Listo',
     'settings.noRestrictions': 'Sin restricciones — toca Editar para agregar',
     'settings.restrictionsNote': 'Las sugerencias de IA y recomendaciones respetan estas restricciones.',
+    'settings.disclaimer': 'Loti AI es solo para fines informativos. No sustituye el consejo médico profesional, diagnóstico o tratamiento. Siempre consulta a tu médico antes de hacer cambios en tu plan de manejo de diabetes.',
+    'common.save': 'Guardar',
+    'common.cancel': 'Cancelar',
+
+    // Tips
+    'tips.mythbuster': 'MITO',
+    'tips.swap': 'INTERCAMBIO',
+    'tips.modifier': 'HÁBITO ACTIVO',
+    'tips.featuredFood': 'NUTRICIÓN',
+    'tips.didYouKnow': '¿SABÍAS QUE?',
+
     'settings.subscription': 'Suscripción',
     'settings.status': 'Estado',
     'settings.premium': 'Premium',
@@ -447,6 +458,17 @@ const translations: Record<Language, Record<string, string>> = {
     'settings.done': 'Done',
     'settings.noRestrictions': 'None set — tap Edit to add',
     'settings.restrictionsNote': 'AI suggestions and recommendations respect these restrictions.',
+    'settings.disclaimer': 'Loti AI is for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult your doctor before making changes to your diabetes management plan.',
+    'common.save': 'Save',
+    'common.cancel': 'Cancel',
+
+    // Tips
+    'tips.mythbuster': 'MYTH',
+    'tips.swap': 'SWAP',
+    'tips.modifier': 'ACTIVE HABIT',
+    'tips.featuredFood': 'NUTRITION',
+    'tips.didYouKnow': 'DID YOU KNOW?',
+
     'settings.subscription': 'Subscription',
     'settings.status': 'Status',
     'settings.premium': 'Premium',

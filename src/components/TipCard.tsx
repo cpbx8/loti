@@ -4,13 +4,14 @@
  */
 import type { TipCard as TipCardData } from '@/data/tipCards'
 import TrafficLightBadge from './TrafficLightBadge'
+import { useLanguage } from '@/lib/i18n'
 
-const TYPE_LABELS: Record<TipCardData['type'], string> = {
-  mythbuster: 'MITO',
-  swap: 'INTERCAMBIO',
-  modifier: 'HÁBITO ACTIVO',
-  featured_food: 'NUTRICIÓN',
-  did_you_know: '¿SABÍAS QUE?',
+const TYPE_I18N_KEYS: Record<TipCardData['type'], string> = {
+  mythbuster: 'tips.mythbuster',
+  swap: 'tips.swap',
+  modifier: 'tips.modifier',
+  featured_food: 'tips.featuredFood',
+  did_you_know: 'tips.didYouKnow',
 }
 
 const MODIFIER_EMOJIS: Record<string, string> = {
@@ -21,7 +22,8 @@ const MODIFIER_EMOJIS: Record<string, string> = {
 }
 
 export default function TipCard({ tip }: { tip: TipCardData }) {
-  const typeLabel = TYPE_LABELS[tip.type]
+  const { t } = useLanguage()
+  const typeLabel = t(TYPE_I18N_KEYS[tip.type])
 
   return (
     <div className={`flex min-h-[180px] w-full flex-col justify-between rounded-2xl p-5 shadow-md ${getCardBg(tip)}`}>
