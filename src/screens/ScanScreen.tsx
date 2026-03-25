@@ -48,6 +48,34 @@ function useLotiPhase(active: boolean) {
   return t(LOTI_PHASES[phase])
 }
 
+/** Stagger-reveal chips one at a time */
+function useChipStagger(results: FoodSearchResult[], isLoading: boolean) {
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [staggerDone, setStaggerDone] = useState(false)
+
+  useEffect(() => {
+    if (isLoading) { setVisibleCount(0); setStaggerDone(false); return }
+    if (results.length === 0) return
+
+    const maxStagger = Math.min(results.length, 5)
+    let count = 0
+    const timer = setInterval(() => {
+      count++
+      if (count >= maxStagger) {
+        clearInterval(timer)
+        setVisibleCount(results.length)
+        setTimeout(() => setStaggerDone(true), 500)
+      } else {
+        setVisibleCount(count)
+      }
+    }, 400)
+    setVisibleCount(1)
+    return () => clearInterval(timer)
+  }, [results, isLoading])
+
+  return { visibleCount, staggerDone }
+}
+
 export default function ScanScreen() {
   const navigate = useNavigate()
   const camera = useCamera()
@@ -59,6 +87,15 @@ export default function ScanScreen() {
   const isAnalyzing = search.state === 'loading'
   const progress = useProgress(isAnalyzing)
   const scanPhase = useLotiPhase(isAnalyzing)
+
+  // Chip stagger for analysis view
+  const chipResults = search.state === 'done' ? search.results : []
+  const { visibleCount, staggerDone } = useChipStagger(chipResults, isAnalyzing)
+  const [showSheet, setShowSheet] = useState(false)
+
+  useEffect(() => {
+    if (staggerDone && search.results.length > 0) setShowSheet(true)
+  }, [staggerDone, search.results.length])
 
   const handleCapture = async () => {
     await camera.capture()
@@ -94,6 +131,7 @@ export default function ScanScreen() {
     camera.reset()
     search.reset()
     setSelected(null)
+    setShowSheet(false)
   }
 
   const handleLogComposite = (components: FoodSearchResult[]) => {
@@ -107,7 +145,7 @@ export default function ScanScreen() {
   }
 
   // ─── Result view ──────────────────────────────────────────
-  if (search.state === 'done' && search.results.length > 0) {
+  if (search.state === 'done' && search.results.length > 0 && showSheet) {
     const display = selected ?? search.topResult!
     const composite = isCompositeResult(search.results)
     const multiple = search.results.length > 1 && !composite
@@ -183,50 +221,13 @@ export default function ScanScreen() {
     )
   }
 
-  // ─── Error ────────────────────────────────────────────────
-  if (search.state === 'error') {
-    return (
-      <div className="flex flex-1 flex-col bg-surface min-h-0">
-        <header className="flex items-center border-b border-border bg-card px-5 py-3">
-          <button onClick={handleScanAnother} className="text-sm text-text-secondary hover:text-text-primary min-h-[44px] flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            {t('common.back')}
-          </button>
-          <h1 className="ml-3 text-lg font-bold text-text-primary">{t('scan.photo')}</h1>
-        </header>
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <p className="text-base font-medium text-text-primary">{t('scan.errorTitle')}</p>
-          <p className="text-sm text-text-secondary text-center">{search.error ?? t('scan.errorSub')}</p>
-          <div className="flex gap-3 mt-2">
-            <button
-              onClick={handleScanAnother}
-              className="rounded-xl border border-border px-4 py-3 text-base font-medium text-text-secondary hover:bg-card min-h-[48px]"
-            >
-              {t('scan.tryAgain')}
-            </button>
-            <button
-              onClick={() => navigate('/text')}
-              className="rounded-3xl bg-primary px-4 py-3 text-base font-medium text-white hover:bg-primary-dark min-h-[48px]"
-            >
-              {t('scan.errorTypeInstead')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // ─── Analysis view (photo taken, analyzing or chips staggering) ───
+  if ((camera.base64 || camera.previewUrl) && !showSheet) {
+    const hasError = search.state === 'error' || (search.state === 'done' && search.results.length === 0)
 
-  // ─── Analyzing overlay ────────────────────────────────────
-  if (camera.previewUrl && isAnalyzing) {
     return (
       <div className="flex flex-1 flex-col bg-surface min-h-0">
+        {/* Top bar */}
         <div className="flex items-center px-4 pt-4 pb-2 flex-shrink-0">
           <button
             onClick={handleScanAnother}
@@ -239,30 +240,85 @@ export default function ScanScreen() {
           </button>
         </div>
 
+        {/* Full-width photo */}
         {camera.previewUrl && (
           <div className="w-full overflow-hidden rounded-2xl mx-auto px-4" style={{ aspectRatio: '4/3', maxHeight: '40vh' }}>
             <img src={camera.previewUrl} alt="Scanned food" className="w-full h-full object-cover rounded-2xl" />
           </div>
         )}
 
-        <div className="flex flex-1 flex-col items-center px-5 pt-4 gap-4">
-          <div className="w-full rounded-2xl bg-white p-5 shadow-sm loti-message-enter">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">🔍</span>
-              <div className="flex-1">
-                <p className="text-body font-semibold text-on-surface">{scanPhase}</p>
-                <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
+        <div className="flex flex-1 flex-col items-center px-5 pt-4 gap-4 overflow-y-auto">
+          {/* Error state */}
+          {hasError && (
+            <div className="w-full rounded-2xl bg-white p-5 shadow-sm loti-message-enter">
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">🥺</span>
+                <div className="flex-1">
+                  <p className="text-body font-semibold text-on-surface">{t('scan.errorTitle')}</p>
+                  <p className="text-caption text-on-surface-variant mt-1">
+                    {search.error ?? t('scan.errorNoFood')}
+                  </p>
+                  <p className="text-caption text-on-surface-variant mt-0.5">{t('scan.errorSub')}</p>
                 </div>
-                <p className="text-[10px] font-semibold text-on-surface-variant mt-1 text-right">
-                  {Math.round(progress)}%
-                </p>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={handleScanAnother}
+                  className="flex-1 ghost-border rounded-full px-4 py-3 text-body font-medium text-on-surface-variant hover:bg-surface-container-high min-h-[48px]"
+                >
+                  {t('scan.tryAgain')}
+                </button>
+                <button
+                  onClick={() => navigate('/text')}
+                  className="flex-1 btn-gradient min-h-[48px]"
+                >
+                  {t('scan.errorTypeInstead')}
+                </button>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Analyzing state */}
+          {isAnalyzing && (
+            <div className="w-full rounded-2xl bg-white p-5 shadow-sm loti-message-enter">
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">🔍</span>
+                <div className="flex-1">
+                  <p className="text-body font-semibold text-on-surface">{scanPhase}</p>
+                  {/* Progress bar */}
+                  <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="text-[10px] font-semibold text-on-surface-variant mt-1 text-right">
+                    {Math.round(progress)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Ingredient chips (staggering in) */}
+          {chipResults.length > 0 && visibleCount > 0 && (
+            <div className="flex flex-wrap gap-2 w-full">
+              {chipResults.slice(0, visibleCount).map((item, i) => (
+                <span
+                  key={item.name_es + i}
+                  className="inline-flex items-center gap-1 rounded-full bg-green-50 border border-green-200 px-3 py-1.5 text-sm font-medium text-green-800 animate-chip-in"
+                >
+                  <span className="text-green-500">&#10003;</span>
+                  {item.name_es}
+                </span>
+              ))}
+              {visibleCount < chipResults.length && (
+                <span className="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 animate-chip-in">
+                  {t('scan.moreIngredients').replace('{{count}}', String(chipResults.length - visibleCount))}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     )
