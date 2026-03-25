@@ -51,6 +51,8 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.empty.greeting': '¿Qué vamos a desayunar?',
     'dashboard.empty.subtitle': 'Escanea o busca tu primera comida y te sigo la glucosa todo el día.',
     'dashboard.empty.cta': 'Escanear comida',
+    'dashboard.nudge.title': '¿Quieres balancear tu día?',
+    'dashboard.nudge.subtitle': 'Te sugiero algo verde para compensar 🌿',
 
     // Tab bar
     'tab.history': 'Historial',
@@ -60,6 +62,7 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.photo': 'Escanear foto',
     'scan.barcode': 'Código de barras',
     'scan.text': 'Escribir alimento',
+    'scan.mealIdeas': 'Ideas',
 
     // Scan - Loti's Kitchen
     'scan.greeting': '¿Qué vamos a comer?',
@@ -279,6 +282,8 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.empty.greeting': "What's for breakfast?",
     'dashboard.empty.subtitle': "Scan or search your first meal and I'll track your glucose all day.",
     'dashboard.empty.cta': 'Scan a meal',
+    'dashboard.nudge.title': 'Want to balance your day?',
+    'dashboard.nudge.subtitle': 'Let me suggest something green to compensate 🌿',
 
     // Tab bar
     'tab.history': 'History',
@@ -288,6 +293,7 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.photo': 'Scan photo',
     'scan.barcode': 'Barcode',
     'scan.text': 'Type food',
+    'scan.mealIdeas': 'Ideas',
 
     // Scan - Loti's Kitchen
     'scan.greeting': 'What are we eating?',

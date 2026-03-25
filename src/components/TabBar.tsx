@@ -4,7 +4,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useLanguage } from '@/lib/i18n'
 
 /** Routes where the tab bar should be hidden */
-const HIDDEN_ROUTES = ['/onboarding', '/settings', '/paywall', '/scan', '/barcode', '/text', '/search', '/weekly-report', '/privacy', '/terms']
+const HIDDEN_ROUTES = ['/onboarding', '/settings', '/paywall', '/scan', '/barcode', '/text', '/search', '/weekly-report', '/privacy', '/terms', '/meal-ideas']
 
 export default function TabBar() {
   const location = useLocation()
@@ -80,6 +80,18 @@ export default function TabBar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               <span className="text-[10px] font-medium">{t('scan.text')}</span>
+            </button>
+
+            <div className="w-px h-8 bg-white/15" />
+
+            <button
+              onClick={() => gatedNavigate('/meal-ideas')}
+              className="flex flex-col items-center gap-1 rounded-xl px-5 py-2.5 text-white/90 hover:bg-white/10 active:bg-white/15 transition-colors min-h-[44px] min-w-[72px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
+              </svg>
+              <span className="text-[10px] font-medium">{t('scan.mealIdeas')}</span>
             </button>
           </div>
         </div>

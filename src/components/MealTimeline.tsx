@@ -1,6 +1,7 @@
 /**
  * MealTimeline — vertical timeline of today's meals with colored dots.
  */
+import { useNavigate } from 'react-router-dom'
 import type { FoodLogEntry } from '@/hooks/useDailyLog'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import type { TrafficLight } from '@/types/shared'
@@ -30,6 +31,7 @@ interface Props {
 export default function MealTimeline({ entries, onRemove }: Props) {
   const thresholds = useThresholds()
   const { t } = useLanguage()
+  const navigate = useNavigate()
 
   if (entries.length === 0) return null
 
@@ -104,6 +106,34 @@ export default function MealTimeline({ entries, onRemove }: Props) {
               </div>
             )
           })}
+
+          {/* Contextual nudge after yellow/red meals */}
+          {(() => {
+            const lastEntry = sorted[sorted.length - 1]
+            if (!lastEntry) return null
+            const lastTL: TrafficLight = lastEntry.glycemic_load != null
+              ? getPersonalizedTrafficLight(lastEntry.glycemic_load, thresholds)
+              : lastEntry.result_traffic_light ?? 'green'
+            if (lastTL === 'green') return null
+            return (
+              <div className="relative mt-2">
+                <div className="absolute -left-6 top-[6px] h-3 w-3 rounded-full bg-primary ring-2 ring-surface flex items-center justify-center">
+                  <span className="text-[6px] text-white">✦</span>
+                </div>
+                <button
+                  onClick={() => navigate('/meal-ideas')}
+                  className="w-full surface-section rounded-xl px-4 py-3 text-left border border-primary/15 hover:border-primary/30 transition-colors"
+                >
+                  <p className="text-body font-medium text-primary">
+                    {t('dashboard.nudge.title')}
+                  </p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    {t('dashboard.nudge.subtitle')}
+                  </p>
+                </button>
+              </div>
+            )
+          })()}
         </div>
       </div>
     </div>
