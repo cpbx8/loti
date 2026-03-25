@@ -20,6 +20,7 @@ import WeeklyReportScreen from '@/screens/WeeklyReportScreen'
 import PaywallScreen from '@/screens/PaywallScreen'
 import OnboardingScreen from '@/screens/OnboardingScreen'
 import MealIdeasScreen from '@/screens/MealIdeasScreen'
+import FoodDetailScreen from '@/screens/FoodDetailScreen'
 
 // Reactive onboarding check — re-renders when localStorage changes
 // (works for both SQLite + localStorage, since SummaryScreen sets both)
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="/barcode" element={<BarcodeScreen />} />
             <Route path="/text" element={<TextInputScreen />} />
             <Route path="/meal-ideas" element={<MealIdeasScreen />} />
+            <Route path="/food/:id" element={<FoodDetailScreen />} />
             <Route path="/favorites" element={<FavoritesScreen />} />
             <Route path="/history" element={<HistoryScreen />} />
             <Route path="/store-guide/:chainId" element={<StoreGuideScreen />} />

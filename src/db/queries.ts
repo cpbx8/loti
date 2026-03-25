@@ -251,6 +251,36 @@ export async function deleteScanLog(id: string): Promise<void> {
   await db.run('DELETE FROM scan_logs WHERE id = ?', [id])
 }
 
+export async function getScanById(id: string): Promise<ScanLogRow | null> {
+  const db = getDb()
+  if (!db) {
+    const key = 'loti_food_log'
+    const existing = JSON.parse(localStorage.getItem(key) || '[]')
+    return existing.find((e: any) => e.id === id) ?? null
+  }
+  const result = await db.query('SELECT * FROM scan_logs WHERE id = ?', [id])
+  const rows = (result.values || []) as ScanLogRow[]
+  return rows[0] ?? null
+}
+
+export async function updateScanEntry(id: string, updates: { serving_size_g: number; quantity: number }): Promise<void> {
+  const db = getDb()
+  if (!db) {
+    const key = 'loti_food_log'
+    const existing = JSON.parse(localStorage.getItem(key) || '[]')
+    const idx = existing.findIndex((e: any) => e.id === id)
+    if (idx >= 0) {
+      existing[idx] = { ...existing[idx], ...updates }
+      localStorage.setItem(key, JSON.stringify(existing))
+    }
+    return
+  }
+  await db.run(
+    'UPDATE scan_logs SET serving_size_g = ?, quantity = ? WHERE id = ?',
+    [updates.serving_size_g, updates.quantity, id]
+  )
+}
+
 export async function getScansForDate(dateStr: string): Promise<ScanLogRow[]> {
   const db = getDb()
   if (!db) return getLocalScansForDate(dateStr)

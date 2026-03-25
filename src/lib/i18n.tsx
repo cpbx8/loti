@@ -54,6 +54,23 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.nudge.title': '¿Quieres balancear tu día?',
     'dashboard.nudge.subtitle': 'Te sugiero algo verde para compensar 🌿',
 
+    // Food detail
+    'foodDetail.portion': 'Porción',
+    'foodDetail.serving': 'porción',
+    'foodDetail.servings': 'porciones',
+    'foodDetail.nutrition': 'Nutrición',
+    'foodDetail.calories': 'Calorías',
+    'foodDetail.carbs': 'Carbohidratos',
+    'foodDetail.protein': 'Proteína',
+    'foodDetail.fat': 'Grasa',
+    'foodDetail.fiber': 'Fibra',
+    'foodDetail.gl': 'Carga Glucémica',
+    'foodDetail.glucoseImpact': 'Impacto en Glucosa',
+    'foodDetail.save': 'Guardar cambios',
+    'foodDetail.deleteTitle': '¿Eliminar este alimento?',
+    'foodDetail.deleteMessage': 'Esta acción no se puede deshacer.',
+    'foodDetail.delete': 'Eliminar',
+
     // Tab bar
     'tab.history': 'Historial',
     'tab.favorites': 'Favoritos',
@@ -284,6 +301,23 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.empty.cta': 'Scan a meal',
     'dashboard.nudge.title': 'Want to balance your day?',
     'dashboard.nudge.subtitle': 'Let me suggest something green to compensate 🌿',
+
+    // Food detail
+    'foodDetail.portion': 'Portion',
+    'foodDetail.serving': 'serving',
+    'foodDetail.servings': 'servings',
+    'foodDetail.nutrition': 'Nutrition',
+    'foodDetail.calories': 'Calories',
+    'foodDetail.carbs': 'Carbs',
+    'foodDetail.protein': 'Protein',
+    'foodDetail.fat': 'Fat',
+    'foodDetail.fiber': 'Fiber',
+    'foodDetail.gl': 'Glycemic Load',
+    'foodDetail.glucoseImpact': 'Glucose Impact',
+    'foodDetail.save': 'Save changes',
+    'foodDetail.deleteTitle': 'Delete this food?',
+    'foodDetail.deleteMessage': 'This action cannot be undone.',
+    'foodDetail.delete': 'Delete',
 
     // Tab bar
     'tab.history': 'History',

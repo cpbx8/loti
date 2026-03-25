@@ -13,7 +13,7 @@ import PaywallScreen from '@/screens/PaywallScreen'
 
 export default function DashboardScreen() {
   const navigate = useNavigate()
-  const { entries, loading, removeEntry } = useDailyLog(getToday())
+  const { entries, loading } = useDailyLog(getToday())
   const streak = useStreak()
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState<'scan' | 'barcode' | 'text' | 'ai_assistant' | undefined>()
@@ -93,7 +93,7 @@ export default function DashboardScreen() {
           {/* ── Meals or Empty State ── */}
           <div className="px-5 mt-6">
             {entries.length > 0 ? (
-              <MealTimeline entries={entries} onRemove={removeEntry} />
+              <MealTimeline entries={entries} />
             ) : (
               /* Empty state: Loti greets */
               <div className="text-center py-8">

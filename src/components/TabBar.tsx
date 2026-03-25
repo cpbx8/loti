@@ -4,7 +4,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useLanguage } from '@/lib/i18n'
 
 /** Routes where the tab bar should be hidden */
-const HIDDEN_ROUTES = ['/onboarding', '/settings', '/paywall', '/scan', '/barcode', '/text', '/search', '/weekly-report', '/privacy', '/terms', '/meal-ideas']
+const HIDDEN_ROUTES = ['/onboarding', '/settings', '/paywall', '/scan', '/barcode', '/text', '/search', '/weekly-report', '/privacy', '/terms', '/meal-ideas', '/food']
 
 export default function TabBar() {
   const location = useLocation()
