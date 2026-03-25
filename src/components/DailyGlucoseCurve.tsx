@@ -281,7 +281,7 @@ export default function DailyGlucoseCurve({ entries }: Props) {
             </div>
             <div>
               <p className="text-body text-on-surface">
-                {t('glucose.peakEstimate')} <strong style={{ color: CURVE_STROKE }}>{result.peakValue} mg/dL</strong> {t('glucose.peakAt')} {Math.round((result.peakMinute - (result.points[0]?.time ?? 0)))} {t('glucose.peakMin')}
+                {t('glucose.peakEstimate')} <strong style={{ color: CURVE_STROKE }}>{result.peakValue} mg/dL</strong> {t('glucose.peakAt')} {formatMinuteAsHour(result.peakMinute)}
               </p>
               <p className="text-label text-on-surface-variant font-normal normal-case tracking-normal">
                 {t('glucose.returnBase')}{Math.round(((result.peakMinute + 120) - result.peakMinute) / 60 * 10) / 10} {t('glucose.returnHrs')}
