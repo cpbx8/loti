@@ -69,15 +69,6 @@ export default function MealTimeline({ entries, onRemove }: Props) {
                       <p className="text-body font-medium text-on-surface truncate">
                         {entry.food_name || '—'}
                       </p>
-                      <p className="text-xs text-text-tertiary mt-0.5">
-                        {entry.calories_kcal != null ? `${Math.round(entry.calories_kcal)} kcal` : '—'}
-                        {' · '}
-                        {entry.protein_g != null ? `${Math.round(entry.protein_g)}P` : '—'}
-                        {' · '}
-                        {entry.carbs_g != null ? `${Math.round(entry.carbs_g)}C` : '—'}
-                        {' · '}
-                        {entry.fat_g != null ? `${Math.round(entry.fat_g)}F` : '—'}
-                      </p>
                     </div>
 
                     {/* GL badge */}
