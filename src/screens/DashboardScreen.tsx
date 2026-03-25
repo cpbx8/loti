@@ -4,7 +4,7 @@ import { useLanguage } from '@/lib/i18n'
 import { useDailyLog, getToday } from '@/hooks/useDailyLog'
 import { useStreak } from '@/hooks/useStreak'
 import { useSubscription } from '@/hooks/useSubscription'
-import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
+// useThresholds removed — GlucoseScoreHero handles its own glucose model
 import TrialBanner from '@/components/TrialBanner'
 import DailyGlucoseCurve from '@/components/DailyGlucoseCurve'
 import GlucoseScoreHero from '@/components/GlucoseScoreHero'
@@ -13,17 +13,12 @@ import PaywallScreen from '@/screens/PaywallScreen'
 
 export default function DashboardScreen() {
   const navigate = useNavigate()
-  const { entries, totals, loading, removeEntry } = useDailyLog(getToday())
+  const { entries, loading, removeEntry } = useDailyLog(getToday())
   const streak = useStreak()
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState<'scan' | 'barcode' | 'text' | 'ai_assistant' | undefined>()
   useSubscription() // keep hook active for trial state
   const { t } = useLanguage()
-  const thresholds = useThresholds()
-
-  const scoreTL = totals.averageGL != null
-    ? getPersonalizedTrafficLight(totals.averageGL, thresholds)
-    : null
 
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-0">
@@ -88,11 +83,7 @@ export default function DashboardScreen() {
           <TrialBanner onUpgrade={() => setPaywallOpen(true)} />
 
           {/* ── Score Hero ── */}
-          <GlucoseScoreHero
-            score={totals.averageGL}
-            trafficLight={scoreTL}
-            entryCount={entries.length}
-          />
+          <GlucoseScoreHero entries={entries} />
 
           {/* ── Daily Glucose Curve ── */}
           <div className="px-5">
