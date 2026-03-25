@@ -12,12 +12,7 @@ const HEALTH_LABELS: Record<string, string> = {
   gestational: 'Gestational Diabetes',
 }
 
-const GOAL_LABELS: Record<string, string> = {
-  lower_a1c: 'Lower my A1C',
-  lose_weight: 'Lose weight',
-  learn: 'Learn about food',
-  wellness: 'General wellness',
-}
+// Goal labels removed — goal screen cut from onboarding
 
 export default function SummaryScreen() {
   const navigate = useNavigate()
@@ -27,7 +22,7 @@ export default function SummaryScreen() {
 
   // Stagger in each line
   useEffect(() => {
-    const total = 5
+    const total = 4
     let i = 0
     const timer = setInterval(() => {
       i++
@@ -72,7 +67,7 @@ export default function SummaryScreen() {
 
     // Also keep localStorage for web fallback
     localStorage.setItem('loti_onboarding_complete', 'true')
-    navigate('/', { replace: true })
+    navigate('/scan', { replace: true })
   }
 
   return (
@@ -98,16 +93,8 @@ export default function SummaryScreen() {
             </div>
           </div>
 
-          {/* Goal */}
-          <div className={`transition-all duration-300 ${visibleLines >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <span className="text-sm text-text-secondary">Goal: </span>
-            <span className="text-sm font-medium text-text-primary">
-              {GOAL_LABELS[state.goal ?? 'learn']}
-            </span>
-          </div>
-
           {/* Thresholds */}
-          <div className={`transition-all duration-300 ${visibleLines >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={`transition-all duration-300 ${visibleLines >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <p className="text-sm text-text-secondary">Your thresholds:</p>
             <div className="mt-1 flex gap-3 text-sm">
               <span className="text-tl-green-fill font-medium">Green &lt; {thresholds.greenMax} GL</span>
@@ -117,7 +104,7 @@ export default function SummaryScreen() {
           </div>
 
           {/* A1C */}
-          <div className={`transition-all duration-300 ${visibleLines >= 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={`transition-all duration-300 ${visibleLines >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <span className="text-sm text-text-secondary">A1C: </span>
             <span className="text-sm font-medium text-text-primary">
               {state.a1cValue ? `${state.a1cValue}%` : 'Not provided — you can add this anytime'}
@@ -125,7 +112,7 @@ export default function SummaryScreen() {
           </div>
 
           {/* Completion */}
-          <div className={`transition-all duration-300 ${visibleLines >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+          <div className={`transition-all duration-300 ${visibleLines >= 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <span className="text-sm text-text-tertiary">
               {completedCount}/{totalCount} profile complete
               {completedCount < totalCount && ' — finish later in Settings'}
@@ -170,7 +157,7 @@ export default function SummaryScreen() {
           onClick={handleStart}
           className="w-full rounded-3xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
         >
-          Start scanning
+          Scan your first food
         </button>
       </div>
     </div>

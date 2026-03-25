@@ -104,14 +104,12 @@ export interface ScreenDef {
 export const ONBOARDING_SCREENS: ScreenDef[] = [
   { id: 'welcome', label: 'Welcome', skippable: false, shouldShow: () => true },
   { id: 'health_state', label: 'Health State', skippable: false, shouldShow: () => true },
-  { id: 'goal', label: 'Goal', skippable: false, shouldShow: () => true },
   { id: 'diagnosis', label: 'Diagnosis', skippable: true, shouldShow: (s) => s.healthState !== 'healthy' },
   { id: 'a1c', label: 'A1C', skippable: true, shouldShow: () => true },
   { id: 'medications', label: 'Medications', skippable: true, shouldShow: (s) => s.healthState !== 'healthy' },
   { id: 'age_sex', label: 'About You', skippable: false, shouldShow: () => true },
   { id: 'activity', label: 'Activity', skippable: true, shouldShow: () => true },
   { id: 'dietary', label: 'Dietary', skippable: true, shouldShow: () => true },
-  { id: 'meal_struggles', label: 'Meals', skippable: true, shouldShow: () => true },
   { id: 'summary', label: 'Summary', skippable: false, shouldShow: () => true },
 ]
 
