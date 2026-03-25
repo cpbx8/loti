@@ -2,7 +2,6 @@
  * FoodResultCard — editorial wellness food analysis display.
  * Matches the Rork "Análisis de Alimento" screen design.
  */
-import { useState, useCallback } from 'react'
 import type { FoodSearchResult } from '@/types/shared'
 import TrafficLightBadge from './TrafficLightBadge'
 import GlucoseSpikeCurve from './GlucoseSpikeCurve'
@@ -55,11 +54,9 @@ interface FoodResultCardProps {
   result: FoodSearchResult
   showSource?: boolean
   compact?: boolean
-  onQuantityChange?: (qty: number, scaled: FoodSearchResult) => void
 }
 
-export function FoodResultCard({ result: r, showSource = true, compact = false, onQuantityChange }: FoodResultCardProps) {
-  const [quantity, setQuantity] = useState(1)
+export function FoodResultCard({ result: r, showSource = true, compact = false }: FoodResultCardProps) {
   const displayName = r.name_es || r.name_en || ''
   const thresholds = useThresholds()
   const { add: addFavorite, isFavorite, remove: removeFavorite, favorites } = useFavorites()
@@ -67,13 +64,11 @@ export function FoodResultCard({ result: r, showSource = true, compact = false, 
   const foodName = r.name_en || r.name_es || ''
   const isFav = isFavorite(foodName)
 
-  // Scale values by quantity
-  const q = quantity
-  const cal = r.calories * q
-  const protein = r.protein_g * q
-  const carbs = r.carbs_g * q
-  const fiber = r.fiber_g != null ? r.fiber_g * q : null
-  const gl = r.glycemic_load != null ? r.glycemic_load * q : null
+  const cal = r.calories
+  const protein = r.protein_g
+  const carbs = r.carbs_g
+  const fiber = r.fiber_g != null ? r.fiber_g : null
+  const gl = r.glycemic_load != null ? r.glycemic_load : null
 
   // Traffic light
   const tl = gl != null ? getPersonalizedTrafficLight(gl, thresholds) : r.traffic_light
@@ -84,21 +79,6 @@ export function FoodResultCard({ result: r, showSource = true, compact = false, 
 
   // Swap GL for comparison curve
   const swapGL = (tl === 'yellow' || tl === 'red') && gl ? estimateSwapGL(gl) : null
-
-  const adjustQty = useCallback((delta: number) => {
-    const next = Math.max(0.5, Math.round((quantity + delta) * 2) / 2)
-    setQuantity(next)
-    onQuantityChange?.(next, {
-      ...r,
-      calories: r.calories * next,
-      protein_g: r.protein_g * next,
-      carbs_g: r.carbs_g * next,
-      fat_g: r.fat_g * next,
-      fiber_g: r.fiber_g != null ? r.fiber_g * next : undefined,
-      glycemic_load: r.glycemic_load != null ? r.glycemic_load * next : undefined,
-      serving_size: r.serving_size * next,
-    })
-  }, [quantity, r, onQuantityChange])
 
   return (
     <div className="flex flex-col gap-5">
@@ -131,29 +111,6 @@ export function FoodResultCard({ result: r, showSource = true, compact = false, 
           </p>
         </div>
       )}
-
-      {/* ── Quantity adjuster ──────────────────────── */}
-      <div className="flex items-center justify-between surface-card p-4">
-        <span className="text-body font-medium text-on-surface-variant">{t('result.portion')}</span>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => adjustQty(-0.5)}
-            disabled={quantity <= 0.5}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high text-on-surface disabled:opacity-30 min-h-[32px] min-w-[32px]"
-          >
-            −
-          </button>
-          <span className="min-w-[2.5rem] text-center text-title text-on-surface">
-            {quantity % 1 === 0 ? quantity : quantity.toFixed(1)}
-          </span>
-          <button
-            onClick={() => adjustQty(0.5)}
-            className="btn-gradient flex h-8 w-8 items-center justify-center !p-0 !rounded-full min-h-[32px] min-w-[32px] text-sm"
-          >
-            +
-          </button>
-        </div>
-      </div>
 
       {/* ── Glucose response curve ──────────────────── */}
       {hasTL && gl != null && gl > 0 && (
@@ -274,7 +231,7 @@ export function FoodResultCard({ result: r, showSource = true, compact = false, 
               swap_suggestion: r.swap_suggestion ?? null,
               disclaimer: 'AI-estimated',
               input_method: 'text_input',
-              quantity: quantity,
+              quantity: 1,
               per_unit_gl: r.glycemic_load ?? null,
               matched_food_id: r.id ?? null,
               match_method: r.source,
