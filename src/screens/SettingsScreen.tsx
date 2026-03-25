@@ -4,6 +4,7 @@ import type { ActivityLevel, Sex } from '@/contexts/OnboardingContext'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useProfile } from '@/hooks/useProfile'
 import { useLanguage } from '@/lib/i18n'
+import { clearAllData } from '@/db/queries'
 
 const STORAGE_KEY = 'loti_onboarding'
 
@@ -141,12 +142,17 @@ export default function SettingsScreen() {
     }
   }
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
+    // Clear SQLite tables
+    await clearAllData()
+    // Clear localStorage
     localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem('loti_onboarding_complete')
     localStorage.removeItem('loti_food_log')
     localStorage.removeItem('loti_suggest_count')
     localStorage.removeItem('loti_store_oxxo')
+    localStorage.removeItem('loti_subscription')
+    localStorage.removeItem('loti_language')
     navigate('/onboarding')
   }
 
@@ -517,22 +523,22 @@ export default function SettingsScreen() {
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClearConfirm(false)}>
           <div className="mx-6 bg-card rounded-2xl p-5 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-text-primary mb-2">¿Resetear todo?</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-2">{t('settings.clearConfirmTitle')}</h3>
             <p className="text-sm text-text-secondary mb-5">
-              Esto eliminará tu perfil, registro de alimentos y todos los datos en caché. Tendrás que hacer el onboarding de nuevo.
+              {t('settings.clearConfirmMessage')}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearConfirm(false)}
                 className="flex-1 ghost-border rounded-full px-4 py-2.5 text-sm font-medium text-text-primary min-h-[44px]"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleClearData}
                 className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white min-h-[44px]"
               >
-                Resetear
+                {t('settings.clearConfirmButton')}
               </button>
             </div>
           </div>

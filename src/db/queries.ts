@@ -573,6 +573,20 @@ export async function cleanupOldAnalytics(): Promise<void> {
   }
 }
 
+export async function clearAllData(): Promise<void> {
+  const db = getDb()
+  if (!db) return
+
+  try {
+    await db.run('DELETE FROM scan_logs')
+    await db.run('DELETE FROM favorites')
+    await db.run('DELETE FROM user_profile')
+    await db.run('DELETE FROM analytics_events')
+  } catch (err) {
+    console.warn('[Loti] Clear all data failed:', err)
+  }
+}
+
 // ─── HELPERS ────────────────────────────────────────────────────
 
 function safeParseArray(value: unknown): string[] {
