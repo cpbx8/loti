@@ -21,6 +21,7 @@ import PaywallScreen from '@/screens/PaywallScreen'
 import OnboardingScreen from '@/screens/OnboardingScreen'
 import MealIdeasScreen from '@/screens/MealIdeasScreen'
 import FoodDetailScreen from '@/screens/FoodDetailScreen'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 // Reactive onboarding check — re-renders when localStorage changes
 // (works for both SQLite + localStorage, since SummaryScreen sets both)
@@ -81,6 +82,7 @@ export default function App() {
   }
 
   return (
+    <ErrorBoundary>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
       <div className="flex flex-col overflow-hidden" style={{ height: '100dvh', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 pb-[58px]">
@@ -106,5 +108,6 @@ export default function App() {
         <TabBar />
       </div>
     </BrowserRouter>
+    </ErrorBoundary>
   )
 }
