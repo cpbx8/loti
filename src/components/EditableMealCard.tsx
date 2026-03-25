@@ -208,6 +208,7 @@ interface EditableMealCardProps {
 
 export default function EditableMealCard({ total, initialComponents, onLog }: EditableMealCardProps) {
   const [components, setComponents] = useState<FoodSearchResult[]>(initialComponents)
+  const [ingredientsExpanded, setIngredientsExpanded] = useState(true)
   const { t } = useLanguage()
 
   // Build a live-updating synthetic total from current components
@@ -244,24 +245,38 @@ export default function EditableMealCard({ total, initialComponents, onLog }: Ed
 
       {/* ── Editable ingredients ── */}
       <div>
-        <p className="text-label text-on-surface-variant mb-3">{t('meal.ingredients')}</p>
-        <div className="flex flex-col gap-2">
-          {components.length === 0 && (
-            <div className="surface-card rounded-2xl p-6 text-center">
-              <p className="text-body font-medium text-on-surface">{t('meal.emptyTitle')}</p>
-              <p className="text-label text-on-surface-variant mt-1 font-normal normal-case tracking-normal">{t('meal.emptyDesc')}</p>
-            </div>
-          )}
-          {components.map((c, i) => (
-            <IngredientRow
-              key={`${c.name_es || c.name_en}-${i}`}
-              item={c}
-              onUpdateGrams={(grams) => handleUpdateGrams(i, grams)}
-              onRemove={() => handleRemove(i)}
-            />
-          ))}
-          <AddIngredientRow onAdd={handleAdd} />
-        </div>
+        <button
+          onClick={() => setIngredientsExpanded(prev => !prev)}
+          className="flex items-center justify-between w-full py-2"
+        >
+          <span className="text-label text-on-surface-variant">{t('meal.ingredients')}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-4 w-4 text-on-surface-variant transition-transform ${ingredientsExpanded ? 'rotate-180' : ''}`}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {ingredientsExpanded && (
+          <div className="flex flex-col gap-2">
+            {components.length === 0 && (
+              <div className="surface-card rounded-2xl p-6 text-center">
+                <p className="text-body font-medium text-on-surface">{t('meal.emptyTitle')}</p>
+                <p className="text-label text-on-surface-variant mt-1 font-normal normal-case tracking-normal">{t('meal.emptyDesc')}</p>
+              </div>
+            )}
+            {components.map((c, i) => (
+              <IngredientRow
+                key={`${c.name_es || c.name_en}-${i}`}
+                item={c}
+                onUpdateGrams={(grams) => handleUpdateGrams(i, grams)}
+                onRemove={() => handleRemove(i)}
+              />
+            ))}
+            <AddIngredientRow onAdd={handleAdd} />
+          </div>
+        )}
       </div>
 
       {/* ── Log button ── */}
