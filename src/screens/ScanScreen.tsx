@@ -83,6 +83,7 @@ export default function ScanScreen() {
   const { addEntry } = useDailyLog()
   const { t } = useLanguage()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
+  const [editMode, setEditMode] = useState(false)
 
   const isAnalyzing = search.state === 'loading'
   const progress = useProgress(isAnalyzing)
@@ -132,6 +133,7 @@ export default function ScanScreen() {
     search.reset()
     setSelected(null)
     setShowSheet(false)
+    setEditMode(false)
   }
 
   const handleLogComposite = (components: FoodSearchResult[]) => {
@@ -172,10 +174,10 @@ export default function ScanScreen() {
 
           {/* Scrollable content */}
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 pb-24">
-            {composite ? (
+            {composite || editMode ? (
               <EditableMealCard
                 total={search.results[0]}
-                initialComponents={search.results.slice(1)}
+                initialComponents={composite ? search.results.slice(1) : [search.results[0]]}
                 onLog={handleLogComposite}
               />
             ) : multiple ? (
@@ -190,14 +192,25 @@ export default function ScanScreen() {
                 )}
               </>
             ) : (
-              <FoodResultCard result={display} />
+              <>
+                <FoodResultCard result={display} />
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="flex items-center justify-center gap-2 w-full py-3 text-body text-primary font-medium hover:bg-surface-container-high rounded-2xl transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  {t('scan.addMissing')}
+                </button>
+              </>
             )}
 
             <SearchMeta source={search.source} cached={search.cached} latencyMs={search.latencyMs} />
           </div>
 
           {/* Pinned action buttons */}
-          {!composite && (
+          {!composite && !editMode && (
             <div className="flex gap-3 glass p-4 sticky bottom-0 flex-shrink-0">
               <button
                 onClick={handleScanAnother}
