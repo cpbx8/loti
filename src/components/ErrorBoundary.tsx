@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-surface p-8 text-center" style={{ height: '100dvh' }}>
-          <div className="text-5xl">🦎</div>
+          <div className="text-5xl">🌸</div>
           <h1 className="text-title text-on-surface">Something went wrong</h1>
           <p className="text-body text-on-surface-variant max-w-xs">
             Loti hit an unexpected error. Try refreshing — your data is safe.

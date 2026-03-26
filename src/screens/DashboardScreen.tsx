@@ -98,7 +98,7 @@ export default function DashboardScreen() {
               /* Empty state: Loti greets */
               <div className="text-center py-8">
                 <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center text-[44px]" style={{ background: 'linear-gradient(135deg, #fce4ec, #f8bbd0)' }}>
-                  🦎
+                  🌸
                 </div>
                 <p className="mt-4 text-title text-on-surface">{t('dashboard.empty.greeting')}</p>
                 <p className="mt-2 text-body text-on-surface-variant max-w-[240px] mx-auto leading-relaxed">

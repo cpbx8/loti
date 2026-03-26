@@ -80,7 +80,7 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
 
       {/* Mascot placeholder */}
       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary-light mb-4">
-        <span className="text-5xl">🦎</span>
+        <span className="text-5xl">🌸</span>
       </div>
 
       {/* Headline */}

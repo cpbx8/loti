@@ -485,7 +485,7 @@ export default function ScanScreen() {
       {camera.streamState === 'error' && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black px-8">
           <div className="text-center">
-            <span className="text-5xl">🦎</span>
+            <span className="text-5xl">🌸</span>
             <p className="mt-4 text-body font-medium text-white">{t('scan.permissionNeeded')}</p>
             <div className="flex gap-3 mt-6">
               <button

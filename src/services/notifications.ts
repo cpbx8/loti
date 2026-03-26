@@ -17,21 +17,21 @@ const DAILY_NOTIFICATION_ID = 1001
 const COPY = {
   es: {
     notLogged: {
-      title: 'Loti 🦎',
+      title: 'Loti 🌸',
       body: '¿Cómo va tu alimentación hoy? Registra lo que comiste.',
     },
     alreadyLogged: {
-      title: 'Loti 🦎',
+      title: 'Loti 🌸',
       body: '¡Buen trabajo hoy! Revisa tu curva de glucosa.',
     },
   },
   en: {
     notLogged: {
-      title: 'Loti 🦎',
+      title: 'Loti 🌸',
       body: "How's your eating going today? Log what you had.",
     },
     alreadyLogged: {
-      title: 'Loti 🦎',
+      title: 'Loti 🌸',
       body: 'Nice work today! Check your glucose curve.',
     },
   },
