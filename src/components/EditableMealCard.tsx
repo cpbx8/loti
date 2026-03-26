@@ -120,15 +120,20 @@ function AddIngredientRow({ onAdd }: { onAdd: (result: FoodSearchResult) => void
 interface IngredientRowProps {
   item: FoodSearchResult
   onUpdateGrams: (grams: number) => void
+  onReplace: (newItem: FoodSearchResult) => void
   onRemove: () => void
 }
 
-function IngredientRow({ item, onUpdateGrams, onRemove }: IngredientRowProps) {
+function IngredientRow({ item, onUpdateGrams, onReplace, onRemove }: IngredientRowProps) {
   const thresholds = useThresholds()
   const { t } = useLanguage()
+  const search = useWaterfallSearch()
   const [editing, setEditing] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
   const [gramsInput, setGramsInput] = useState(String(Math.round(item.serving_size)))
   const inputRef = useRef<HTMLInputElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   const tl = item.glycemic_load != null
     ? getPersonalizedTrafficLight(item.glycemic_load, thresholds)
@@ -141,6 +146,35 @@ function IngredientRow({ item, onUpdateGrams, onRemove }: IngredientRowProps) {
     }
   }, [editing])
 
+  useEffect(() => {
+    if (editingName && nameRef.current) {
+      nameRef.current.focus()
+      nameRef.current.select()
+    }
+  }, [editingName])
+
+  // When name search completes, replace the ingredient with the top result
+  useEffect(() => {
+    if (search.state === 'done' && search.results.length > 0) {
+      onReplace(search.results[0])
+      setEditingName(false)
+      search.reset()
+    } else if (search.state === 'done' && search.results.length === 0) {
+      // No results — revert
+      setEditingName(false)
+      search.reset()
+    }
+  }, [search.state]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const commitName = () => {
+    const trimmed = nameInput.trim()
+    if (trimmed.length >= 2 && trimmed !== (item.name_es || item.name_en)) {
+      search.searchText(trimmed)
+    } else {
+      setEditingName(false)
+    }
+  }
+
   const commitGrams = () => {
     const val = parseInt(gramsInput, 10)
     if (!isNaN(val) && val > 0 && val !== Math.round(item.serving_size)) {
@@ -150,11 +184,37 @@ function IngredientRow({ item, onUpdateGrams, onRemove }: IngredientRowProps) {
     setEditing(false)
   }
 
+  const displayName = item.name_es || item.name_en || ''
+
   return (
     <div className="flex items-center gap-3 surface-card px-4 py-3 rounded-2xl">
       {tl && <TrafficLightBadge rating={tl} size="sm" />}
       <div className="flex-1 min-w-0">
-        <p className="text-body text-on-surface truncate">{item.name_es || item.name_en}</p>
+        {editingName ? (
+          <div className="flex items-center gap-1">
+            <input
+              ref={nameRef}
+              type="text"
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={e => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') setEditingName(false) }}
+              placeholder={displayName}
+              className="flex-1 min-w-0 rounded-lg bg-surface-container px-2 py-0.5 text-body text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            {search.state === 'loading' && (
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent flex-shrink-0" />
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => { setNameInput(displayName); setEditingName(true) }}
+            className="text-body text-on-surface truncate block max-w-full text-left"
+            title={t('meal.tapToEdit')}
+          >
+            {displayName}
+          </button>
+        )}
         {editing ? (
           <div className="flex items-center gap-1 mt-0.5">
             <input
@@ -230,6 +290,10 @@ export default function EditableMealCard({ total, initialComponents, onLog }: Ed
     ))
   }, [])
 
+  const handleReplace = useCallback((index: number, newItem: FoodSearchResult) => {
+    setComponents(prev => prev.map((c, i) => i === index ? newItem : c))
+  }, [])
+
   const handleRemove = useCallback((index: number) => {
     setComponents(prev => prev.filter((_, i) => i !== index))
   }, [])
@@ -271,6 +335,7 @@ export default function EditableMealCard({ total, initialComponents, onLog }: Ed
                 key={`${c.name_es || c.name_en}-${i}`}
                 item={c}
                 onUpdateGrams={(grams) => handleUpdateGrams(i, grams)}
+                onReplace={(newItem) => handleReplace(i, newItem)}
                 onRemove={() => handleRemove(i)}
               />
             ))}

@@ -177,6 +177,7 @@ const translations: Record<Language, Record<string, string>> = {
     'meal.emptyDesc': 'Agrega lo que comiste para ver el impacto',
     'meal.searchError': 'Error al buscar. Intenta de nuevo.',
     'meal.editPortion': 'Editar porción',
+    'meal.tapToEdit': 'Toca para corregir',
 
     // Favorites
     'favorites.title': 'Favoritos',
@@ -451,6 +452,7 @@ const translations: Record<Language, Record<string, string>> = {
     'meal.emptyDesc': 'Add what you ate to see the impact',
     'meal.searchError': 'Search failed. Try again.',
     'meal.editPortion': 'Edit portion',
+    'meal.tapToEdit': 'Tap to correct',
 
     // Favorites
     'favorites.title': 'Favorites',
