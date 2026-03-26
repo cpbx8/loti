@@ -15,11 +15,15 @@ try {
   // Capacitor not available — web fallback will be used
 }
 
+type StreamState = 'idle' | 'loading' | 'active' | 'error'
+
 interface CameraState {
   previewUrl: string | null
   base64: string | null
   loading: boolean
   error: string | null
+  streamState: StreamState
+  torchOn: boolean
 }
 
 /**
@@ -39,16 +43,19 @@ export function useCamera() {
     base64: null,
     loading: false,
     error: null,
+    streamState: 'idle',
+    torchOn: false,
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   /** Process a file/blob from either native camera or file input */
   const processPhoto = useCallback(async (blob: Blob, previewUrl: string) => {
     setState(s => ({ ...s, loading: true, error: null }))
     try {
       const base64 = await compressImage(blob)
-      setState({ previewUrl, base64, loading: false, error: null })
+      setState(s => ({ ...s, previewUrl, base64, loading: false, error: null }))
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to process photo'
       setState(s => ({ ...s, loading: false, error: message }))
@@ -74,7 +81,7 @@ export function useCamera() {
       const blob = await response.blob()
       const base64 = await compressImage(blob)
 
-      setState({ previewUrl: photo.webPath, base64, loading: false, error: null })
+      setState(s => ({ ...s, previewUrl: photo.webPath!, base64, loading: false, error: null }))
       return true
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Camera failed'
@@ -140,9 +147,75 @@ export function useCamera() {
     captureWeb()
   }, [captureNative, captureWeb])
 
-  const reset = useCallback(() => {
-    setState({ previewUrl: null, base64: null, loading: false, error: null })
+  /** Start live camera stream (for viewfinder) */
+  const startStream = useCallback(async (): Promise<MediaStream | null> => {
+    // Already active
+    if (streamRef.current) return streamRef.current
+
+    setState(s => ({ ...s, streamState: 'loading', error: null }))
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      })
+      streamRef.current = stream
+      setState(s => ({ ...s, streamState: 'active' }))
+      return stream
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Camera failed'
+      setState(s => ({ ...s, streamState: 'error', error: message }))
+      return null
+    }
   }, [])
 
-  return { ...state, capture, uploadFromGallery, reset }
+  /** Stop live camera stream */
+  const stopStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop())
+      streamRef.current = null
+    }
+    setState(s => ({ ...s, streamState: 'idle', torchOn: false }))
+  }, [])
+
+  /** Capture a frame from the live video element */
+  const captureFrame = useCallback(async (video: HTMLVideoElement) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.drawImage(video, 0, 0)
+
+    const blob = await new Promise<Blob | null>(resolve =>
+      canvas.toBlob(resolve, 'image/jpeg', 0.9)
+    )
+    if (!blob) return
+
+    // Stop the stream — not needed during analysis
+    stopStream()
+
+    const url = URL.createObjectURL(blob)
+    await processPhoto(blob, url)
+  }, [stopStream, processPhoto])
+
+  /** Toggle torch (flashlight) — best-effort, silently fails if unsupported */
+  const toggleTorch = useCallback(async () => {
+    if (!streamRef.current) return
+    const track = streamRef.current.getVideoTracks()[0]
+    if (!track) return
+    try {
+      const newState = !state.torchOn
+      await track.applyConstraints({ advanced: [{ torch: newState } as MediaTrackConstraintSet] })
+      setState(s => ({ ...s, torchOn: newState }))
+    } catch {
+      // Torch not supported on this device — silently ignore
+    }
+  }, [state.torchOn])
+
+  const reset = useCallback(() => {
+    stopStream()
+    setState({ previewUrl: null, base64: null, loading: false, error: null, streamState: 'idle', torchOn: false })
+  }, [stopStream])
+
+  return { ...state, capture, uploadFromGallery, reset, startStream, stopStream, captureFrame, toggleTorch }
 }

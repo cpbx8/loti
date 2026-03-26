@@ -278,3 +278,15 @@ html {
 .loti-message-enter {
   animation: fadeIn 200ms ease-out;
 }
+
+/* Verdict flash overlay */
+@keyframes verdictFlash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-verdict-flash {
+  animation: verdictFlash 1.2s ease-out forwards;
+}

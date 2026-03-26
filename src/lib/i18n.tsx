@@ -120,6 +120,12 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.permissionNeeded': 'Loti necesita acceso a la cámara para escanear tu comida',
     'scan.openSettings': 'Abrir Ajustes',
     'scan.moreIngredients': '+{{count}} más',
+    'scan.scanFood': 'Escanear comida',
+    'scan.flash': 'Flash',
+    'scan.cameraLoading': 'Iniciando cámara...',
+    'scan.lowImpact': 'Bajo impacto',
+    'scan.moderateImpact': 'Impacto moderado',
+    'scan.highImpact': 'Alto impacto',
 
     // Text input
     'text.title': 'Buscar Alimento',
@@ -396,6 +402,12 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.permissionNeeded': 'Loti needs camera access to scan your food',
     'scan.openSettings': 'Open Settings',
     'scan.moreIngredients': '+{{count}} more',
+    'scan.scanFood': 'Scan Food',
+    'scan.flash': 'Flash',
+    'scan.cameraLoading': 'Starting camera...',
+    'scan.lowImpact': 'Low Impact',
+    'scan.moderateImpact': 'Moderate Impact',
+    'scan.highImpact': 'High Impact',
 
     // Text input
     'text.title': 'Search Food',

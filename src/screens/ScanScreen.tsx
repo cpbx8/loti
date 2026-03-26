@@ -6,6 +6,8 @@ import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@
 import { useLanguage } from '@/lib/i18n'
 import EditableMealCard from '@/components/EditableMealCard'
 import type { FoodSearchResult } from '@/types/shared'
+import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
+import type { TrafficLight } from '@/types/shared'
 import { useState, useEffect, useRef } from 'react'
 
 /** Animated progress that ticks up while analyzing */
@@ -84,6 +86,9 @@ export default function ScanScreen() {
   const { t } = useLanguage()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
   const [editMode, setEditMode] = useState(false)
+  const [verdictFlash, setVerdictFlash] = useState<TrafficLight | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const thresholds = useThresholds()
 
   const isAnalyzing = search.state === 'loading'
   const progress = useProgress(isAnalyzing)
@@ -94,12 +99,45 @@ export default function ScanScreen() {
   const { visibleCount, staggerDone } = useChipStagger(chipResults, isAnalyzing)
   const [showSheet, setShowSheet] = useState(false)
 
+  // Verdict flash before bottom sheet
   useEffect(() => {
-    if (staggerDone && search.results.length > 0) setShowSheet(true)
-  }, [staggerDone, search.results.length])
+    if (staggerDone && search.results.length > 0) {
+      const top = search.topResult
+      if (top) {
+        const tl = top.glycemic_load != null
+          ? getPersonalizedTrafficLight(top.glycemic_load, thresholds)
+          : top.traffic_light ?? 'yellow'
+        setVerdictFlash(tl)
+        const timer = setTimeout(() => {
+          setVerdictFlash(null)
+          setShowSheet(true)
+        }, 1200)
+        return () => clearTimeout(timer)
+      } else {
+        setShowSheet(true)
+      }
+    }
+  }, [staggerDone, search.results.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Start/stop live camera stream for viewfinder
+  const isViewfinder = !camera.base64 && !camera.previewUrl && !showSheet && !verdictFlash
+  useEffect(() => {
+    if (!isViewfinder) return
+    let cancelled = false
+    camera.startStream().then(stream => {
+      if (cancelled || !stream || !videoRef.current) return
+      videoRef.current.srcObject = stream
+      videoRef.current.play().catch(() => {})
+    })
+    return () => { cancelled = true }
+  }, [isViewfinder]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCapture = async () => {
-    await camera.capture()
+    if (videoRef.current) {
+      await camera.captureFrame(videoRef.current)
+    } else {
+      await camera.capture()
+    }
   }
 
   // Auto-analyze when photo is captured
@@ -134,6 +172,7 @@ export default function ScanScreen() {
     setSelected(null)
     setShowSheet(false)
     setEditMode(false)
+    setVerdictFlash(null)
   }
 
   const handleLogComposite = (components: FoodSearchResult[]) => {
@@ -343,83 +382,142 @@ export default function ScanScreen() {
     )
   }
 
-  // ─── Loti's Kitchen Entry Screen ──────────────────────────
+  // ─── Live Camera Viewfinder ──────────────────────────────
   return (
-    <div className="flex flex-1 flex-col bg-surface min-h-0">
-      {/* Close button */}
-      <div className="flex items-center px-4 pt-4 pb-2 flex-shrink-0">
+    <div className="relative flex flex-1 flex-col bg-black min-h-0">
+      {/* Full-screen live video */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+
+      {/* Corner bracket overlay */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+        <div className="relative" style={{ width: '70vw', height: '70vw', maxWidth: '320px', maxHeight: '320px' }}>
+          <div className="absolute top-0 left-0 w-10 h-10 border-t-[3px] border-l-[3px] border-white rounded-tl-lg" />
+          <div className="absolute top-0 right-0 w-10 h-10 border-t-[3px] border-r-[3px] border-white rounded-tr-lg" />
+          <div className="absolute bottom-0 left-0 w-10 h-10 border-b-[3px] border-l-[3px] border-white rounded-bl-lg" />
+          <div className="absolute bottom-0 right-0 w-10 h-10 border-b-[3px] border-r-[3px] border-white rounded-br-lg" />
+        </div>
+      </div>
+
+      {/* Top bar */}
+      <div className="relative z-20 flex items-center justify-between px-4 pt-4 flex-shrink-0">
         <button
           onClick={() => { camera.reset(); search.reset(); navigate('/') }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm min-h-[44px] min-w-[44px]"
           aria-label={t('common.closeMenu')}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-on-surface" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Gallery thumbnail */}
+        <button
+          onClick={() => camera.uploadFromGallery()}
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/40 backdrop-blur-sm min-h-[44px] min-w-[44px]"
+          aria-label={t('scan.fromGallery')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </button>
       </div>
 
-      {/* Loti greeting */}
-      <div className="flex flex-col items-center pt-8 pb-6 px-6">
-        <span className="text-[64px] leading-none">🦎</span>
-        <h1 className="text-title text-on-surface mt-4">{t('scan.greeting')}</h1>
-        <p className="text-body text-on-surface-variant mt-1">{t('scan.greetingSub')}</p>
+      {/* Bottom controls */}
+      <div className="relative z-20 mt-auto pb-8 flex flex-col items-center gap-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)' }}>
+        {/* "Scan Food" chip */}
+        <span className="rounded-full bg-white/20 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-white">
+          {t('scan.scanFood')}
+        </span>
+
+        {/* Control row: flash | shutter | type */}
+        <div className="flex items-center justify-center gap-10 w-full px-8">
+          {/* Flash toggle */}
+          <button
+            onClick={() => camera.toggleTorch()}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm min-h-[44px] min-w-[44px]"
+            aria-label={t('scan.flash')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${camera.torchOn ? 'text-yellow-300' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </button>
+
+          {/* Shutter button */}
+          <button
+            onClick={handleCapture}
+            disabled={camera.loading || camera.streamState !== 'active'}
+            className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white border-[4px] border-white/30 active:scale-90 transition-transform disabled:opacity-50"
+            aria-label={t('scan.scanFood')}
+          >
+            <div className="h-[60px] w-[60px] rounded-full bg-white" />
+          </button>
+
+          {/* Type instead */}
+          <button
+            onClick={() => { camera.stopStream(); navigate('/text') }}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm min-h-[44px] min-w-[44px]"
+            aria-label={t('scan.typeInstead')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Action cards */}
-      <div className="flex gap-4 px-6">
-        {/* Take Photo */}
-        <button
-          onClick={handleCapture}
-          disabled={camera.loading}
-          className="flex-1 flex flex-col items-center gap-3 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 min-h-[140px] justify-center"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+      {/* Camera loading overlay */}
+      {camera.streamState === 'loading' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+            <p className="text-sm text-white/70">{t('scan.cameraLoading')}</p>
           </div>
-          <div className="text-center">
-            <p className="text-body font-semibold text-on-surface">{t('scan.takePhoto')}</p>
-            <p className="text-caption text-on-surface-variant mt-0.5">{t('scan.takePhotoSub')}</p>
-          </div>
-        </button>
-
-        {/* From Gallery */}
-        <button
-          onClick={() => camera.uploadFromGallery()}
-          disabled={camera.loading}
-          className="flex-1 flex flex-col items-center gap-3 rounded-2xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 min-h-[140px] justify-center"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <p className="text-body font-semibold text-on-surface">{t('scan.fromGallery')}</p>
-            <p className="text-caption text-on-surface-variant mt-0.5">{t('scan.fromGallerySub')}</p>
-          </div>
-        </button>
-      </div>
-
-      {/* Camera error */}
-      {camera.error && (
-        <div className="mx-6 mt-4 rounded-2xl bg-error/10 p-4">
-          <p className="text-body text-error text-center">{t('scan.permissionNeeded')}</p>
         </div>
       )}
 
-      {/* "Or type what you ate" link */}
-      <div className="flex justify-center mt-8">
-        <button
-          onClick={() => navigate('/text')}
-          className="text-body text-primary font-medium hover:underline min-h-[44px] flex items-center"
-        >
-          {t('scan.typeInstead')}
-        </button>
-      </div>
+      {/* Camera error overlay */}
+      {camera.streamState === 'error' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black px-8">
+          <div className="text-center">
+            <span className="text-5xl">🦎</span>
+            <p className="mt-4 text-body font-medium text-white">{t('scan.permissionNeeded')}</p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { camera.stopStream(); navigate('/text') }}
+                className="flex-1 rounded-full border border-white/30 px-4 py-3 text-body font-medium text-white min-h-[48px]"
+              >
+                {t('scan.errorTypeInstead')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verdict flash overlay */}
+      {verdictFlash && (
+        <div className={`absolute inset-0 z-40 flex items-center justify-center animate-verdict-flash ${
+          verdictFlash === 'green' ? 'bg-tl-green-fill/60' :
+          verdictFlash === 'yellow' ? 'bg-tl-yellow-fill/60' :
+          'bg-tl-red-fill/60'
+        }`}>
+          <div className="text-center">
+            <div className="text-6xl font-bold text-white">
+              {verdictFlash === 'green' ? '✓' : verdictFlash === 'yellow' ? '⚠' : '!'}
+            </div>
+            <p className="mt-3 text-xl font-bold text-white">
+              {verdictFlash === 'green' ? t('scan.lowImpact') :
+               verdictFlash === 'yellow' ? t('scan.moderateImpact') :
+               t('scan.highImpact')}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
