@@ -93,6 +93,17 @@ const translations: Record<Language, Record<string, string>> = {
     'onboarding.welcomeTitle': 'Mira cómo tu comida afecta tu glucosa',
     'onboarding.welcomeSub': 'Toma una foto. Obtén una calificación roja/amarilla/verde al instante.',
 
+    // Splash intro cards
+    'splash.skip': 'Omitir',
+    'splash.next': 'Siguiente',
+    'splash.getStarted': 'Comenzar',
+    'splash.card1Title': 'Escanea tu comida',
+    'splash.card1Sub': 'Toma una foto de tu plato y Loti identifica cada ingrediente al instante.',
+    'splash.card2Title': 'Mira el impacto en tu glucosa',
+    'splash.card2Sub': 'Obtén una calificación verde, amarilla o roja basada en TU perfil de salud.',
+    'splash.card3Title': 'Come mejor cada día',
+    'splash.card3Sub': 'Loti aprende lo que comes y te sugiere alternativas más saludables.',
+
     // Scan menu
     'scan.photo': 'Escanear foto',
     'scan.barcode': 'Código de barras',
@@ -366,6 +377,17 @@ const translations: Record<Language, Record<string, string>> = {
     'onboarding.scanFirst': 'Scan your first food',
     'onboarding.welcomeTitle': 'See how your food affects your glucose',
     'onboarding.welcomeSub': 'Snap a photo. Get an instant red/yellow/green rating.',
+
+    // Splash intro cards
+    'splash.skip': 'Skip',
+    'splash.next': 'Next',
+    'splash.getStarted': 'Get Started',
+    'splash.card1Title': 'Scan your food',
+    'splash.card1Sub': 'Take a photo of your plate and Loti identifies every ingredient instantly.',
+    'splash.card2Title': 'See your glucose impact',
+    'splash.card2Sub': 'Get a green, yellow, or red rating based on YOUR health profile.',
+    'splash.card3Title': 'Eat smarter every day',
+    'splash.card3Sub': 'Loti learns what you eat and suggests healthier alternatives.',
 
     // Scan menu
     'scan.photo': 'Scan photo',
