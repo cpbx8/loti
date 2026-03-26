@@ -43,9 +43,8 @@ Deno.serve(async (req) => {
     const apiDenied = validateApiKey(req)
     if (apiDenied) return apiDenied
 
-    const body: SearchRequest & { locale?: string } = await req.json()
-    const { query, type, image_base64, locale } = body
-    const language = locale ?? 'es'
+    const body: SearchRequest = await req.json()
+    const { query, type, image_base64 } = body
 
     if (!query && type !== "photo") {
       return errorResponse(400, "Missing query parameter")
@@ -140,7 +139,7 @@ async function waterfallText(
     && !cacheResults[0].serving_description?.startsWith('Total (')
 
   if (isDirectMatch) {
-    const withGI = await Promise.all(cacheResults.map(r => estimateGI(r, language)))
+    const withGI = await Promise.all(cacheResults.map(estimateGI))
     // Write back GI data to cache for results that didn't have it
     for (const r of withGI) {
       if (r.id && r.glycemic_index != null) {
@@ -165,7 +164,7 @@ async function waterfallText(
   if (!decomp.composite) {
     const goodCacheResults = cacheResults.filter(r => isGoodMatch(query, r))
     if (goodCacheResults.length > 0) {
-      const withGI = await Promise.all(goodCacheResults.map(r => estimateGI(r, language)))
+      const withGI = await Promise.all(goodCacheResults.map(estimateGI))
       for (const r of withGI) {
         if (r.id && r.glycemic_index != null) {
           cacheResult(supabase, r).catch(() => {})
@@ -213,7 +212,7 @@ async function waterfallText(
 
   // Step 4: If we got components, estimate GI for each, then build combined total
   if (componentResults.length > 0) {
-    const componentsWithGI = await Promise.all(componentResults.map(r => estimateGI(r, language)))
+    const componentsWithGI = await Promise.all(componentResults.map(estimateGI))
     const total = buildMealTotal(displayName, componentsWithGI)
     return {
       results: [total, ...componentsWithGI],
@@ -239,7 +238,7 @@ async function waterfallSingleItem(
   if (fsResults.length > 0) {
     const best = pickBestMatch(query, fsResults)
     if (best) {
-      const withGI = await estimateGI(best, language)
+      const withGI = await estimateGI(best)
       cacheResult(supabase, withGI).catch(() => {})
       return {
         results: [withGI],
@@ -253,7 +252,7 @@ async function waterfallSingleItem(
   // Tier 2: Open Food Facts
   const offResults = await searchOFFText(query)
   if (offResults.length > 0) {
-    const withGI = await Promise.all(offResults.map(r => estimateGI(r, language)))
+    const withGI = await Promise.all(offResults.map(estimateGI))
     for (const r of withGI) cacheResult(supabase, r).catch(() => {})
     return {
       results: withGI,
@@ -267,7 +266,7 @@ async function waterfallSingleItem(
   const gptResults = await searchGPTText(query)
   if (gptResults.length > 0) {
     // GPT results may already have GI from the prompt; estimateGI will just compute GL/traffic light
-    const withGI = await Promise.all(gptResults.map(r => estimateGI(r, language)))
+    const withGI = await Promise.all(gptResults.map(estimateGI))
     for (const r of withGI) cacheResult(supabase, r).catch(() => {})
     return {
       results: withGI,
@@ -362,7 +361,7 @@ async function waterfallBarcode(
   // Tier 0: Cache
   const cached = await searchCacheBarcode(supabase, barcode)
   if (cached) {
-    const withGI = await estimateGI(cached, language)
+    const withGI = await estimateGI(cached)
     if (withGI.id && withGI.glycemic_index != null) {
       cacheResult(supabase, withGI).catch(() => {})
     }
@@ -377,7 +376,7 @@ async function waterfallBarcode(
   // Tier 1: FatSecret barcode
   const fsResult = await searchFatSecretBarcode(barcode)
   if (fsResult) {
-    const withGI = await estimateGI(fsResult, language)
+    const withGI = await estimateGI(fsResult)
     cacheResult(supabase, withGI).catch(() => {})
     return {
       results: [withGI],
@@ -425,7 +424,7 @@ async function waterfallBarcode(
             image_url: (product.image_url as string) ?? undefined,
           }
           console.log(`[waterfall] barcode OFF HIT for "${barcode}" → ${name}`)
-          const withGI = await estimateGI(offResult, language)
+          const withGI = await estimateGI(offResult)
           cacheResult(supabase, withGI).catch(() => {})
           return {
             results: [withGI],
@@ -444,7 +443,7 @@ async function waterfallBarcode(
   const gptResults = await searchGPTText(`Product with barcode ${barcode}`)
   if (gptResults.length > 0) {
     gptResults[0].barcode = barcode
-    const withGI = await estimateGI(gptResults[0], language)
+    const withGI = await estimateGI(gptResults[0])
     cacheResult(supabase, withGI).catch(() => {})
     return {
       results: [withGI, ...gptResults.slice(1)],
@@ -499,7 +498,7 @@ async function waterfallPhoto(
   }
 
   // Post-process: estimate GI for all results
-  const withGI = await Promise.all(finalResults.map(r => estimateGI(r, language)))
+  const withGI = await Promise.all(finalResults.map(estimateGI))
   // Write back GI data to cache
   for (const r of withGI) {
     if (r.glycemic_index != null) {
