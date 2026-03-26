@@ -4,6 +4,7 @@ import { useOnboarding, computeThresholds, getTrafficLightFromGL, ONBOARDING_SCR
 import TrafficLightBadge from '@/components/TrafficLightBadge'
 import { upsertProfile, completeOnboarding } from '@/db/queries'
 import { startTrial } from '@/lib/revenuecat'
+import { useLanguage } from '@/lib/i18n'
 
 const HEALTH_LABELS: Record<string, string> = {
   healthy: 'Healthy',
@@ -17,6 +18,7 @@ const HEALTH_LABELS: Record<string, string> = {
 export default function SummaryScreen() {
   const navigate = useNavigate()
   const { state } = useOnboarding()
+  const { t } = useLanguage()
   const thresholds = computeThresholds(state)
   const [visibleLines, setVisibleLines] = useState(0)
 
@@ -157,7 +159,7 @@ export default function SummaryScreen() {
           onClick={handleStart}
           className="w-full rounded-3xl bg-primary px-6 py-4 text-lg font-semibold text-white shadow-lg hover:bg-primary-dark transition-colors min-h-[52px]"
         >
-          Scan your first food
+          {t('onboarding.scanFirst')}
         </button>
       </div>
     </div>

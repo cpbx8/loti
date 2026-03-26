@@ -75,6 +75,24 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.history': 'Historial',
     'tab.favorites': 'Favoritos',
 
+    // History screen
+    'history.title': 'Historial',
+    'history.weeklyImpact': 'Impacto Semanal',
+    'history.green': 'Verde',
+    'history.yellow': 'Amarillo',
+    'history.red': 'Rojo',
+    'history.dailyBreakdown': 'Desglose Diario',
+    'history.thisWeek': 'Esta Semana',
+    'history.daysLogged': 'días registrados esta semana',
+    'history.dayByDay': 'Día a Día',
+    'history.itemsLogged': '{{count}} alimentos registrados',
+    'history.noMeals': 'Sin comidas registradas',
+
+    // Onboarding CTA
+    'onboarding.scanFirst': 'Escanea tu primer alimento',
+    'onboarding.welcomeTitle': 'Mira cómo tu comida afecta tu glucosa',
+    'onboarding.welcomeSub': 'Toma una foto. Obtén una calificación roja/amarilla/verde al instante.',
+
     // Scan menu
     'scan.photo': 'Escanear foto',
     'scan.barcode': 'Código de barras',
@@ -169,15 +187,6 @@ const translations: Record<Language, Record<string, string>> = {
     'favorites.logToDiary': 'Registrar en diario',
     'favorites.badge': 'Favorito',
     'favorites.perServing': 'por porción',
-
-    // History
-    'history.title': 'Historial',
-    'history.weeklyImpact': 'Impacto semanal',
-    'history.green': 'Verde',
-    'history.yellow': 'Amarillo',
-    'history.red': 'Rojo',
-    'history.noEntries': 'Sin escaneos esta semana',
-    'history.removedFromLog': 'Eliminado del registro',
 
     // Settings
     'settings.title': 'Ajustes',
@@ -337,6 +346,24 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.history': 'History',
     'tab.favorites': 'Favorites',
 
+    // History screen
+    'history.title': 'History',
+    'history.weeklyImpact': 'Weekly Impact',
+    'history.green': 'Green',
+    'history.yellow': 'Yellow',
+    'history.red': 'Red',
+    'history.dailyBreakdown': 'Daily Breakdown',
+    'history.thisWeek': 'This Week',
+    'history.daysLogged': 'days logged this week',
+    'history.dayByDay': 'Day by Day',
+    'history.itemsLogged': '{{count}} items logged',
+    'history.noMeals': 'No meals logged',
+
+    // Onboarding CTA
+    'onboarding.scanFirst': 'Scan your first food',
+    'onboarding.welcomeTitle': 'See how your food affects your glucose',
+    'onboarding.welcomeSub': 'Snap a photo. Get an instant red/yellow/green rating.',
+
     // Scan menu
     'scan.photo': 'Scan photo',
     'scan.barcode': 'Barcode',
@@ -431,15 +458,6 @@ const translations: Record<Language, Record<string, string>> = {
     'favorites.logToDiary': 'Log to diary',
     'favorites.badge': 'Favorite',
     'favorites.perServing': 'per serving',
-
-    // History
-    'history.title': 'History',
-    'history.weeklyImpact': 'Weekly Impact',
-    'history.green': 'Green',
-    'history.yellow': 'Yellow',
-    'history.red': 'Red',
-    'history.noEntries': 'No scans this week',
-    'history.removedFromLog': 'Removed from log',
 
     // Settings
     'settings.title': 'Settings',

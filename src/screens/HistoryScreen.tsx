@@ -75,22 +75,22 @@ export default function HistoryScreen() {
         <div className="flex-1 overflow-y-auto p-5 pb-24">
           {/* Weekly GI breakdown */}
           <div className="mb-6">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Weekly Impact</p>
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">{t('history.weeklyImpact')}</p>
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-green-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekGreen}</p>
-                <p className="text-xs text-text-secondary">Green</p>
+                <p className="text-xs text-text-secondary">{t('history.green')}</p>
               </div>
               <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-yellow-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekYellow}</p>
-                <p className="text-xs text-text-secondary">Yellow</p>
+                <p className="text-xs text-text-secondary">{t('history.yellow')}</p>
               </div>
               <div className="rounded-2xl bg-card p-3 shadow-sm text-center">
                 <div className="mx-auto mb-1 h-3 w-3 rounded-full bg-tl-red-fill" />
                 <p className="text-2xl font-bold text-text-primary">{weekRed}</p>
-                <p className="text-xs text-text-secondary">Red</p>
+                <p className="text-xs text-text-secondary">{t('history.red')}</p>
               </div>
             </div>
             {/* Proportional bar */}
@@ -105,7 +105,7 @@ export default function HistoryScreen() {
 
           {/* Daily GI bars */}
           <div className="mb-6">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Daily Breakdown</p>
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">{t('history.dailyBreakdown')}</p>
             <div className="flex items-end gap-1.5 h-28">
               {days.map(day => {
                 const dayLabel = new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'narrow' })
@@ -126,12 +126,12 @@ export default function HistoryScreen() {
 
           {/* This week summary */}
           <div className="mb-6">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">This Week</p>
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">{t('history.thisWeek')}</p>
             <div className="rounded-2xl bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold text-text-primary">{daysLogged}</p>
-                  <p className="text-sm text-text-secondary">days logged this week</p>
+                  <p className="text-sm text-text-secondary">{t('history.daysLogged')}</p>
                 </div>
                 <div className="flex gap-1">
                   {days.map(day => (
@@ -153,7 +153,7 @@ export default function HistoryScreen() {
 
           {/* Day-by-day breakdown */}
           <div>
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Day by Day</p>
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">{t('history.dayByDay')}</p>
             <div className="space-y-2">
               {[...days].reverse().map(day => {
                 const green = day.entries.filter(e => getEntryTL(e, thresholds) === 'green').length
@@ -170,8 +170,8 @@ export default function HistoryScreen() {
                       <p className="text-sm font-medium text-text-primary">{displayDate(day.date)}</p>
                       <p className="text-xs text-text-tertiary">
                         {day.totals.scan_count > 0
-                          ? `${day.totals.scan_count} items logged`
-                          : 'No meals logged'}
+                          ? t('history.itemsLogged').replace('{{count}}', String(day.totals.scan_count))
+                          : t('history.noMeals')}
                       </p>
                     </div>
                     {day.totals.scan_count > 0 && (
