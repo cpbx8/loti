@@ -2,6 +2,7 @@
  * Unified hook for all food lookups via the AI proxy search-foods endpoint.
  */
 import { useState, useCallback } from 'react'
+import { useLanguage } from '@/lib/i18n'
 import * as aiProxy from '@/services/aiProxy'
 import type { FoodSearchResult, SearchResponse } from '@/types/shared'
 
@@ -19,6 +20,7 @@ export function useWaterfallSearch() {
   const [state, setState] = useState<LookupState>('idle')
   const [data, setData] = useState<WaterfallResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { language } = useLanguage()
 
   const search = useCallback(async (opts: {
     type: LookupType
@@ -34,6 +36,7 @@ export function useWaterfallSearch() {
         type: opts.type,
         query: opts.query ?? '',
         image_base64: opts.image_base64,
+        locale: language,
       }) as SearchResponse
 
       if (!resp.results || resp.results.length === 0) {

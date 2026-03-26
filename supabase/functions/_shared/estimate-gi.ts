@@ -14,7 +14,23 @@ import type { FoodSearchResult } from "./waterfall-types.ts"
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!
 const TIMEOUT_MS = 5000
 
-const GI_SYSTEM_PROMPT = `You are a glycemic index expert specializing in Mexican and Latin American foods.
+function buildGIPrompt(language: string): string {
+  const isEnglish = language === 'en'
+  const swapExamples = isEnglish
+    ? `  - "Try corn tortilla instead of flour — 30% less glucose impact"
+  - "Add nopales (cactus) to reduce the glucose spike"
+  - "Lime and vinegar lower the glycemic impact — squeeze some lime on it"
+  - "Try unsweetened jamaica water instead of soda"
+  - "Swap white rice for brown rice or beans"
+  Keep suggestions short (1 sentence), in English, practical, and specific to the cuisine.`
+    : `  - "Prueba tortilla de maíz en vez de harina — 30% menos impacto glucémico"
+  - "Agrega nopales para reducir el impacto en tu glucosa"
+  - "El limón y vinagre reducen el impacto glucémico — exprímele limón"
+  - "Prueba agua de jamaica sin azúcar en vez de refresco"
+  - "Cambia arroz blanco por arroz integral o frijoles"
+  Keep suggestions short (1 sentence), in Spanish, practical, and specific to Mexican cuisine.`
+
+  return `You are a glycemic index expert specializing in Mexican and Latin American foods.
 
 Given a food name and its carbohydrate content, estimate the glycemic index (GI).
 
@@ -28,16 +44,12 @@ Return ONLY valid JSON (no markdown, no backticks) in this exact format:
 Rules:
 - glycemic_index: integer 0-100
 - gi_source: "published" if it's a well-known food with widely published GI data (white bread, banana, rice, etc.), "estimated" otherwise
-- swap_suggestion: If the food would result in high glycemic load (GL >= 11), suggest a culturally appropriate lower-GI Mexican alternative. Examples:
-  - "Prueba tortilla de maíz en vez de harina — 30% menos impacto glucémico"
-  - "Agrega nopales para reducir el impacto en tu glucosa"
-  - "El limón y vinagre reducen el impacto glucémico — exprímele limón"
-  - "Prueba agua de jamaica sin azúcar en vez de refresco"
-  - "Cambia arroz blanco por arroz integral o frijoles"
-  Keep suggestions short (1 sentence), in Spanish, practical, and specific to Mexican cuisine.
+- swap_suggestion: If the food would result in high glycemic load (GL >= 11), suggest a culturally appropriate lower-GI alternative. Examples:
+${swapExamples}
   Set to null if the food is already low-GI (GL <= 10).
 - For zero-carb foods (meat, cheese, oils), use GI = 0
 - For mixed dishes, estimate the weighted average GI of the carb-containing components`
+}
 
 interface GPTGIResponse {
   glycemic_index: number
@@ -71,6 +83,7 @@ function computeGLAndTrafficLight(
  */
 export async function estimateGI(
   result: FoodSearchResult,
+  language: string = 'es',
 ): Promise<FoodSearchResult> {
   // If already has full GI data (from cache), just recompute GL/traffic light
   if (result.glycemic_index != null && result.glycemic_index >= 0) {
@@ -116,7 +129,7 @@ export async function estimateGI(
         max_tokens: 200,
         temperature: 0.1,
         messages: [
-          { role: "system", content: GI_SYSTEM_PROMPT },
+          { role: "system", content: buildGIPrompt(language) },
           { role: "user", content: `Estimate GI for: ${foodDesc}` },
         ],
         response_format: { type: "json_object" },
