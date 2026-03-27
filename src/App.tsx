@@ -87,7 +87,7 @@ export default function App() {
   return (
     <ErrorBoundary>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
-      <div className="flex flex-col overflow-hidden" style={{ height: '100dvh', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex flex-col overflow-hidden" style={{ height: '100dvh' }}>
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 pb-[58px]">
           <Routes>
             <Route path="/onboarding" element={<OnboardingScreen />} />
