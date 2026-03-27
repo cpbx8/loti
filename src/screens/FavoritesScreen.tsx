@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Favorite } from '@/hooks/useFavorites'
@@ -6,6 +6,10 @@ import type { ScanResult } from '@/types/shared'
 import { useDailyLog } from '@/hooks/useDailyLog'
 import { useThresholds, getPersonalizedTrafficLight } from '@/hooks/useThresholds'
 import { useLanguage } from '@/lib/i18n'
+import { useCustomMeals } from '@/hooks/useCustomMeals'
+import { getCustomMealItems } from '@/db/customMealQueries'
+import type { CustomMealItem } from '@/db/customMealQueries'
+import MealCard from '@/components/MealCard'
 
 export default function FavoritesScreen() {
   const navigate = useNavigate()
@@ -13,6 +17,20 @@ export default function FavoritesScreen() {
   const { addEntry } = useDailyLog()
   const { t } = useLanguage()
   const [selected, setSelected] = useState<Favorite | null>(null)
+  const { meals, toggleFavorite } = useCustomMeals()
+  const favoritedMeals = meals.filter(m => m.is_favorite)
+  const [mealItems, setMealItems] = useState<Record<string, CustomMealItem[]>>({})
+
+  useEffect(() => {
+    async function load() {
+      const map: Record<string, CustomMealItem[]> = {}
+      for (const meal of favoritedMeals) {
+        map[meal.id] = await getCustomMealItems(meal.id)
+      }
+      setMealItems(map)
+    }
+    if (favoritedMeals.length > 0) load()
+  }, [meals])
 
   const handleSelect = (fav: Favorite) => {
     touch(fav.id)
@@ -56,11 +74,11 @@ export default function FavoritesScreen() {
           </svg>
         </button>
         <h1 className="ml-2 text-title text-on-surface">{t('favorites.title')}</h1>
-        <span className="ml-auto text-body text-on-surface-variant">{favorites.length}</span>
+        <span className="ml-auto text-body text-on-surface-variant">{favoritedMeals.length + favorites.length}</span>
       </header>
 
-      <div className="flex-1 overflow-y-auto">
-        {favorites.length === 0 ? (
+      <div className="flex-1 overflow-y-auto pb-6">
+        {favoritedMeals.length === 0 && favorites.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16 text-center px-6">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -68,9 +86,7 @@ export default function FavoritesScreen() {
               </svg>
             </div>
             <p className="text-body font-medium text-on-surface">{t('favorites.empty')}</p>
-            <p className="text-body text-on-surface-variant">
-              {t('favorites.emptyDesc')}
-            </p>
+            <p className="text-body text-on-surface-variant">{t('favorites.emptyDesc')}</p>
             <button
               onClick={() => navigate('/text')}
               className="mt-2 btn-gradient min-h-[48px] px-6"
@@ -79,15 +95,41 @@ export default function FavoritesScreen() {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 p-4">
-            {favorites.map(fav => (
-              <FavoriteRow
-                key={fav.id}
-                favorite={fav}
-                onSelect={() => handleSelect(fav)}
-                onRemove={() => remove(fav.id)}
-              />
-            ))}
+          <div className="flex flex-col gap-4 p-4">
+            {/* Favorited custom meals */}
+            {favoritedMeals.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-2">Mis Comidas</p>
+                <div className="flex flex-col gap-2">
+                  {favoritedMeals.map(meal => (
+                    <MealCard
+                      key={meal.id}
+                      meal={meal}
+                      items={mealItems[meal.id] ?? []}
+                      onTap={() => navigate(`/log-meal/${meal.id}`)}
+                      onFavorite={() => toggleFavorite(meal.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Single-food favorites */}
+            {favorites.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-2">Alimentos</p>
+                <div className="flex flex-col gap-2">
+                  {favorites.map(fav => (
+                    <FavoriteRow
+                      key={fav.id}
+                      favorite={fav}
+                      onSelect={() => handleSelect(fav)}
+                      onRemove={() => remove(fav.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
