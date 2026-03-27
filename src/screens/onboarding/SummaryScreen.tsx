@@ -67,7 +67,7 @@ export default function SummaryScreen() {
 
     // Also keep localStorage for web fallback
     localStorage.setItem('loti_onboarding_complete', 'true')
-    navigate('/scan', { replace: true })
+    navigate('/', { replace: true })
   }
 
   return (

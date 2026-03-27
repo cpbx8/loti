@@ -2,6 +2,7 @@ import { useState, useCallback, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
 import { useDailyLog } from '@/hooks/useDailyLog'
+import { useSubscription } from '@/hooks/useSubscription'
 import BarcodeScanner from '@/components/BarcodeScanner'
 import { FoodResultCard, FoodResultList, SearchMeta } from '@/components/FoodResultCard'
 import type { FoodSearchResult } from '@/types/shared'
@@ -42,6 +43,7 @@ export default function BarcodeScreen() {
   const navigate = useNavigate()
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
+  const { scans_today: scansToday, is_premium } = useSubscription()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
 
@@ -50,6 +52,8 @@ export default function BarcodeScreen() {
     setSelected(null)
     search.searchBarcode(code)
   }, [search.searchBarcode])
+
+  const afterLogDest = scansToday === 0 && !is_premium ? '/paywall' : '/'
 
   const handleLog = () => {
     const item = selected ?? search.topResult
@@ -67,7 +71,7 @@ export default function BarcodeScreen() {
     })
     search.reset()
     setSelected(null)
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleScanAnother = () => {

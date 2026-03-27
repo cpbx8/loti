@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCamera } from '@/hooks/useCamera'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
 import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
+import { useSubscription } from '@/hooks/useSubscription'
 import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
 import { useLanguage } from '@/lib/i18n'
 import EditableMealCard from '@/components/EditableMealCard'
@@ -83,6 +84,7 @@ export default function ScanScreen() {
   const camera = useCamera()
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
+  const { scans_today: scansToday, is_premium } = useSubscription()
   const { t } = useLanguage()
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -147,6 +149,8 @@ export default function ScanScreen() {
     }
   }, [camera.base64]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const afterLogDest = scansToday === 0 && !is_premium ? '/paywall' : '/'
+
   const handleLog = () => {
     const item = selected ?? search.topResult
     if (!item) return
@@ -154,7 +158,7 @@ export default function ScanScreen() {
     camera.reset()
     search.reset()
     setSelected(null)
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleLogAll = () => {
@@ -163,7 +167,7 @@ export default function ScanScreen() {
     }
     camera.reset()
     search.reset()
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleScanAnother = () => {
@@ -182,7 +186,7 @@ export default function ScanScreen() {
     camera.reset()
     search.reset()
     setSelected(null)
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   // ─── Bottom Sheet Result view ─────────────────────────────

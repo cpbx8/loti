@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
 import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
+import { useSubscription } from '@/hooks/useSubscription'
 import { useLanguage } from '@/lib/i18n'
 import { FoodResultCard, FoodResultList, isCompositeResult, SearchMeta } from '@/components/FoodResultCard'
 import EditableMealCard from '@/components/EditableMealCard'
@@ -12,6 +13,7 @@ export default function TextInputScreen() {
   const search = useWaterfallSearch()
   const { addEntry } = useDailyLog()
   const { t } = useLanguage()
+  const { scans_today: scansToday, is_premium } = useSubscription()
   const [input, setInput] = useState('')
   const [selected, setSelected] = useState<FoodSearchResult | null>(null)
   const handleSubmit = () => {
@@ -21,6 +23,8 @@ export default function TextInputScreen() {
     search.searchText(trimmed)
   }
 
+  const afterLogDest = scansToday === 0 && !is_premium ? '/paywall' : '/'
+
   const handleLog = () => {
     const item = selected ?? search.topResult
     if (!item) return
@@ -28,7 +32,7 @@ export default function TextInputScreen() {
     search.reset()
     setSelected(null)
     setInput('')
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleLogAll = () => {
@@ -37,7 +41,7 @@ export default function TextInputScreen() {
     }
     search.reset()
     setInput('')
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleLogComposite = (components: FoodSearchResult[]) => {
@@ -46,7 +50,7 @@ export default function TextInputScreen() {
     }
     search.reset()
     setInput('')
-    navigate('/')
+    navigate(afterLogDest)
   }
 
   const handleTryAnother = () => {

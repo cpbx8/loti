@@ -36,7 +36,7 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
 
   const handleClose = () => {
     if (onClose) onClose()
-    else navigate(-1)
+    else navigate('/')
   }
 
   const handlePurchase = async () => {
