@@ -98,6 +98,22 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.barcode': 'Código de barras',
     'scan.text': 'Escribir alimento',
     'scan.mealIdeas': 'Ideas',
+    'scan.myMeals': 'Mis Comidas',
+
+    // Custom Meals
+    'customMeal.createTitle': 'Crear Comida',
+    'customMeal.logTitle': 'Registrar Comida',
+    'customMeal.myMealsTitle': 'Mis Comidas',
+    'customMeal.mealName': 'Nombre de la Comida',
+    'customMeal.addIngredients': 'Agregar Ingredientes',
+    'customMeal.searchPlaceholder': 'Buscar alimentos...',
+    'customMeal.ingredients': 'Ingredientes',
+    'customMeal.save': 'Guardar Comida',
+    'customMeal.log': 'Registrar Comida',
+    'customMeal.new': 'Nueva',
+    'customMeal.noMeals': 'Sin comidas guardadas',
+    'customMeal.noMealsHint': 'Crea tu primera comida personalizada',
+    'customMeal.createFirst': 'Crear Primera Comida',
 
     // Scan - Loti's Kitchen
     'scan.greeting': '¿Qué vamos a comer?',
@@ -380,6 +396,22 @@ const translations: Record<Language, Record<string, string>> = {
     'scan.barcode': 'Barcode',
     'scan.text': 'Type food',
     'scan.mealIdeas': 'Ideas',
+    'scan.myMeals': 'My Meals',
+
+    // Custom Meals
+    'customMeal.createTitle': 'Create Meal',
+    'customMeal.logTitle': 'Log Meal',
+    'customMeal.myMealsTitle': 'My Meals',
+    'customMeal.mealName': 'Meal Name',
+    'customMeal.addIngredients': 'Add Ingredients',
+    'customMeal.searchPlaceholder': 'Search foods...',
+    'customMeal.ingredients': 'Ingredients',
+    'customMeal.save': 'Save Meal',
+    'customMeal.log': 'Log Meal',
+    'customMeal.new': 'New',
+    'customMeal.noMeals': 'No saved meals',
+    'customMeal.noMealsHint': 'Create your first custom meal',
+    'customMeal.createFirst': 'Create First Meal',
 
     // Scan - Loti's Kitchen
     'scan.greeting': 'What are we eating?',

@@ -21,6 +21,9 @@ import PaywallScreen from '@/screens/PaywallScreen'
 import OnboardingScreen from '@/screens/OnboardingScreen'
 import MealIdeasScreen from '@/screens/MealIdeasScreen'
 import FoodDetailScreen from '@/screens/FoodDetailScreen'
+import CreateMealScreen from '@/screens/CreateMealScreen'
+import LogMealScreen from '@/screens/LogMealScreen'
+import MyMealsScreen from '@/screens/MyMealsScreen'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
 // Reactive onboarding check — re-renders when localStorage changes
@@ -96,6 +99,9 @@ export default function App() {
             <Route path="/meal-ideas" element={<MealIdeasScreen />} />
             <Route path="/food/:id" element={<FoodDetailScreen />} />
             <Route path="/favorites" element={<FavoritesScreen />} />
+            <Route path="/my-meals" element={<MyMealsScreen />} />
+            <Route path="/create-meal" element={<CreateMealScreen />} />
+            <Route path="/log-meal/:mealId" element={<LogMealScreen />} />
             <Route path="/history" element={<HistoryScreen />} />
             <Route path="/store-guide/:chainId" element={<StoreGuideScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
