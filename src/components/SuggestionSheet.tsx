@@ -244,7 +244,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
       fiber_g: null,
       glycemic_load: s.estimated_gl,
       result_traffic_light: s.traffic_light,
-      serving_size_g: 0,
+      serving_size_g: 100, // default serving — prevents division-by-zero in FoodDetailScreen
       input_method: 'ai_suggestion',
     })
   }

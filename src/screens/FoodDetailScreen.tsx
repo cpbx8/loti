@@ -66,8 +66,9 @@ export default function FoodDetailScreen() {
   }
 
   const og = origGrams ?? entry.serving_size_g ?? 100
-  const gramsPerServing = og / origServings
-  const ratio = grams / og
+  const safeOg = og > 0 ? og : 100 // guard against division by zero
+  const gramsPerServing = safeOg / origServings
+  const ratio = grams / safeOg
   const hasChanges = Math.abs(grams - og) > 0.5
 
   // Scaled macros
