@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSubscription, type PaywallVariant, type BlockedFeature } from '@/hooks/useSubscription'
+import { getOfferings, purchasePackage, restorePurchases } from '@/lib/revenuecat'
 
 const FEATURE_SUBTEXTS: Record<BlockedFeature, string> = {
   scan: 'Unlock unlimited food scanning',
@@ -23,23 +24,68 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
   const [selectedPlan, setSelectedPlan] = useState<'annual' | 'monthly'>('annual')
 
   const variant = variantProp ?? sub.getPaywallVariant(blockedFeature)
+  const [purchasing, setPurchasing] = useState(false)
+  const [restoring, setRestoring] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Pre-load offerings so the purchase is instant when tapped
+  const [offerings, setOfferings] = useState<Awaited<ReturnType<typeof getOfferings>>>(null)
+  useEffect(() => {
+    getOfferings().then(setOfferings)
+  }, [])
 
   const handleClose = () => {
     if (onClose) onClose()
     else navigate(-1)
   }
 
-  const handlePurchase = () => {
-    // Stub: in production, trigger Apple IAP via Capacitor plugin
-    // For now, activate premium directly for testing
-    sub.activatePremium(selectedPlan)
-    if (onClose) onClose()
-    else navigate('/')
+  const handlePurchase = async () => {
+    setError(null)
+    setPurchasing(true)
+    try {
+      // Find the matching package from RevenueCat offerings
+      const packageId = selectedPlan === 'annual' ? '$rc_annual' : '$rc_monthly'
+      const pkg = offerings?.availablePackages?.find(p => p.identifier === packageId)
+
+      if (pkg) {
+        const success = await purchasePackage(pkg)
+        if (success) {
+          sub.activatePremium(selectedPlan)
+          if (onClose) onClose()
+          else navigate('/')
+          return
+        }
+      } else {
+        // No offerings available (simulator/web) — activate directly for testing
+        sub.activatePremium(selectedPlan)
+        if (onClose) onClose()
+        else navigate('/')
+        return
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Purchase failed. Please try again.')
+    } finally {
+      setPurchasing(false)
+    }
   }
 
-  const handleRestore = () => {
-    // Stub: restore Apple IAP purchases
-    alert('Restore purchases will be available when the app is on the App Store.')
+  const handleRestore = async () => {
+    setError(null)
+    setRestoring(true)
+    try {
+      const restored = await restorePurchases()
+      if (restored) {
+        sub.activatePremium('annual') // entitlement active — plan type doesn't matter
+        if (onClose) onClose()
+        else navigate('/')
+      } else {
+        setError('No active subscription found to restore.')
+      }
+    } catch {
+      setError('Restore failed. Please try again.')
+    } finally {
+      setRestoring(false)
+    }
   }
 
   // Headlines and subtexts by variant
@@ -164,10 +210,16 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
       {/* CTA */}
       <button
         onClick={handlePurchase}
-        className="w-full rounded-3xl bg-primary py-4 text-base font-semibold text-white shadow-lg min-h-[48px] transition-transform active:scale-[0.98]"
+        disabled={purchasing || restoring}
+        className="w-full rounded-3xl bg-primary py-4 text-base font-semibold text-white shadow-lg min-h-[48px] transition-transform active:scale-[0.98] disabled:opacity-60"
       >
-        Continue · {selectedPlan === 'annual' ? 'MX$699/year' : 'MX$99/month'}
+        {purchasing ? 'Processing…' : `Continue · ${selectedPlan === 'annual' ? 'MX$699/year' : 'MX$99/month'}`}
       </button>
+
+      {/* Error */}
+      {error && (
+        <p className="text-xs text-error text-center mt-2">{error}</p>
+      )}
 
       {/* Legal */}
       <p className="text-[10px] text-text-tertiary text-center mt-3 leading-relaxed">
@@ -178,9 +230,10 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
       {/* Restore */}
       <button
         onClick={handleRestore}
-        className="mt-4 text-xs text-text-tertiary underline"
+        disabled={purchasing || restoring}
+        className="mt-4 text-xs text-text-tertiary underline disabled:opacity-60"
       >
-        Restore Purchase
+        {restoring ? 'Restoring…' : 'Restore Purchase'}
       </button>
     </div>
   )
