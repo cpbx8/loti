@@ -45,10 +45,11 @@ export default function DailyGlucoseCurve({ entries }: Props) {
   const { profile } = useProfile()
   const { t } = useLanguage()
   const healthState = profile?.health_state || 'healthy'
+  const a1c = profile?.a1c_value ?? null
 
   const result = useMemo(
-    () => computeDailyGlucose(entries, healthState),
-    [entries, healthState]
+    () => computeDailyGlucose(entries, healthState, undefined, a1c),
+    [entries, healthState, a1c]
   )
 
   const hasData = entries.some(e => e.glycemic_load != null && e.glycemic_load > 0)

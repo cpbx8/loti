@@ -32,11 +32,12 @@ export default function GlucoseScoreHero({ entries }: Props) {
   const { profile } = useProfile()
   const thresholds = useThresholds()
   const healthState = profile?.health_state || 'healthy'
+  const a1c = profile?.a1c_value ?? null
   const [infoOpen, setInfoOpen] = useState(false)
 
   const result = useMemo(
-    () => computeDailyGlucose(entries, healthState),
-    [entries, healthState]
+    () => computeDailyGlucose(entries, healthState, undefined, a1c),
+    [entries, healthState, a1c]
   )
 
   const hasData = entries.some(e => e.glycemic_load != null && e.glycemic_load > 0)
@@ -44,7 +45,7 @@ export default function GlucoseScoreHero({ entries }: Props) {
   const moodKeys = MOOD_KEYS[result.status] ?? []
   const moodKey = moodKeys.length > 0 ? moodKeys[entries.length % moodKeys.length] : null
 
-  const fastingBaseline = getFastingBaseline(healthState)
+  const fastingBaseline = getFastingBaseline(healthState, a1c)
 
   return (
     <>

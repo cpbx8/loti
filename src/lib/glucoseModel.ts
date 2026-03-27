@@ -47,15 +47,27 @@ export const DANGER_ZONES = {
 
 // ─── Fasting Baselines ───────────────────────────────────────
 
-export function getFastingBaseline(healthState: string): number {
-  switch (healthState) {
-    case 'healthy':     return 85    // clinical normal: 70-99
-    case 'prediabetic': return 112   // clinical range: 100-125
-    case 'type2':       return 150   // clinical: 126+, typical morning 140-160
-    case 'gestational': return 105   // varies, typically elevated
-    case 'type1':       return 140   // highly variable, moderate estimate
-    default:            return 85
+export function getFastingBaseline(healthState: string, a1c?: number | null): number {
+  // Default baselines by health state (ADA clinical ranges)
+  const defaults: Record<string, number> = {
+    healthy: 85,        // clinical normal: 70-99
+    prediabetic: 112,   // clinical range: 100-125
+    type2: 150,         // clinical: 126+, typical morning 140-160
+    gestational: 105,   // varies, typically elevated
+    type1: 140,         // highly variable, moderate estimate
   }
+  const base = defaults[healthState] ?? 85
+
+  if (a1c == null || a1c <= 0) return base
+
+  // ADAG formula: eAG (mg/dL) = 28.7 × A1C − 46.7
+  // Fasting glucose is typically ~90% of estimated average glucose
+  const eAG = 28.7 * a1c - 46.7
+  const a1cFasting = Math.round(eAG * 0.9)
+
+  // Blend: 50% health-state default + 50% A1C-derived, clamped to reasonable range
+  const blended = Math.round((base + a1cFasting) / 2)
+  return Math.max(70, Math.min(250, blended))
 }
 
 // ─── Glucose Rise ────────────────────────────────────────────
@@ -77,8 +89,8 @@ export function getGlucoseRise(gl: number, healthState: string): number {
 
 // ─── Curve Parameters ────────────────────────────────────────
 
-export function getCurveParams(gl: number, healthState: string): CurveParams {
-  const baseline = getFastingBaseline(healthState)
+export function getCurveParams(gl: number, healthState: string, a1c?: number | null): CurveParams {
+  const baseline = getFastingBaseline(healthState, a1c)
   const peakRise = getGlucoseRise(gl, healthState)
 
   const timingParams: Record<string, { timeToPeak: number; timeToBaseline: number; returnFraction: number }> = {
@@ -125,8 +137,8 @@ export function getCurveParams(gl: number, healthState: string): CurveParams {
 
 // ─── Single Food Curve ───────────────────────────────────────
 
-export function generateGlucoseCurve(gl: number, healthState: string): GlucosePoint[] {
-  const params = getCurveParams(gl, healthState)
+export function generateGlucoseCurve(gl: number, healthState: string, a1c?: number | null): GlucosePoint[] {
+  const params = getCurveParams(gl, healthState, a1c)
   const { baseline, peakRise, timeToPeak, timeToBaseline, returnFraction } = params
 
   const peak = baseline + peakRise
@@ -164,8 +176,8 @@ export function generateGlucoseCurve(gl: number, healthState: string): GlucosePo
 
 // ─── Single Food Curve Function (for composite daily) ────────
 
-function singleFoodCurveFn(gl: number, healthState: string): (minutesSinceEating: number) => number {
-  const params = getCurveParams(gl, healthState)
+function singleFoodCurveFn(gl: number, healthState: string, a1c?: number | null): (minutesSinceEating: number) => number {
+  const params = getCurveParams(gl, healthState, a1c)
   const { peakRise, timeToPeak, timeToBaseline, returnFraction, baseline } = params
   const peak = baseline + peakRise
   const returnLevel = baseline * returnFraction
@@ -218,14 +230,15 @@ function entryMinuteOfDay(entry: FoodLogEntry): number {
 export function computeDailyGlucose(
   entries: FoodLogEntry[],
   healthState: string,
-  nowMinute?: number
+  nowMinute?: number,
+  a1c?: number | null,
 ): DailyGlucoseResult {
   const now = nowMinute ?? (() => {
     const d = new Date()
     return d.getHours() * 60 + d.getMinutes()
   })()
 
-  const baseline = getFastingBaseline(healthState)
+  const baseline = getFastingBaseline(healthState, a1c)
   const validEntries = entries.filter(e => e.glycemic_load != null && e.glycemic_load > 0)
 
   if (validEntries.length === 0) {
@@ -240,7 +253,7 @@ export function computeDailyGlucose(
   const curves = validEntries.map(entry => {
     const gl = (entry.glycemic_load ?? 0) * (entry.serving_count ?? 1)
     const eatenAt = entryMinuteOfDay(entry)
-    const curveFn = singleFoodCurveFn(gl, healthState)
+    const curveFn = singleFoodCurveFn(gl, healthState, a1c)
     return { eatenAt, curveFn }
   })
 
