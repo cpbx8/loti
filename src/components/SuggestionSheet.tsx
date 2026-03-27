@@ -6,7 +6,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as aiProxy from '@/services/aiProxy'
 import { useThresholds } from '@/hooks/useThresholds'
-import { useDailyLog } from '@/hooks/useDailyLog'
+import { useDailyLog, toLogEntry } from '@/hooks/useDailyLog'
 import { useProfile } from '@/hooks/useProfile'
 import { getScanSummary, formatScanSummaryForPrompt, getTodaySummaryLine } from '@/utils/scanSummary'
 import SuggestionCard from './SuggestionCard'
@@ -234,7 +234,25 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
     navigate(`/search?q=${encodeURIComponent(foodName)}`)
   }
 
-  const logSuggestion = (s: Suggestion) => {
+  const logSuggestion = async (s: Suggestion) => {
+    // Try to backfill nutrition data via waterfall search
+    try {
+      const locale = localStorage.getItem('loti_language') || 'es'
+      const resp = await aiProxy.searchFoods({ query: s.food_name, type: 'text', locale })
+      const results = (resp as any)?.results
+      if (results && results.length > 0) {
+        const entry = toLogEntry(results[0], 'ai_suggestion')
+        // Use AI suggestion's GL + traffic light (more contextual), but backfill macros from search
+        entry.glycemic_load = s.estimated_gl
+        entry.result_traffic_light = s.traffic_light
+        addEntry(entry)
+        return
+      }
+    } catch {
+      // Search failed — fall through to basic entry
+    }
+
+    // Fallback: log with suggestion data only
     addEntry({
       food_name: s.food_name,
       calories_kcal: 0,
@@ -244,7 +262,7 @@ export default function SuggestionSheet({ open, onClose }: SuggestionSheetProps)
       fiber_g: null,
       glycemic_load: s.estimated_gl,
       result_traffic_light: s.traffic_light,
-      serving_size_g: 100, // default serving — prevents division-by-zero in FoodDetailScreen
+      serving_size_g: 100,
       input_method: 'ai_suggestion',
     })
   }
