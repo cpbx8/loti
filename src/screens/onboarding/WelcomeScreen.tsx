@@ -8,7 +8,7 @@ export default function WelcomeScreen() {
   const { language, setLanguage, t } = useLanguage()
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-primary/10 to-surface px-8" style={{ minHeight: '100svh', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}>
+    <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-primary/10 to-surface px-8 overflow-hidden">
       <LotiMascot expression="welcome" size="xl" className="mb-6" />
 
       {/* Language toggle */}
