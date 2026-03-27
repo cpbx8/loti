@@ -17,7 +17,7 @@ export default function TabBar() {
     location.pathname.startsWith('/store-guide')
   if (isHidden) return null
 
-  const isHistory = location.pathname.startsWith('/history')
+  const isFavorites = location.pathname.startsWith('/favorites')
   const isHome = location.pathname === '/'
 
   const gatedNavigate = (path: string) => {
@@ -89,34 +89,32 @@ export default function TabBar() {
 
       {/* Tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 flex items-stretch glass z-30" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {/* History tab — left */}
+        {/* Favorites tab — left */}
         <button
-          onClick={() => navigate('/history')}
+          onClick={() => navigate('/favorites')}
           className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] transition-colors ${
-            isHistory ? 'text-primary' : 'text-text-tertiary'
+            isFavorites ? 'text-primary' : 'text-text-tertiary'
           }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isFavorites ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
-          <span className="text-[10px] font-medium">{t('tab.history')}</span>
+          <span className="text-[10px] font-medium">{t('tab.favorites')}</span>
         </button>
 
-        {/* Home — center, elevated */}
-        <div className="flex flex-1 items-center justify-center">
-          <button
-            onClick={() => navigate('/')}
-            className={`flex h-14 w-14 items-center justify-center rounded-full -mt-5 transition-all active:scale-90 shadow-lg ${
-              isHome ? 'bg-primary' : 'bg-surface-container-high'
-            }`}
-            style={isHome ? { boxShadow: '0px 8px 24px rgba(166, 47, 74, 0.30)' } : { boxShadow: '0px 4px 12px rgba(0,0,0,0.10)' }}
-            aria-label="Home"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${isHome ? 'text-white' : 'text-text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          </button>
-        </div>
+        {/* Home — center, normal tab size */}
+        <button
+          onClick={() => navigate('/')}
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] transition-colors ${
+            isHome ? 'text-primary' : 'text-text-tertiary'
+          }`}
+          aria-label="Home"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className="text-[10px] font-medium">Home</span>
+        </button>
 
         {/* + button — far right, elevated */}
         <div className="flex flex-1 items-center justify-center">
