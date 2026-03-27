@@ -35,9 +35,10 @@ interface Props {
   items: CustomMealItem[]
   onTap?: () => void
   onLongPress?: () => void
+  onFavorite?: () => void
 }
 
-export default function MealCard({ meal, items, onTap, onLongPress }: Props) {
+export default function MealCard({ meal, items, onTap, onLongPress, onFavorite }: Props) {
   const tl = worstTrafficLight(
     items.map(i => (i.traffic_light ?? 'green') as TrafficLight),
   )
@@ -61,30 +62,42 @@ export default function MealCard({ meal, items, onTap, onLongPress }: Props) {
   }
 
   return (
-    <button
-      onClick={onTap}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
-      className="w-full rounded-2xl bg-card p-4 shadow-sm hover:shadow-md transition-shadow text-left flex items-center gap-3 min-h-[60px]"
-    >
-      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-surface-container-low text-2xl">
-        {meal.icon}
-      </div>
+    <div className="w-full rounded-2xl bg-card shadow-sm hover:shadow-md transition-shadow flex items-center min-h-[60px]">
+      <button
+        onClick={onTap}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        className="flex-1 p-4 text-left flex items-center gap-3 min-w-0"
+      >
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-surface-container-low text-2xl">
+          {meal.icon}
+        </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-[15px] font-medium text-text-primary truncate">{meal.name}</p>
-        <p className="text-xs text-text-secondary mt-0.5">{items.length} items</p>
-      </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[15px] font-medium text-text-primary truncate">{meal.name}</p>
+          <p className="text-xs text-text-secondary mt-0.5">{items.length} items</p>
+        </div>
 
-      <div className="text-right flex-shrink-0">
-        <p className={`font-serif text-lg font-bold ${TL_GL_COLOR[tl]}`}>
-          {Math.round(totalGL)} <span className="text-[10px] font-sans font-semibold text-text-tertiary">GL</span>
-        </p>
-        <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${TL_BADGE_STYLE[tl]}`}>
-          {TL_ICON[tl]} {TL_SHORT[tl]}
-        </span>
-      </div>
-    </button>
+        <div className="text-right flex-shrink-0">
+          <p className={`font-serif text-lg font-bold ${TL_GL_COLOR[tl]}`}>
+            {Math.round(totalGL)} <span className="text-[10px] font-sans font-semibold text-text-tertiary">GL</span>
+          </p>
+          <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${TL_BADGE_STYLE[tl]}`}>
+            {TL_ICON[tl]} {TL_SHORT[tl]}
+          </span>
+        </div>
+      </button>
+
+      {onFavorite && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onFavorite() }}
+          className="flex-shrink-0 px-3 py-4 text-xl leading-none"
+          aria-label={meal.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          {meal.is_favorite ? '♥' : '♡'}
+        </button>
+      )}
+    </div>
   )
 }

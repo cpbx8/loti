@@ -8,7 +8,7 @@
 
 import { Capacitor } from '@capacitor/core'
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite'
-import { MIGRATION_001, MIGRATION_002 } from './migrations'
+import { MIGRATION_001, MIGRATION_002, MIGRATION_003 } from './migrations'
 import { SEED_FOODS, generateStoreProductInserts } from './seeds'
 import { OXXO_SEED_PRODUCTS } from '@/data/oxxoProducts'
 import { SEVEN_ELEVEN_SEED_PRODUCTS } from '@/data/sevenElevenProducts'
@@ -88,6 +88,11 @@ async function runMigrations(): Promise<void> {
   if (version < 2) {
     await db.execute(MIGRATION_002)
     await setDbVersion(2)
+  }
+
+  if (version < 3) {
+    await db.execute(MIGRATION_003)
+    await setDbVersion(3)
   }
 }
 

@@ -177,3 +177,7 @@ CREATE INDEX IF NOT EXISTS idx_meal_items_meal ON custom_meal_items(meal_id);
 -- Add meal_group_id to scan_logs for grouping custom meal log entries
 ALTER TABLE scan_logs ADD COLUMN meal_group_id TEXT;
 `;
+
+export const MIGRATION_003 = `
+ALTER TABLE custom_meals ADD COLUMN is_favorite INTEGER DEFAULT 0;
+`;

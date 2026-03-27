@@ -10,6 +10,7 @@ export interface CustomMeal {
   id: string
   name: string
   icon: string
+  is_favorite: boolean
   created_at: string
   updated_at: string
 }
@@ -68,7 +69,7 @@ export async function createCustomMeal(name: string, icon: string = '🍽️'): 
 
   if (!db) {
     const meals = lsGet<CustomMeal>(LS_MEALS_KEY)
-    meals.push({ id, name, icon, created_at: now, updated_at: now })
+    meals.push({ id, name, icon, is_favorite: false, created_at: now, updated_at: now })
     lsSet(LS_MEALS_KEY, meals)
     return id
   }
@@ -112,13 +113,18 @@ export async function addCustomMealItem(mealId: string, item: NewCustomMealItem)
 export async function getCustomMeals(): Promise<CustomMeal[]> {
   const db = getDb()
   if (!db) {
-    return lsGet<CustomMeal>(LS_MEALS_KEY).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    )
+    return lsGet<CustomMeal>(LS_MEALS_KEY).sort((a, b) => {
+      if (a.is_favorite !== b.is_favorite) return a.is_favorite ? -1 : 1
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
   }
 
-  const result = await db.query('SELECT * FROM custom_meals ORDER BY created_at DESC')
-  return (result.values || []) as CustomMeal[]
+  const result = await db.query(
+    'SELECT * FROM custom_meals ORDER BY is_favorite DESC, created_at DESC',
+  )
+  return ((result.values || []) as (Omit<CustomMeal, 'is_favorite'> & { is_favorite: number })[]).map(
+    r => ({ ...r, is_favorite: Boolean(r.is_favorite) }),
+  )
 }
 
 export async function getCustomMealById(id: string): Promise<CustomMeal | null> {
@@ -177,6 +183,24 @@ export async function updateCustomMeal(
   await db.run(`UPDATE custom_meals SET ${fields.join(', ')} WHERE id = ?`, values)
 }
 
+export async function toggleFavoriteMeal(id: string): Promise<void> {
+  const db = getDb()
+  if (!db) {
+    const meals = lsGet<CustomMeal>(LS_MEALS_KEY)
+    const idx = meals.findIndex(m => m.id === id)
+    if (idx >= 0) {
+      meals[idx].is_favorite = !meals[idx].is_favorite
+      lsSet(LS_MEALS_KEY, meals)
+    }
+    return
+  }
+
+  await db.run(
+    'UPDATE custom_meals SET is_favorite = NOT is_favorite WHERE id = ?',
+    [id],
+  )
+}
+
 export async function updateCustomMealItemQuantity(
   itemId: string,
   quantity: number,
@@ -222,15 +246,15 @@ export async function removeCustomMealItem(itemId: string): Promise<void> {
 // ─── LOG A CUSTOM MEAL ──────────────────────────────────────────
 
 /**
- * Log all items of a custom meal into scan_logs with a shared meal_group_id.
- * Each item becomes its own scan_logs entry, scaled by the given multiplier.
+ * Log a custom meal as a single scan_logs entry.
+ * All ingredients are aggregated into one row using the meal's name,
+ * so it appears as one item in the daily log.
  */
 export async function logCustomMeal(
   mealId: string,
   multiplier: number = 1,
   itemOverrides?: Map<string, { quantity: number }>,
 ): Promise<string> {
-  // Imported here to avoid circular dependency
   const { insertScanLog } = await import('./queries')
 
   const meal = await getCustomMealById(mealId)
@@ -239,27 +263,48 @@ export async function logCustomMeal(
   const items = await getCustomMealItems(mealId)
   if (items.length === 0) throw new Error('Cannot log empty meal')
 
-  const groupId = crypto.randomUUID()
+  // Aggregate all items into totals
+  let totalGL = 0
+  let totalCalories = 0
+  let totalProtein = 0
+  let totalCarbs = 0
+  let totalFat = 0
+  let totalFiber = 0
+  let totalServing = 0
+  const trafficLights: string[] = []
 
   for (const item of items) {
     const qty = (itemOverrides?.get(item.id)?.quantity ?? item.quantity) * multiplier
-
-    await insertScanLog({
-      food_name: item.food_name,
-      food_name_en: item.food_name_en,
-      glycemic_load: (item.glycemic_load ?? 0) * qty,
-      traffic_light: item.traffic_light ?? 'green',
-      input_method: 'custom_meal',
-      quantity: 1, // qty is already baked into the GL value
-      serving_size_g: item.serving_size_g != null ? item.serving_size_g * qty : null,
-      calories_kcal: item.calories_kcal != null ? Math.round(item.calories_kcal * qty) : null,
-      protein_g: item.protein_g != null ? Math.round(item.protein_g * qty * 10) / 10 : null,
-      carbs_g: item.carbs_g != null ? Math.round(item.carbs_g * qty * 10) / 10 : null,
-      fat_g: item.fat_g != null ? Math.round(item.fat_g * qty * 10) / 10 : null,
-      fiber_g: item.fiber_g != null ? Math.round(item.fiber_g * qty * 10) / 10 : null,
-      meal_group_id: groupId,
-    })
+    totalGL += (item.glycemic_load ?? 0) * qty
+    totalCalories += (item.calories_kcal ?? 0) * qty
+    totalProtein += (item.protein_g ?? 0) * qty
+    totalCarbs += (item.carbs_g ?? 0) * qty
+    totalFat += (item.fat_g ?? 0) * qty
+    totalFiber += (item.fiber_g ?? 0) * qty
+    if (item.serving_size_g != null) totalServing += item.serving_size_g * qty
+    if (item.traffic_light) trafficLights.push(item.traffic_light)
   }
 
-  return groupId
+  // Worst traffic light wins
+  const tl = trafficLights.includes('red') ? 'red'
+    : trafficLights.includes('yellow') ? 'yellow'
+    : 'green'
+
+  const logId = await insertScanLog({
+    food_name: `${meal.icon} ${meal.name}`,
+    food_name_en: meal.name,
+    glycemic_load: Math.round(totalGL * 10) / 10,
+    traffic_light: tl,
+    input_method: 'custom_meal',
+    quantity: 1,
+    serving_size_g: totalServing > 0 ? Math.round(totalServing) : null,
+    calories_kcal: totalCalories > 0 ? Math.round(totalCalories) : null,
+    protein_g: totalProtein > 0 ? Math.round(totalProtein * 10) / 10 : null,
+    carbs_g: totalCarbs > 0 ? Math.round(totalCarbs * 10) / 10 : null,
+    fat_g: totalFat > 0 ? Math.round(totalFat * 10) / 10 : null,
+    fiber_g: totalFiber > 0 ? Math.round(totalFiber * 10) / 10 : null,
+    meal_group_id: mealId,
+  })
+
+  return logId
 }

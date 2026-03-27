@@ -40,6 +40,13 @@ export function useCustomMeals() {
     },
   })
 
+  const favoriteMutation = useMutation({
+    mutationFn: (id: string) => cmq.toggleFavoriteMeal(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customMeals'] })
+    },
+  })
+
   return {
     meals: query.data ?? [],
     loading: query.isLoading,
@@ -55,6 +62,10 @@ export function useCustomMeals() {
       (id: string, updates: { name?: string; icon?: string }) =>
         updateMutation.mutate({ id, updates }),
       [updateMutation],
+    ),
+    toggleFavorite: useCallback(
+      (id: string) => favoriteMutation.mutate(id),
+      [favoriteMutation],
     ),
   }
 }

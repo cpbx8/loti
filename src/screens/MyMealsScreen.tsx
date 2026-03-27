@@ -1,7 +1,8 @@
 /**
  * My Meals Screen — lists all saved custom meals with create button.
+ * Swipe left to delete. Tap heart to favorite.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCustomMeals } from '@/hooks/useCustomMeals'
 import { getCustomMealItems } from '@/db/customMealQueries'
@@ -9,12 +10,20 @@ import type { CustomMealItem } from '@/db/customMealQueries'
 import { useLanguage } from '@/lib/i18n'
 import MealCard from '@/components/MealCard'
 
+const SNAP_DISTANCE = 80
+const SNAP_THRESHOLD = 40
+
 export default function MyMealsScreen() {
   const navigate = useNavigate()
   const { t } = useLanguage()
-  const { meals, loading, deleteMeal } = useCustomMeals()
+  const { meals, loading, deleteMeal, toggleFavorite } = useCustomMeals()
   const [itemsByMeal, setItemsByMeal] = useState<Record<string, CustomMealItem[]>>({})
-  const [contextMenu, setContextMenu] = useState<string | null>(null)
+
+  // Swipe-to-delete state
+  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null)
+  const [dragOffset, setDragOffset] = useState(0)
+  const swipeRef = useRef<{ id: string; startX: number } | null>(null)
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
 
   // Fetch items for all meals
   useEffect(() => {
@@ -28,8 +37,46 @@ export default function MyMealsScreen() {
     if (meals.length > 0) loadItems()
   }, [meals])
 
+  function handleSwipeStart(id: string, e: React.TouchEvent) {
+    // Close any other open swipe
+    if (openSwipeId && openSwipeId !== id) setOpenSwipeId(null)
+    swipeRef.current = { id, startX: e.touches[0].clientX }
+    setActiveDragId(id)
+    setDragOffset(0)
+  }
+
+  function handleSwipeMove(id: string, e: React.TouchEvent) {
+    if (!swipeRef.current || swipeRef.current.id !== id) return
+    const dx = e.touches[0].clientX - swipeRef.current.startX
+    if (dx < 0) {
+      e.preventDefault()
+      setDragOffset(Math.max(dx, -SNAP_DISTANCE))
+    }
+  }
+
+  function handleSwipeEnd(id: string) {
+    if (!swipeRef.current || swipeRef.current.id !== id) return
+    if (dragOffset < -SNAP_THRESHOLD) {
+      setOpenSwipeId(id)
+    } else {
+      setOpenSwipeId(null)
+    }
+    setDragOffset(0)
+    setActiveDragId(null)
+    swipeRef.current = null
+  }
+
+  function getOffset(id: string): number {
+    if (activeDragId === id) return dragOffset
+    if (openSwipeId === id) return -SNAP_DISTANCE
+    return 0
+  }
+
   return (
-    <div className="flex flex-1 flex-col bg-surface min-h-0 overflow-hidden">
+    <div
+      className="flex flex-1 flex-col bg-surface min-h-0 overflow-hidden"
+      onClick={() => { if (openSwipeId) setOpenSwipeId(null) }}
+    >
       <header className="glass flex items-center justify-between px-5 py-3 z-10 flex-shrink-0">
         <div className="flex items-center">
           <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
@@ -68,51 +115,38 @@ export default function MyMealsScreen() {
         ) : (
           <div className="space-y-3 mt-4">
             {meals.map(meal => (
-              <div key={meal.id} className="relative">
-                <MealCard
-                  meal={meal}
-                  items={itemsByMeal[meal.id] ?? []}
-                  onTap={() => navigate(`/create-meal?edit=${meal.id}`)}
-                  onLongPress={() => setContextMenu(meal.id)}
-                />
+              <div key={meal.id} className="relative overflow-hidden rounded-2xl">
+                {/* Delete button revealed by swipe */}
+                <div
+                  className="absolute right-0 inset-y-0 w-20 flex items-center justify-center bg-error rounded-2xl"
+                  style={{ borderRadius: '1rem' }}
+                >
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setOpenSwipeId(null); deleteMeal(meal.id) }}
+                    className="flex flex-col items-center gap-0.5 text-white"
+                  >
+                    <span className="text-lg">🗑️</span>
+                    <span className="text-[10px] font-semibold">Delete</span>
+                  </button>
+                </div>
 
-                {/* Context menu */}
-                {contextMenu === meal.id && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setContextMenu(null)} />
-                    <div className="absolute right-2 top-full mt-1 z-50 rounded-xl bg-card shadow-lg py-1 min-w-[140px]">
-                      <button
-                        onClick={() => { setContextMenu(null); navigate(`/create-meal?edit=${meal.id}`) }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-text-primary hover:bg-surface"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={async () => {
-                          setContextMenu(null)
-                          const { createCustomMeal, addCustomMealItem, getCustomMealItems: getItems } = await import('@/db/customMealQueries')
-                          const srcItems = await getItems(meal.id)
-                          const newId = await createCustomMeal(`${meal.name} (copy)`, meal.icon)
-                          for (const item of srcItems) {
-                            const { id: _, meal_id: __, ...rest } = item
-                            await addCustomMealItem(newId, rest)
-                          }
-                          // Trigger refresh
-                          window.location.reload()
-                        }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-text-primary hover:bg-surface"
-                      >
-                        📋 Duplicate
-                      </button>
-                      <button
-                        onClick={() => { setContextMenu(null); deleteMeal(meal.id) }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-error hover:bg-surface"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
-                  </>
-                )}
+                {/* Swipeable card */}
+                <div
+                  style={{
+                    transform: `translateX(${getOffset(meal.id)}px)`,
+                    transition: activeDragId === meal.id ? 'none' : 'transform 0.2s ease-out',
+                  }}
+                  onTouchStart={(e) => handleSwipeStart(meal.id, e)}
+                  onTouchMove={(e) => handleSwipeMove(meal.id, e)}
+                  onTouchEnd={() => handleSwipeEnd(meal.id)}
+                >
+                  <MealCard
+                    meal={meal}
+                    items={itemsByMeal[meal.id] ?? []}
+                    onTap={() => { if (openSwipeId) { setOpenSwipeId(null); return } navigate(`/create-meal?edit=${meal.id}`) }}
+                    onFavorite={() => toggleFavorite(meal.id)}
+                  />
+                </div>
               </div>
             ))}
           </div>
