@@ -96,7 +96,7 @@ export default function CreateMealScreen() {
   const canSave = items.length > 0 && name.trim().length > 0
 
   return (
-    <div className="flex flex-1 flex-col bg-surface min-h-0">
+    <div className="flex flex-1 flex-col bg-surface min-h-0 overflow-hidden">
       {/* Header */}
       <header className="glass flex items-center px-5 py-3 z-10 flex-shrink-0">
         <button

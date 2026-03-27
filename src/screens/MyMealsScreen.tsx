@@ -29,7 +29,7 @@ export default function MyMealsScreen() {
   }, [meals])
 
   return (
-    <div className="flex flex-1 flex-col bg-surface min-h-0">
+    <div className="flex flex-1 flex-col bg-surface min-h-0 overflow-hidden">
       <header className="glass flex items-center justify-between px-5 py-3 z-10 flex-shrink-0">
         <div className="flex items-center">
           <button onClick={() => navigate('/')} className="text-body text-on-surface-variant hover:text-on-surface min-h-[44px] flex items-center">
