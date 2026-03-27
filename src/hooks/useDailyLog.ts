@@ -32,6 +32,7 @@ export interface FoodLogEntry {
   serving_count?: number
   meal_type: string | null
   created_at: string
+  meal_group_id?: string | null
 }
 
 export interface NewLogEntry {
@@ -125,6 +126,7 @@ function mapToEntry(row: queries.ScanLogRow): FoodLogEntry {
     serving_count: row.quantity,
     meal_type: row.meal_type,
     created_at: row.scanned_at,
+    meal_group_id: row.meal_group_id ?? null,
   }
 }
 
