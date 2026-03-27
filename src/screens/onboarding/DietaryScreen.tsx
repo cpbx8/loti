@@ -1,61 +1,58 @@
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import OnboardingLayout, { OnboardingHeadline, OnboardingSubtext, OnboardingCTA, OnboardingSkip, SelectionChip } from '@/components/OnboardingLayout'
+import { useLanguage } from '@/lib/i18n'
 
-const RESTRICTIONS = [
-  'Vegetarian',
-  'Vegan',
-  'Gluten-free / Celiac',
-  'Lactose intolerant',
-  'Dairy-free',
-  'Keto / Low carb',
-  'Paleo',
-  'Mediterranean',
-  'Low sodium',
-  'Low fat',
-  'Nut allergy',
-  'Shellfish allergy',
-  'Soy-free',
-  'Egg-free',
-  'Halal',
-  'Kosher',
-  'None',
+type DietKey = 'vegetarian' | 'vegan' | 'glutenFree' | 'lactoseIntolerant' | 'dairyFree' | 'keto' | 'paleo' | 'mediterranean' | 'lowSodium' | 'lowFat' | 'nutAllergy' | 'shellfishAllergy' | 'soyFree' | 'eggFree' | 'halal' | 'kosher' | 'none'
+
+const DIET_KEYS: DietKey[] = [
+  'vegetarian', 'vegan', 'glutenFree', 'lactoseIntolerant', 'dairyFree',
+  'keto', 'paleo', 'mediterranean', 'lowSodium', 'lowFat',
+  'nutAllergy', 'shellfishAllergy', 'soyFree', 'eggFree',
+  'halal', 'kosher', 'none',
 ]
 
 export default function DietaryScreen() {
   const { state, update, next, skip } = useOnboarding()
+  const { t } = useLanguage()
   const selected = state.dietaryRestrictions
 
-  const toggle = (item: string) => {
-    if (item === 'None') {
-      update({ dietaryRestrictions: selected.includes(item) ? [] : [item] })
+  const RESTRICTIONS = DIET_KEYS.map(key => ({
+    key,
+    label: t(`onboarding.dietary.${key}` as any),
+  }))
+
+  const toggle = (label: string) => {
+    const noneLabel = t('onboarding.dietary.none' as any)
+    if (label === noneLabel) {
+      update({ dietaryRestrictions: selected.includes(label) ? [] : [label] })
     } else {
-      const without = selected.filter(s => s !== 'None')
-      if (without.includes(item)) {
-        update({ dietaryRestrictions: without.filter(s => s !== item) })
+      const without = selected.filter(s => s !== noneLabel)
+      if (without.includes(label)) {
+        update({ dietaryRestrictions: without.filter(s => s !== label) })
       } else {
-        update({ dietaryRestrictions: [...without, item] })
+        update({ dietaryRestrictions: [...without, label] })
       }
     }
   }
 
   return (
     <OnboardingLayout>
-      <OnboardingHeadline>Any dietary restrictions?</OnboardingHeadline>
-      <OnboardingSubtext>We'll filter swap suggestions accordingly</OnboardingSubtext>
+      <OnboardingHeadline>{t('onboarding.dietary.title')}</OnboardingHeadline>
+      <OnboardingSubtext>{t('onboarding.dietary.sub')}</OnboardingSubtext>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {RESTRICTIONS.map(r => (
           <SelectionChip
-            key={r}
-            selected={selected.includes(r)}
-            onClick={() => toggle(r)}
-            label={r}
+            key={r.key}
+            selected={selected.includes(r.label)}
+            onClick={() => toggle(r.label)}
+            label={r.label}
           />
         ))}
       </div>
 
       <OnboardingCTA onClick={next} disabled={selected.length === 0}>
-        Continue
+        {t('onboarding.continue')}
       </OnboardingCTA>
       <OnboardingSkip onClick={skip} />
     </OnboardingLayout>

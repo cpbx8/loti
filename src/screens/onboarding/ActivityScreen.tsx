@@ -1,20 +1,22 @@
 import { useOnboarding, type ActivityLevel } from '@/contexts/OnboardingContext'
 import OnboardingLayout, { OnboardingHeadline, OnboardingSubtext, OnboardingCTA, OnboardingSkip, SelectionCard } from '@/components/OnboardingLayout'
-
-const OPTIONS: { value: ActivityLevel; icon: string; title: string; subtitle: string }[] = [
-  { value: 'sedentary', icon: '\u{1FA91}', title: 'Sedentary', subtitle: 'Little to no exercise' },
-  { value: 'light', icon: '\u{1F6B6}', title: 'Lightly active', subtitle: 'Light exercise 1-3 days/week' },
-  { value: 'moderate', icon: '\u{1F3C3}', title: 'Moderately active', subtitle: 'Exercise 3-5 days/week' },
-  { value: 'very_active', icon: '\u{1F4AA}', title: 'Very active', subtitle: 'Hard exercise 6-7 days/week' },
-]
+import { useLanguage } from '@/lib/i18n'
 
 export default function ActivityScreen() {
   const { state, update, next, skip } = useOnboarding()
+  const { t } = useLanguage()
+
+  const OPTIONS: { value: ActivityLevel; icon: string; title: string; subtitle: string }[] = [
+    { value: 'sedentary', icon: '\u{1FA91}', title: t('onboarding.activity.sedentary'), subtitle: t('onboarding.activity.sedentarySub') },
+    { value: 'light', icon: '\u{1F6B6}', title: t('onboarding.activity.light'), subtitle: t('onboarding.activity.lightSub') },
+    { value: 'moderate', icon: '\u{1F3C3}', title: t('onboarding.activity.moderate'), subtitle: t('onboarding.activity.moderateSub') },
+    { value: 'very_active', icon: '\u{1F4AA}', title: t('onboarding.activity.very'), subtitle: t('onboarding.activity.verySub') },
+  ]
 
   return (
     <OnboardingLayout>
-      <OnboardingHeadline>How active are you?</OnboardingHeadline>
-      <OnboardingSubtext>Physical activity affects how your body handles glucose</OnboardingSubtext>
+      <OnboardingHeadline>{t('onboarding.activity.title')}</OnboardingHeadline>
+      <OnboardingSubtext>{t('onboarding.activity.sub')}</OnboardingSubtext>
 
       <div className="mt-6 flex flex-col gap-3">
         {OPTIONS.map(opt => (
@@ -30,7 +32,7 @@ export default function ActivityScreen() {
       </div>
 
       <OnboardingCTA onClick={next} disabled={!state.activityLevel}>
-        Continue
+        {t('onboarding.continue')}
       </OnboardingCTA>
       <OnboardingSkip onClick={skip} />
     </OnboardingLayout>

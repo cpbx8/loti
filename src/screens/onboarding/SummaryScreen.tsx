@@ -6,21 +6,19 @@ import { upsertProfile, completeOnboarding } from '@/db/queries'
 import { startTrial } from '@/lib/revenuecat'
 import { useLanguage } from '@/lib/i18n'
 
-const HEALTH_LABELS: Record<string, string> = {
-  healthy: 'Healthy',
-  prediabetic: 'Prediabetic',
-  type2: 'Type 2 Diabetes',
-  gestational: 'Gestational Diabetes',
-}
-
-// Goal labels removed — goal screen cut from onboarding
-
 export default function SummaryScreen() {
   const navigate = useNavigate()
   const { state } = useOnboarding()
   const { t } = useLanguage()
   const thresholds = computeThresholds(state)
   const [visibleLines, setVisibleLines] = useState(0)
+
+  const HEALTH_LABELS: Record<string, string> = {
+    healthy: t('onboarding.summary.healthy'),
+    prediabetic: t('onboarding.summary.prediabetic'),
+    type2: t('onboarding.summary.type2'),
+    gestational: t('onboarding.summary.gestational'),
+  }
 
   // Stagger in each line
   useEffect(() => {
@@ -75,7 +73,7 @@ export default function SummaryScreen() {
   return (
     <div className="flex flex-1 flex-col bg-surface min-h-[100svh] px-6 pb-8">
       <h1 className="mt-12 text-center text-headline text-on-surface">
-        Your Loti profile is ready
+        {t('onboarding.summary.title')}
       </h1>
 
       {/* Animated profile card */}
@@ -97,7 +95,7 @@ export default function SummaryScreen() {
 
           {/* Thresholds */}
           <div className={`transition-all duration-300 ${visibleLines >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <p className="text-sm text-text-secondary">Your thresholds:</p>
+            <p className="text-sm text-text-secondary">{t('onboarding.summary.thresholds')}</p>
             <div className="mt-1 flex gap-3 text-sm">
               <span className="text-tl-green-fill font-medium">Green &lt; {thresholds.greenMax} GL</span>
               <span className="text-tl-yellow-fill font-medium">Yellow &lt; {thresholds.yellowMax} GL</span>
@@ -107,17 +105,17 @@ export default function SummaryScreen() {
 
           {/* A1C */}
           <div className={`transition-all duration-300 ${visibleLines >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-            <span className="text-sm text-text-secondary">A1C: </span>
+            <span className="text-sm text-text-secondary">{t('onboarding.summary.a1cLabel')} </span>
             <span className="text-sm font-medium text-text-primary">
-              {state.a1cValue ? `${state.a1cValue}%` : 'Not provided — you can add this anytime'}
+              {state.a1cValue ? `${state.a1cValue}%` : t('onboarding.summary.a1cNone')}
             </span>
           </div>
 
           {/* Completion */}
           <div className={`transition-all duration-300 ${visibleLines >= 4 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <span className="text-sm text-text-tertiary">
-              {completedCount}/{totalCount} profile complete
-              {completedCount < totalCount && ' — finish later in Settings'}
+              {t('onboarding.summary.profileComplete').replace('{{completed}}', String(completedCount)).replace('{{total}}', String(totalCount))}
+              {completedCount < totalCount && ` — ${t('onboarding.summary.finishLater')}`}
             </span>
           </div>
         </div>

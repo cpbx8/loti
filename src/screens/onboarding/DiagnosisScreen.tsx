@@ -1,21 +1,23 @@
 import { useOnboarding } from '@/contexts/OnboardingContext'
+import { useLanguage } from '@/lib/i18n'
 import OnboardingLayout, { OnboardingHeadline, OnboardingSubtext, OnboardingCTA, OnboardingSkip, SelectionCard } from '@/components/OnboardingLayout'
 
 const OPTIONS = [
-  { value: 'less_than_6mo', title: 'Less than 6 months ago' },
-  { value: '6mo_to_2yr', title: '6 months \u2013 2 years' },
-  { value: '2yr_to_5yr', title: '2 \u2013 5 years' },
-  { value: 'more_than_5yr', title: 'More than 5 years' },
-  { value: 'unsure', title: "I'm not sure" },
+  { value: 'less_than_6mo', key: 'onboarding.diagnosis.less6m' },
+  { value: '6mo_to_2yr', key: 'onboarding.diagnosis.6m2y' },
+  { value: '2yr_to_5yr', key: 'onboarding.diagnosis.2y5y' },
+  { value: 'more_than_5yr', key: 'onboarding.diagnosis.more5y' },
+  { value: 'unsure', key: 'onboarding.diagnosis.unsure' },
 ]
 
 export default function DiagnosisScreen() {
   const { state, update, next, skip } = useOnboarding()
+  const { t } = useLanguage()
 
   return (
     <OnboardingLayout>
-      <OnboardingHeadline>When were you diagnosed?</OnboardingHeadline>
-      <OnboardingSubtext>This helps us understand your journey</OnboardingSubtext>
+      <OnboardingHeadline>{t('onboarding.diagnosis.title')}</OnboardingHeadline>
+      <OnboardingSubtext>{t('onboarding.diagnosis.sub')}</OnboardingSubtext>
 
       <div className="mt-6 flex flex-col gap-3">
         {OPTIONS.map(opt => (
@@ -23,14 +25,14 @@ export default function DiagnosisScreen() {
             key={opt.value}
             selected={state.diagnosisDuration === opt.value}
             onClick={() => update({ diagnosisDuration: opt.value })}
-            title={opt.title}
+            title={t(opt.key)}
             subtitle=""
           />
         ))}
       </div>
 
       <OnboardingCTA onClick={next} disabled={!state.diagnosisDuration}>
-        Continue
+        {t('onboarding.continue')}
       </OnboardingCTA>
       <OnboardingSkip onClick={skip} />
     </OnboardingLayout>

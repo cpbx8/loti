@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import OnboardingLayout, { OnboardingHeadline, OnboardingSubtext, OnboardingCTA, OnboardingSkip } from '@/components/OnboardingLayout'
-
-const RANGES = [
-  { label: 'Below 5.7% = Normal', min: 0, max: 5.69 },
-  { label: '5.7 \u2013 6.4% = Prediabetic range', min: 5.7, max: 6.4 },
-  { label: '6.5%+ = Diabetic range', min: 6.5, max: 100 },
-]
+import { useLanguage } from '@/lib/i18n'
 
 export default function A1CScreen() {
   const { state, update, next, skip } = useOnboarding()
+  const { t } = useLanguage()
   const [inputVal, setInputVal] = useState(state.a1cValue?.toString() ?? '')
   const numVal = parseFloat(inputVal)
   const isValid = !isNaN(numVal) && numVal >= 4.0 && numVal <= 14.0
+
+  const RANGES = [
+    { label: t('onboarding.a1c.normal'), min: 0, max: 5.69 },
+    { label: t('onboarding.a1c.prediabetic'), min: 5.7, max: 6.4 },
+    { label: t('onboarding.a1c.diabetic'), min: 6.5, max: 100 },
+  ]
 
   const handleContinue = () => {
     if (isValid) {
@@ -28,12 +30,12 @@ export default function A1CScreen() {
 
   return (
     <OnboardingLayout>
-      <OnboardingHeadline>Do you know your most recent A1C?</OnboardingHeadline>
-      <OnboardingSubtext>Don't worry if you don't — we can work without it</OnboardingSubtext>
+      <OnboardingHeadline>{t('onboarding.a1c.title')}</OnboardingHeadline>
+      <OnboardingSubtext>{t('onboarding.a1c.sub')}</OnboardingSubtext>
 
       <div className="mx-auto mt-4 rounded-2xl bg-card border border-border px-4 py-3 max-w-sm">
         <p className="text-xs text-text-tertiary leading-relaxed">
-          <span className="font-medium text-text-secondary">What is A1C?</span> It's a blood test that measures your average blood sugar over the past 2-3 months. Your doctor may also call it HbA1c or glycated hemoglobin.
+          <span className="font-medium text-text-secondary">{t('onboarding.a1c.whatIs')}</span> {t('onboarding.a1c.explanation')}
         </p>
       </div>
 
@@ -45,7 +47,7 @@ export default function A1CScreen() {
             step="0.1"
             min="4.0"
             max="14.0"
-            placeholder="e.g., 7.2"
+            placeholder={t('onboarding.a1c.placeholder')}
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             className="w-full rounded-xl border-2 border-border bg-card px-4 py-4 text-center text-2xl font-semibold text-text-primary focus:border-primary focus:outline-none min-h-[56px]"
@@ -54,7 +56,7 @@ export default function A1CScreen() {
         </div>
 
         {inputVal && !isValid && (
-          <p className="mt-2 text-sm text-error">A1C values are typically between 4.0 and 14.0</p>
+          <p className="mt-2 text-sm text-error">{t('onboarding.a1c.range')}</p>
         )}
 
         <div className="mt-6 flex flex-col gap-2 w-full">
@@ -78,11 +80,11 @@ export default function A1CScreen() {
         onClick={handleDontKnow}
         className="mt-6 w-full rounded-xl border border-border px-4 py-3 text-sm text-text-secondary hover:bg-card min-h-[44px]"
       >
-        I don't know my A1C
+        {t('onboarding.a1c.dontKnow')}
       </button>
 
       <OnboardingCTA onClick={handleContinue} disabled={!isValid}>
-        Continue
+        {t('onboarding.continue')}
       </OnboardingCTA>
       <OnboardingSkip onClick={skip} />
     </OnboardingLayout>
