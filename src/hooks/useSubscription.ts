@@ -7,7 +7,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { checkPremiumStatus, getTrialInfo, startTrial, getOfferings, purchasePackage, restorePurchases } from '@/lib/revenuecat'
-import { getTodayScanCount } from '@/db/queries'
+import { getTotalScanCount } from '@/db/queries'
 
 export interface ScanPermission {
   allowed: boolean
@@ -20,7 +20,7 @@ export interface ScanPermission {
 export type PaywallVariant = 'scan_limit' | 'mid_trial' | 'expired' | 'blocked_feature'
 export type BlockedFeature = 'scan' | 'barcode' | 'text' | 'ai_assistant' | 'favorite'
 
-const DAILY_SCAN_LIMIT = 3
+const TRIAL_SCAN_LIMIT = 3
 
 export function useSubscription() {
   const queryClient = useQueryClient()
@@ -40,10 +40,10 @@ export function useSubscription() {
     staleTime: 1000 * 60, // 1 minute
   })
 
-  // Today's scan count from SQLite
+  // Total lifetime scan count from SQLite
   const scanCountQuery = useQuery({
-    queryKey: ['todayScanCount'],
-    queryFn: getTodayScanCount,
+    queryKey: ['totalScanCount'],
+    queryFn: getTotalScanCount,
     staleTime: 0, // Always fresh
   })
 
@@ -54,7 +54,7 @@ export function useSubscription() {
   const isTrialActive = !isPremium && trial.isTrialActive
   const isTrialExpired = !isPremium && !trial.isTrialActive && trial.daysRemaining <= 0
   const trialDaysRemaining = trial.daysRemaining
-  const scansRemaining = isPremium ? Infinity : Math.max(0, DAILY_SCAN_LIMIT - scansToday)
+  const scansRemaining = isPremium ? Infinity : Math.max(0, TRIAL_SCAN_LIMIT - scansToday)
 
   const trialDay = useMemo(() => {
     return Math.min(5, Math.max(1, 5 - trialDaysRemaining + 1))
@@ -90,7 +90,7 @@ export function useSubscription() {
 
   const incrementScanCount = useCallback(() => {
     // Invalidate the scan count query — SQLite scan_logs is the source of truth
-    queryClient.invalidateQueries({ queryKey: ['todayScanCount'] })
+    queryClient.invalidateQueries({ queryKey: ['totalScanCount'] })
   }, [queryClient])
 
   const recordPaywallImpression = useCallback(() => {
@@ -143,7 +143,7 @@ export function useSubscription() {
     trialDay,
     scans_today: scansToday,
     scansRemaining,
-    dailyScanLimit: DAILY_SCAN_LIMIT,
+    dailyScanLimit: TRIAL_SCAN_LIMIT,
     paywall_impressions: paywallImpressions,
     subscription_type: null as 'monthly' | 'annual' | null,
 

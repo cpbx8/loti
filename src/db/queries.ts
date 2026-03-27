@@ -333,6 +333,17 @@ export async function getTodayScanCount(): Promise<number> {
   return result.values?.[0]?.count || 0
 }
 
+export async function getTotalScanCount(): Promise<number> {
+  const db = getDb()
+  if (!db) {
+    const all: any[] = JSON.parse(localStorage.getItem('loti_food_log') || '[]')
+    return all.length
+  }
+
+  const result = await db.query('SELECT COUNT(*) as count FROM scan_logs')
+  return result.values?.[0]?.count || 0
+}
+
 export async function getDistinctScanDates(limit = 90): Promise<string[]> {
   const db = getDb()
   if (!db) {

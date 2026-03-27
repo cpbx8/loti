@@ -94,12 +94,12 @@ export default function PaywallScreen({ variant: variantProp, blockedFeature, on
 
   switch (variant) {
     case 'scan_limit':
-      headline = "You've used all 3 scans today"
+      headline = "You've used your 3 free scans"
       subtext = 'Go unlimited — scan everything, anytime'
       break
     case 'mid_trial':
-      headline = 'Get the most out of Loti'
-      subtext = `Your trial ends in ${sub.trialDaysRemaining} day${sub.trialDaysRemaining !== 1 ? 's' : ''}`
+      headline = 'Enjoying Loti?'
+      subtext = `${sub.scansRemaining} free scan${sub.scansRemaining !== 1 ? 's' : ''} remaining — go unlimited`
       break
     case 'expired':
       headline = 'Your trial has ended'

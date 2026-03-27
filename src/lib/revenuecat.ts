@@ -32,9 +32,12 @@ export async function initRevenueCat(): Promise<void> {
 }
 
 export async function checkPremiumStatus(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform() || !initialized) {
+  if (!Capacitor.isNativePlatform()) {
     // On web, treat as premium for development
     return true
+  }
+  if (!initialized) {
+    return false
   }
 
   try {

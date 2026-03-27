@@ -99,7 +99,7 @@ const translations: Record<Language, Record<string, string>> = {
     'history.noMeals': 'Sin comidas registradas',
 
     // Onboarding
-    'onboarding.scanFirst': 'Escanea tu primer alimento',
+    'onboarding.scanFirst': 'Comenzar — 3 escaneos gratis',
     'onboarding.welcomeTitle': 'Mira cómo tu comida afecta tu glucosa',
     'onboarding.welcomeSub': 'Toma una foto. Obtén una calificación roja/amarilla/verde al instante.',
     'onboarding.continue': 'Continuar',
@@ -523,7 +523,7 @@ const translations: Record<Language, Record<string, string>> = {
     'history.noMeals': 'No meals logged',
 
     // Onboarding
-    'onboarding.scanFirst': 'Scan your first food',
+    'onboarding.scanFirst': 'Start free — 3 scans on us',
     'onboarding.welcomeTitle': 'See how your food affects your glucose',
     'onboarding.welcomeSub': 'Snap a photo. Get an instant red/yellow/green rating.',
     'onboarding.continue': 'Continue',
