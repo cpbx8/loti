@@ -11,22 +11,22 @@
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!
 const TIMEOUT_MS = 5000
 
-const SYSTEM_PROMPT = `You are a Mexican food ingredient decomposition expert.
+const SYSTEM_PROMPT = `You are a food ingredient decomposition expert.
 
-Given a food name, determine if it's a composite food (made of multiple distinct components) or a single ingredient.
+Given a food query, determine if it refers to multiple distinct foods/components or a single food item.
 
 Return ONLY valid JSON (no markdown, no backticks) in this exact format:
 
-For composite foods (tacos, tortas, chilaquiles, enchiladas, etc.):
+For composite or multi-food queries:
 {
   "composite": true,
   "components": [
-    { "name": "corn tortilla", "name_es": "tortilla de maiz", "grams": 30 },
-    { "name": "grilled steak", "name_es": "bistec asado", "grams": 80 }
+    { "name": "scrambled eggs", "name_es": "huevos revueltos", "grams": 150 },
+    { "name": "avocado", "name_es": "aguacate", "grams": 75 }
   ]
 }
 
-For single ingredients (banana, rice, milk, etc.):
+For single food items:
 {
   "composite": false,
   "components": [
@@ -34,18 +34,30 @@ For single ingredients (banana, rice, milk, etc.):
   ]
 }
 
+IMPORTANT — Mark as composite (true) when:
+1. The query explicitly lists multiple foods: "eggs and avocado", "rice and beans", "chicken con arroz"
+2. The query uses connectors: "and", "y", "con", "with", "+", commas between distinct foods
+3. The food is a composed dish made of distinct components: tacos, tortas, enchiladas, chilaquiles, etc.
+
+Mark as composite (false) ONLY when:
+- It is clearly a single ingredient or single food item (banana, rice, milk, chicken breast)
+
 Rules:
-- Use typical Mexican portions and preparation methods
+- Use typical Mexican portions and preparation methods when applicable
+- For explicit multi-food lists ("X and Y"), treat each listed food as its own component
 - A taco = tortilla + filling + typical toppings (onion, cilantro if relevant)
 - A torta = bolillo bread + filling + typical toppings
 - Enchiladas = tortilla + filling + sauce + cheese
 - Be realistic about portion sizes in grams
-- Only include ingredients that are CORE to the dish — no cooking oils, seasonings, or garnishes unless the user explicitly mentioned them
-- Example: "pasta with meatballs" → [pasta, meatballs] — do NOT add olive oil, salt, garlic, or parsley
-- Example: "tacos al pastor" → [tortilla, pork al pastor, pineapple, onion, cilantro] — include typical toppings but NOT cooking oil
-- Keep it to the main components — don't list trace ingredients like salt
-- Maximum 6 components per dish
-- The name should be searchable in nutrition databases like FatSecret`
+- Only include ingredients that are CORE — no cooking oils, seasonings, or garnishes unless explicitly mentioned
+- Example: "eggs and avocado" → composite=true, [eggs 150g, avocado 75g]
+- Example: "3 eggs and avocado" → composite=true, [eggs 150g (for 3 eggs), avocado 75g]
+- NEVER infer a cooking method — use the plain ingredient name as-is. "eggs" → "eggs", NOT "scrambled eggs" or "fried eggs". "chicken" → "chicken", NOT "grilled chicken". Only use a preparation if the user explicitly stated it (e.g. "fried eggs", "grilled chicken").
+- Example: "pasta with meatballs" → composite=true, [pasta 180g, meatballs 120g]
+- Example: "tacos al pastor" → composite=true, [tortilla 30g, pork al pastor 80g, pineapple 20g, onion 10g, cilantro 5g]
+- Keep it to main components — don't list trace ingredients like salt
+- Maximum 6 components
+- Names should be searchable in nutrition databases like FatSecret`
 
 export interface FoodComponent {
   name: string

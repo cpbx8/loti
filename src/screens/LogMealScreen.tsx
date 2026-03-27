@@ -135,7 +135,6 @@ export default function LogMealScreen() {
               key={item.id}
               item={item}
               onQuantityChange={handleQuantityOverride}
-              showAdjustLink
             />
           ))}
         </div>

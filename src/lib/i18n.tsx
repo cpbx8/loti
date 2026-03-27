@@ -226,6 +226,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Custom Meals
     'customMeal.createTitle': 'Crear Comida',
+    'customMeal.editTitle': 'Editar Comida',
     'customMeal.logTitle': 'Registrar Comida',
     'customMeal.myMealsTitle': 'Mis Comidas',
     'customMeal.mealName': 'Nombre de la Comida',
@@ -233,6 +234,7 @@ const translations: Record<Language, Record<string, string>> = {
     'customMeal.searchPlaceholder': 'Buscar alimentos...',
     'customMeal.ingredients': 'Ingredientes',
     'customMeal.save': 'Guardar Comida',
+    'customMeal.saveChanges': 'Guardar Cambios',
     'customMeal.log': 'Registrar Comida',
     'customMeal.new': 'Nueva',
     'customMeal.noMeals': 'Sin comidas guardadas',
@@ -644,7 +646,9 @@ const translations: Record<Language, Record<string, string>> = {
     'customMeal.addIngredients': 'Add Ingredients',
     'customMeal.searchPlaceholder': 'Search foods...',
     'customMeal.ingredients': 'Ingredients',
+    'customMeal.editTitle': 'Edit Meal',
     'customMeal.save': 'Save Meal',
+    'customMeal.saveChanges': 'Save Changes',
     'customMeal.log': 'Log Meal',
     'customMeal.new': 'New',
     'customMeal.noMeals': 'No saved meals',

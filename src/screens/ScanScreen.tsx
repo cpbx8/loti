@@ -384,7 +384,7 @@ export default function ScanScreen() {
 
   // ─── Live Camera Viewfinder ──────────────────────────────
   return (
-    <div className="relative flex flex-1 flex-col bg-black min-h-0">
+    <div className="fixed inset-0 flex flex-col bg-black" style={{ zIndex: 50 }}>
       {/* Full-screen live video */}
       <video
         ref={videoRef}
@@ -405,7 +405,7 @@ export default function ScanScreen() {
       </div>
 
       {/* Top bar */}
-      <div className="relative z-20 flex items-center justify-between px-4 pt-4 flex-shrink-0">
+      <div className="relative z-20 flex items-center justify-between px-4 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
         <button
           onClick={() => { camera.reset(); search.reset(); navigate('/') }}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm min-h-[44px] min-w-[44px]"

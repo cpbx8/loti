@@ -16,10 +16,9 @@ interface Props {
   onQuantityChange?: (itemId: string, qty: number) => void
   onRemove?: (itemId: string) => void
   showDragHandle?: boolean
-  showAdjustLink?: boolean
 }
 
-export default function IngredientCard({ item, onQuantityChange, onRemove, showDragHandle, showAdjustLink }: Props) {
+export default function IngredientCard({ item, onQuantityChange, onRemove, showDragHandle }: Props) {
   const tl = (item.traffic_light ?? 'green') as TrafficLight
   const gl = item.glycemic_load ?? 0
 
@@ -39,25 +38,33 @@ export default function IngredientCard({ item, onQuantityChange, onRemove, showD
       {/* GL + traffic dot */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         <span className={`h-2 w-2 rounded-full ${TL_DOT[tl]}`} />
-        <span className="text-sm font-bold text-text-primary">{Math.round(gl * item.quantity)}</span>
+        <span className="text-sm font-bold text-text-primary">
+          {Math.round(gl * item.quantity * 10) / 10}
+        </span>
         <span className="text-[10px] font-semibold text-text-tertiary uppercase">GL</span>
       </div>
 
-      {/* Quantity badge */}
-      <div className="bg-surface-container-low rounded-lg px-2.5 py-1 text-[13px] font-semibold text-on-surface-variant flex-shrink-0">
-        {item.quantity}×
-      </div>
-
-      {showAdjustLink && onQuantityChange && (
-        <button
-          onClick={() => {
-            const next = parseFloat(prompt('Quantity:', String(item.quantity)) ?? String(item.quantity))
-            if (!isNaN(next) && next > 0) onQuantityChange(item.id, next)
-          }}
-          className="text-xs font-medium text-primary flex-shrink-0"
-        >
-          adjust
-        </button>
+      {/* Quantity stepper */}
+      {onQuantityChange ? (
+        <div className="flex items-center gap-1 bg-surface-container-low rounded-lg flex-shrink-0">
+          <button
+            onClick={() => onQuantityChange(item.id, Math.max(0.5, Math.round((item.quantity - 0.5) * 2) / 2))}
+            className="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary text-lg leading-none"
+            aria-label="Decrease quantity"
+          >−</button>
+          <span className="text-[13px] font-semibold text-on-surface-variant min-w-[28px] text-center">
+            {item.quantity}×
+          </span>
+          <button
+            onClick={() => onQuantityChange(item.id, Math.round((item.quantity + 0.5) * 2) / 2)}
+            className="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary text-lg leading-none"
+            aria-label="Increase quantity"
+          >+</button>
+        </div>
+      ) : (
+        <div className="bg-surface-container-low rounded-lg px-2.5 py-1 text-[13px] font-semibold text-on-surface-variant flex-shrink-0">
+          {item.quantity}×
+        </div>
       )}
 
       {onRemove && (

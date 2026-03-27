@@ -57,6 +57,7 @@
 /* ── Base Typography ── */
 body {
   margin: 0;
+  height: 100dvh;
   font-family: "DM Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -71,7 +72,7 @@ body {
 }
 
 #root {
-  min-height: 100svh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   max-width: 430px;
@@ -79,6 +80,7 @@ body {
 }
 
 html {
+  height: 100dvh;
   overscroll-behavior: none;
 }
 

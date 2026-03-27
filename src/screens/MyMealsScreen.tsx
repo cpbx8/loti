@@ -72,7 +72,7 @@ export default function MyMealsScreen() {
                 <MealCard
                   meal={meal}
                   items={itemsByMeal[meal.id] ?? []}
-                  onTap={() => navigate(`/log-meal/${meal.id}`)}
+                  onTap={() => navigate(`/create-meal?edit=${meal.id}`)}
                   onLongPress={() => setContextMenu(meal.id)}
                 />
 

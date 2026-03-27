@@ -3,7 +3,7 @@
  * User names the meal, adds ingredients via search/camera/barcode/recent, adjusts quantities, saves.
  */
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCustomMeals, useCustomMealItems } from '@/hooks/useCustomMeals'
 import { useWaterfallSearch } from '@/hooks/useWaterfallSearch'
@@ -18,6 +18,9 @@ import { getFoodEmoji } from '@/lib/foodEmoji'
 
 export default function CreateMealScreen() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
+  const isEdit = !!editId
   const { t } = useLanguage()
   const { createMeal } = useCustomMeals()
 
@@ -25,8 +28,8 @@ export default function CreateMealScreen() {
   const [name, setName] = useState('')
   const [icon, setIcon] = useState('🍽️')
 
-  // Persisted meal + items — create immediately on mount, save name on exit
-  const [mealId, setMealId] = useState<string | null>(null)
+  // Persisted meal + items — create immediately on mount (create mode), or load existing (edit mode)
+  const [mealId, setMealId] = useState<string | null>(editId)
   const { items, addItem, removeItem, updateItemQuantity } = useCustomMealItems(mealId)
 
   // Search state
@@ -49,10 +52,17 @@ export default function CreateMealScreen() {
     }).slice(0, 8)
   }, [recentQuery.data])
 
-  // Initialize a draft meal on mount
+  // Initialize: load existing meal (edit) or create draft (create)
   useEffect(() => {
-    if (mealId) return
-    createMeal('Draft Meal', '🍽️').then(id => setMealId(id))
+    if (isEdit && editId) {
+      import('@/db/customMealQueries').then(({ getCustomMealById }) => {
+        getCustomMealById(editId).then(meal => {
+          if (meal) { setName(meal.name); setIcon(meal.icon ?? '🍽️') }
+        })
+      })
+    } else if (!mealId) {
+      createMeal('Draft Meal', '🍽️').then(id => setMealId(id))
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = useCallback(() => {
@@ -107,7 +117,7 @@ export default function CreateMealScreen() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="ml-2 text-title text-on-surface">{t('customMeal.createTitle')}</h1>
+        <h1 className="ml-2 text-title text-on-surface">{isEdit ? t('customMeal.editTitle') : t('customMeal.createTitle')}</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto px-5 pb-48">
@@ -252,8 +262,16 @@ export default function CreateMealScreen() {
         )}
       </div>
 
-      {/* Save button — fixed bottom */}
-      <div className="fixed bottom-0 left-0 right-0 px-5 pb-6 pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent z-20">
+      {/* Bottom actions — fixed */}
+      <div className="fixed bottom-0 left-0 right-0 px-5 pb-6 pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent z-20 flex flex-col gap-2">
+        {isEdit && (
+          <button
+            onClick={() => navigate(`/log-meal/${mealId}`)}
+            className="w-full rounded-full py-3.5 text-center text-base font-semibold border-2 border-primary text-primary bg-transparent min-h-[48px] transition-colors hover:bg-primary-light"
+          >
+            {t('customMeal.log')}
+          </button>
+        )}
         <button
           onClick={handleSave}
           disabled={!canSave}
@@ -264,7 +282,7 @@ export default function CreateMealScreen() {
           }`}
           style={canSave ? { boxShadow: '0px 12px 32px rgba(166, 47, 74, 0.25)' } : undefined}
         >
-          {t('customMeal.save')}
+          {isEdit ? t('customMeal.saveChanges') : t('customMeal.save')}
         </button>
       </div>
     </div>
