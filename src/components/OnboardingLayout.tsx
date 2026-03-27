@@ -13,7 +13,7 @@ export default function OnboardingLayout({ children, hideProgress, hideBack }: P
   const { back, stepNumber, totalSteps } = useOnboarding()
 
   return (
-    <div className="flex flex-1 flex-col bg-surface min-h-[100svh]">
+    <div className="flex flex-1 flex-col bg-surface min-h-0">
       {/* Progress dots + back button */}
       {!hideProgress && (
         <div className="relative">
@@ -51,7 +51,7 @@ export default function OnboardingLayout({ children, hideProgress, hideBack }: P
       )}
 
       {/* Screen content */}
-      <div className="flex flex-1 flex-col px-6 pb-8">
+      <div className="flex flex-1 flex-col overflow-y-auto px-6 pb-8" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)' }}>
         {children}
       </div>
     </div>
