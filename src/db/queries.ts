@@ -45,6 +45,7 @@ export interface ScanLogRow {
   source: string | null
   meal_type: string | null
   food_id: string | null
+  meal_group_id: string | null
   scanned_at: string
 }
 
@@ -67,6 +68,7 @@ export interface NewScanLog {
   source?: string | null
   meal_type?: string | null
   food_id?: string | null
+  meal_group_id?: string | null
 }
 
 export interface FoodRow {
@@ -208,14 +210,14 @@ export async function insertScanLog(entry: NewScanLog): Promise<string> {
     // Web fallback: store in localStorage
     const key = 'loti_food_log'
     const existing = JSON.parse(localStorage.getItem(key) || '[]')
-    existing.push({ ...entry, id, scanned_at: new Date().toISOString(), quantity: entry.quantity ?? 1 })
+    existing.push({ ...entry, id, scanned_at: new Date().toISOString(), quantity: entry.quantity ?? 1, meal_group_id: entry.meal_group_id ?? null })
     localStorage.setItem(key, JSON.stringify(existing))
     return id
   }
 
   await db.run(
-    `INSERT INTO scan_logs (id, food_name, food_name_en, glycemic_index, glycemic_load, traffic_light, input_method, quantity, confidence_score, serving_size_g, calories_kcal, protein_g, carbs_g, fat_g, fiber_g, swap_tip, source, meal_type, food_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO scan_logs (id, food_name, food_name_en, glycemic_index, glycemic_load, traffic_light, input_method, quantity, confidence_score, serving_size_g, calories_kcal, protein_g, carbs_g, fat_g, fiber_g, swap_tip, source, meal_type, food_id, meal_group_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id, entry.food_name, entry.food_name_en ?? null, entry.glycemic_index ?? null,
       entry.glycemic_load, entry.traffic_light, entry.input_method,
@@ -223,6 +225,7 @@ export async function insertScanLog(entry: NewScanLog): Promise<string> {
       entry.serving_size_g ?? null, entry.calories_kcal ?? null,
       entry.protein_g ?? null, entry.carbs_g ?? null, entry.fat_g ?? null, entry.fiber_g ?? null,
       entry.swap_tip ?? null, entry.source ?? null, entry.meal_type ?? null, entry.food_id ?? null,
+      entry.meal_group_id ?? null,
     ],
   )
   return id

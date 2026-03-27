@@ -4,7 +4,7 @@ export type TrafficLight = 'green' | 'yellow' | 'red'
 export type GiSource = 'published' | 'estimated' | 'macro_estimated' | 'unknown'
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 export type Confidence = 'high' | 'medium' | 'low'
-export type InputMethod = 'photo_scan' | 'barcode' | 'text_input' | 'manual_search' | 'favorite'
+export type InputMethod = 'photo_scan' | 'barcode' | 'text_input' | 'manual_search' | 'favorite' | 'custom_meal'
 
 export interface ScanRequest {
   image_base64: string
