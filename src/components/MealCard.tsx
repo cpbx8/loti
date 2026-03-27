@@ -92,7 +92,7 @@ export default function MealCard({ meal, items, onTap, onLongPress, onFavorite }
       {onFavorite && (
         <button
           onClick={(e) => { e.stopPropagation(); onFavorite() }}
-          className="flex-shrink-0 px-3 py-4 text-xl leading-none"
+          className={`flex-shrink-0 px-3 py-4 text-xl leading-none transition-colors ${meal.is_favorite ? 'text-error' : 'text-text-tertiary'}`}
           aria-label={meal.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           {meal.is_favorite ? '♥' : '♡'}
