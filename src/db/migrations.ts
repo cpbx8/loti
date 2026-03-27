@@ -143,3 +143,37 @@ CREATE TABLE IF NOT EXISTS barcode_cache (
   cached_at TEXT DEFAULT (datetime('now'))
 );
 `;
+
+export const MIGRATION_002 = `
+-- Custom meals (saved recipes)
+CREATE TABLE IF NOT EXISTS custom_meals (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  icon TEXT DEFAULT '🍽️',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Custom meal ingredients (snapshot of nutrition at creation time)
+CREATE TABLE IF NOT EXISTS custom_meal_items (
+  id TEXT PRIMARY KEY,
+  meal_id TEXT NOT NULL REFERENCES custom_meals(id) ON DELETE CASCADE,
+  food_name TEXT NOT NULL,
+  food_name_en TEXT,
+  serving_size_g REAL,
+  quantity REAL DEFAULT 1,
+  calories_kcal REAL,
+  protein_g REAL,
+  carbs_g REAL,
+  fat_g REAL,
+  fiber_g REAL,
+  glycemic_load REAL,
+  traffic_light TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_meal_items_meal ON custom_meal_items(meal_id);
+
+-- Add meal_group_id to scan_logs for grouping custom meal log entries
+ALTER TABLE scan_logs ADD COLUMN meal_group_id TEXT;
+`;
